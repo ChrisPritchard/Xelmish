@@ -1,8 +1,38 @@
-﻿// Learn more about F# at http://fsharp.org
+﻿open System
+open Elmish
+open System.Threading
 
-open System
+type Model = {
+    count: int
+}
+
+type Message = 
+    | Increment
+    | Reset
+
+let update message model = 
+    match message with
+    | Increment -> { model with count = model.count + 1 }, Cmd.none
+    | Reset -> { model with count = 0 }, Cmd.none
+
+let init () =
+    { count = 0 }, Cmd.none
+
+let mutable timerInstance = Unchecked.defaultof<Timer>
+
+let timer _ =
+    Cmd.ofSub (fun dispatch -> 
+        timerInstance <- 
+            let callback _ = dispatch Increment
+            new Timer(TimerCallback(callback), null, 0, 500))
+
+let view model dispatch = printfn "%A" model
 
 [<EntryPoint>]
-let main argv =
-    printfn "Hello World from F#!"
-    0 // return an integer exit code
+let main _ =
+    
+    Program.mkProgram init update view 
+    |> Program.withSubscription timer
+    |> Program.run
+
+    0
