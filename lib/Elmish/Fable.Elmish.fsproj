@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="prelude.fs" />
+    <Compile Include="cmd.fs" />
+    <Compile Include="ring.fs" />
+    <Compile Include="program.fs" />
+  </ItemGroup>
+</Project>
