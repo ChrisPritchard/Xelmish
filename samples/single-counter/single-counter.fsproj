@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Xelmish.fsproj" />
+    <ProjectReference Include="..\..\src\Xelmish.fsproj" />
   </ItemGroup>
 
 </Project>
