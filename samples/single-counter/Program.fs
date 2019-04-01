@@ -29,5 +29,5 @@ let setState model dispatch =
 [<EntryPoint>]
 let main _ =
     Program.mkSimple init update setState
-    |> Program.runGameLoop
+    |> Xelmish.Program.runGameLoop
     0
