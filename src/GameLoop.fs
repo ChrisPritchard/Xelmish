@@ -1,16 +1,18 @@
 ﻿ module Xelmish.XnaCore
 
- open Elmish
  open Microsoft.Xna.Framework
  open Microsoft.Xna.Framework.Graphics
  
- type GameLoop<'arg, 'model, 'msg, 'view>(program: Program<'arg, 'model, 'msg, 'view>) as this = 
+ type GameLoop<'view>() as this = 
         inherit Game()
 
         let graphics = new GraphicsDeviceManager(this)
         let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
+        let mutable view: 'view option = None
 
-        let mutable view = Unchecked.defaultof<'view>
+        member __.View
+            with set value = 
+                view <- value
 
         override __.LoadContent() = 
             spriteBatch <- new SpriteBatch(this.GraphicsDevice)

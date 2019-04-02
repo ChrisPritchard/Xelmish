@@ -23,7 +23,7 @@ let update msg m =
   | Reset -> init ()
 
 let view model dispatch =
-    dispatch Increment
+    //dispatch Increment
     ()
 
 [<EntryPoint>]
