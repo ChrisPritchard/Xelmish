@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Viewables.fs" />
     <Compile Include="Model.fs" />
     <Compile Include="GameLoop.fs" />
     <Compile Include="Program.fs" />

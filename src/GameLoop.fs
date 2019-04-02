@@ -4,15 +4,16 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 
-open Xelmish.Model
+open Model
+open Viewables
 
-type GameLoop<'view> (config: GameLoopConfig) as this = 
+type GameLoop (config: GameLoopConfig) as this = 
     inherit Game ()
 
     let graphics = new GraphicsDeviceManager (this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
-    let mutable view: 'view option = None
+    let mutable view: (Viewable list) option = None
     let mutable keyboardState = Unchecked.defaultof<KeyboardState>
     let mutable mouseState = Unchecked.defaultof<MouseState>
 

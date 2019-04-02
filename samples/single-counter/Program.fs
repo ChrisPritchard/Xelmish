@@ -1,5 +1,6 @@
 ﻿open Elmish
 open Xelmish.Model
+open Xelmish.Viewables
 
 type Model =
   { Count: int
@@ -23,8 +24,21 @@ let update msg m =
   | Reset -> init ()
 
 let view model dispatch =
-    //dispatch Increment
-    ()
+    [
+        Window (100, 100, 600, 400, [
+            Text (sprintf "Counter value: %i" model.Count)
+            Row [
+                Button ("- counter", fun () -> dispatch Decrement)
+                Button ("+ counter", fun () -> dispatch Increment)
+            ]
+            Text (sprintf "Step size: %i" model.StepSize)
+            Row [
+                Button ("- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
+                Button ("+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
+            ]
+            Button ("reset", fun () -> dispatch Reset)
+        ])
+    ]
 
 [<EntryPoint>]
 let main _ =
