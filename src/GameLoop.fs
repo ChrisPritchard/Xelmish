@@ -1,45 +1,55 @@
-﻿ module Xelmish.XnaCore
+﻿module Xelmish.XnaCore
 
- open Microsoft.Xna.Framework
- open Microsoft.Xna.Framework.Graphics
- open Microsoft.Xna.Framework.Input
- 
- type GameLoop<'view>() as this = 
-        inherit Game()
+open Microsoft.Xna.Framework
+open Microsoft.Xna.Framework.Graphics
+open Microsoft.Xna.Framework.Input
 
-        let graphics = new GraphicsDeviceManager(this)
-        let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
+open Xelmish.Model
 
-        let mutable view: 'view option = None
-        let mutable keyboardState = Unchecked.defaultof<KeyboardState>
-        let mutable mouseState = Unchecked.defaultof<MouseState>
+type GameLoop<'view> (config: GameLoopConfig) as this = 
+    inherit Game ()
 
-        do 
-            this.IsMouseVisible <- true
-            graphics.SynchronizeWithVerticalRetrace <- true
-            this.IsFixedTimeStep <- false 
+    let graphics = new GraphicsDeviceManager (this)
+    let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
-        let renderView gameTime viewElements =
-            ()
+    let mutable view: 'view option = None
+    let mutable keyboardState = Unchecked.defaultof<KeyboardState>
+    let mutable mouseState = Unchecked.defaultof<MouseState>
 
-        member __.View
-            with set value = 
-                view <- value
+    let clearColor = Option.map xnaColor config.clearColour
 
-        override __.LoadContent() = 
-            spriteBatch <- new SpriteBatch(this.GraphicsDevice)
+    do 
+        match config.resolution with
+        | Windowed (w,h) -> 
+            graphics.PreferredBackBufferWidth <- w
+            graphics.PreferredBackBufferHeight <- h
 
-        override __.Update _ =
-            keyboardState <- Keyboard.GetState()
-            mouseState <- Mouse.GetState()
+        this.IsMouseVisible <- config.mouseVisible
+        graphics.SynchronizeWithVerticalRetrace <- true
+        this.IsFixedTimeStep <- false 
 
-        override __.Draw gameTime =
+    let renderView gameTime viewElements =
+        ()
 
-            this.GraphicsDevice.Clear Color.CornflowerBlue
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
+    member __.View
+        with set value = 
+            view <- value
 
-            match view with
-            | None -> __.Exit ()
-            | Some v -> renderView gameTime v
+    override __.LoadContent () = 
+        spriteBatch <- new SpriteBatch (this.GraphicsDevice)
 
-            spriteBatch.End()
+    override __.Update _ =
+        keyboardState <- Keyboard.GetState ()
+        mouseState <- Mouse.GetState ()
+
+    override __.Draw gameTime =
+
+        Option.iter this.GraphicsDevice.Clear clearColor
+
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
+
+        match view with
+        | None -> __.Exit ()
+        | Some v -> renderView gameTime v
+
+        spriteBatch.End ()

@@ -1,5 +1,5 @@
 ﻿open Elmish
-open Xelmish
+open Xelmish.Model
 
 type Model =
   { Count: int
@@ -28,6 +28,12 @@ let view model dispatch =
 
 [<EntryPoint>]
 let main _ =
+    let config = {
+        resolution = Windowed (800, 600)
+        clearColour = Some (rgb 255uy 0uy 0uy)
+        mouseVisible = true
+    }
+
     Program.mkSimple init update view
-    |> Program.runGameLoop
+    |> Xelmish.Program.runGameLoop config
     0
