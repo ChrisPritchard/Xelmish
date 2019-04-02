@@ -20,4 +20,6 @@ type GameLoopConfig = {
     /// If false and you want a mouse cursor, you will need to render one yourself
     mouseVisible: bool
 } 
+/// Specifies the resolution to run the game at. For now, this is set once at initiation.
+/// Also, presently full screen is not supported.
 and Resolution = Windowed of int * int

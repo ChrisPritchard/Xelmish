@@ -1,4 +1,4 @@
-﻿module Xelmish.XnaCore
+﻿module internal Xelmish.XnaCore
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
