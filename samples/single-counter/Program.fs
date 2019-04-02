@@ -22,12 +22,12 @@ let update msg m =
   | SetStepSize x -> { m with StepSize = x }
   | Reset -> init ()
 
-let setState model dispatch =
+let view model dispatch =
     dispatch Increment
     ()
 
 [<EntryPoint>]
 let main _ =
-    Program.mkSimple init update setState
-    |> Xelmish.Program.runGameLoop
+    Program.mkSimple init update view
+    |> Program.runGameLoop
     0
