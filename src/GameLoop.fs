@@ -7,7 +7,7 @@ open Microsoft.Xna.Framework.Input
 open Model
 open Viewables
 
-type GameLoop (config: GameLoopConfig) as this = 
+type GameLoop (config: GameConfig) as this = 
     inherit Game ()
 
     let graphics = new GraphicsDeviceManager (this)
@@ -29,10 +29,7 @@ type GameLoop (config: GameLoopConfig) as this =
         this.IsMouseVisible <- config.mouseVisible
         graphics.SynchronizeWithVerticalRetrace <- true
         this.IsFixedTimeStep <- false 
-
-    let renderView gameTime viewElements =
-        ()
-
+        
     member __.View
         with set value = 
             view <- value

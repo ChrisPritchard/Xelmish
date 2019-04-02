@@ -19,7 +19,7 @@ let private vector2 x y = Vector2(float32 x, float32 y)
 let private rectangle x y w h = Rectangle(x, y, w, h)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
-let rec private renderViewable drawState (px, py, pw, ph) viewable =
+let rec internal renderViewable drawState (px, py, pw, ph) viewable =
     match viewable with
     | Position (x, y, w, h, sv) ->
         renderViewable drawState (px + x, py + y, w, h) sv

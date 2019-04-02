@@ -13,7 +13,7 @@ let rgba r g b a = { r = r; g = g; b = b; a = a }
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)
 
-type GameLoopConfig = {
+type GameConfig = {
     /// If specified, each draw will be blanked by the colour specified
     clearColour: Colour option
     /// Resolution to render the game (in future this will be changable post init)
