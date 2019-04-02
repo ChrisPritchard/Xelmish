@@ -1,6 +1,8 @@
 ﻿module Xelmish.Model
 
 open Microsoft.Xna.Framework
+open Microsoft.Xna.Framework.Input
+open Microsoft.Xna.Framework.Graphics
 
 /// Represents colour, best constructed via the rgb and rgba helper methods
 type Colour = { r: byte; g: byte; b: byte; a: byte }
@@ -23,3 +25,10 @@ type GameLoopConfig = {
 /// Specifies the resolution to run the game at. For now, this is set once at initiation.
 /// Also, presently full screen is not supported.
 and Resolution = Windowed of int * int
+
+type DrawState = internal {
+    gameTime: GameTime
+    keyboardState: KeyboardState
+    mouseState: MouseState
+    spriteBatch: SpriteBatch
+}

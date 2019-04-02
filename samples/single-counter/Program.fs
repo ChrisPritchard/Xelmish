@@ -25,8 +25,10 @@ let update msg m =
 
 let view model dispatch =
     [
-        Window (100, 100, 600, 400, [
-            Text (sprintf "Counter value: %i" model.Count)
+        Position (100, 50, 400, 50, 
+            Text (sprintf "Counter value: %i" model.Count))
+
+        Window (100, 100, 600, 200, [
             Row [
                 Button ("- counter", fun () -> dispatch Decrement)
                 Button ("+ counter", fun () -> dispatch Increment)

@@ -18,6 +18,7 @@ type GameLoop (config: GameLoopConfig) as this =
     let mutable mouseState = Unchecked.defaultof<MouseState>
 
     let clearColor = Option.map xnaColor config.clearColour
+    let defaultBounds = 0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight
 
     do 
         match config.resolution with
@@ -51,6 +52,12 @@ type GameLoop (config: GameLoopConfig) as this =
 
         match view with
         | None -> __.Exit ()
-        | Some v -> renderView gameTime v
+        | Some v -> 
+            let drawState = { 
+                gameTime = gameTime
+                keyboardState = keyboardState
+                mouseState = mouseState 
+                spriteBatch = spriteBatch }
+            List.iter (renderViewable drawState defaultBounds) v
 
         spriteBatch.End ()
