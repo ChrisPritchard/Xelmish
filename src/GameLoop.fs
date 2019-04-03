@@ -15,6 +15,7 @@ type GameLoop (config: GameConfig) as this =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
 
     let mutable view: (Viewable list) option = None
+
     let mutable keyboardState = Unchecked.defaultof<KeyboardState>
     let mutable mouseState = Unchecked.defaultof<MouseState>
 
@@ -57,9 +58,7 @@ type GameLoop (config: GameConfig) as this =
         mouseState <- Mouse.GetState ()
 
     override __.Draw gameTime =
-
         Option.iter this.GraphicsDevice.Clear clearColor
-
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
         match view with

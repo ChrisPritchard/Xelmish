@@ -25,7 +25,7 @@ type GameConfig = {
     assetsToLoad: Loadable list
 } 
 /// Specifies the resolution to run the game at. For now, this is set once at initiation.
-/// Also, presently full screen is not supported.
+/// Also, presently fullscreen is not supported.
 and Resolution = Windowed of int * int
 /// Definitions of assets to load on start, e.g. named texture files.
 /// IMPORTANT: all paths are relative paths to content files, e.g. /Content/Sprite.png, 
@@ -36,10 +36,6 @@ and Loadable =
 | Texture of key:string * path:string
 /// key (how it is referenced) and path (full relative path (without extension) to spriteFont)
 | Font of key:string * path:string
-
-type internal Content =
-    | TextureAsset of Texture2D
-    | FontAsset of SpriteFont
 
 type DrawState = internal {
     gameTime: GameTime
