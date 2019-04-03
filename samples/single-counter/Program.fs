@@ -26,19 +26,19 @@ let update msg m =
 let view model dispatch =
     [
         Position (100, 50, 400, 50, 
-            Text (sprintf "Counter value: %i" model.Count))
+            Text ("connection", sprintf "Counter value: %i" model.Count))
 
         Window (100, 100, 600, 200, [
             Row [
-                Button ("- counter", fun () -> dispatch Decrement)
-                Button ("+ counter", fun () -> dispatch Increment)
+                Button ("connection", "- counter", fun () -> dispatch Decrement)
+                Button ("connection", "+ counter", fun () -> dispatch Increment)
             ]
-            Text (sprintf "Step size: %i" model.StepSize)
+            Text ("connection", sprintf "Step size: %i" model.StepSize)
             Row [
-                Button ("- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
-                Button ("+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
+                Button ("connection", "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
+                Button ("connection", "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
             ]
-            Button ("reset", fun () -> dispatch Reset)
+            Button ("connection", "reset", fun () -> dispatch Reset)
         ])
     ]
 
@@ -48,6 +48,9 @@ let main _ =
         resolution = Windowed (800, 600)
         clearColour = Some (rgb 255uy 0uy 0uy)
         mouseVisible = true
+        assetsToLoad = [
+            Font ("connection", "./connection")
+        ]
     }
 
     Program.mkSimple init update view

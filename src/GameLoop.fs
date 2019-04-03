@@ -6,6 +6,7 @@ open Microsoft.Xna.Framework.Input
 
 open Model
 open Viewables
+open System.IO
 
 type GameLoop (config: GameConfig) as this = 
     inherit Game ()
@@ -19,6 +20,10 @@ type GameLoop (config: GameConfig) as this =
 
     let clearColor = Option.map xnaColor config.clearColour
     let defaultBounds = 0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight
+    
+    let mutable fonts = Map.empty<string, SpriteFont>
+    let mutable textures = Map.empty<string, Texture2D>
+    //let mutable whiteTexture: Texture2D = null
 
     do 
         match config.resolution with
@@ -36,6 +41,16 @@ type GameLoop (config: GameConfig) as this =
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch (this.GraphicsDevice)
+        config.assetsToLoad
+        |> List.iter (
+            function
+            | Texture (key, path) -> 
+                use stream = File.OpenRead path
+                let texture = Texture2D.FromStream (this.GraphicsDevice, stream)
+                textures <- Map.add key texture textures
+            | Font (key, path) -> 
+                let font = this.Content.Load<SpriteFont> path
+                fonts <- Map.add key font fonts)
 
     override __.Update _ =
         keyboardState <- Keyboard.GetState ()
@@ -54,7 +69,9 @@ type GameLoop (config: GameConfig) as this =
                 gameTime = gameTime
                 keyboardState = keyboardState
                 mouseState = mouseState 
-                spriteBatch = spriteBatch }
+                spriteBatch = spriteBatch
+                textures = textures
+                fonts = fonts }
             List.iter (renderViewable drawState defaultBounds) v
 
         spriteBatch.End ()

@@ -21,14 +21,31 @@ type GameConfig = {
     /// Whether or not the mouse cursor should be visible in the render window
     /// If false and you want a mouse cursor, you will need to render one yourself
     mouseVisible: bool
+    /// All assets (like images, fonts etc) that the game will use
+    assetsToLoad: Loadable list
 } 
 /// Specifies the resolution to run the game at. For now, this is set once at initiation.
 /// Also, presently full screen is not supported.
 and Resolution = Windowed of int * int
+/// Definitions of assets to load on start, e.g. named texture files.
+/// IMPORTANT: all paths are relative paths to content files, e.g. /Content/Sprite.png, 
+/// except for fonts, which MUST be relative paths (without extensions) to spritefonts built using the content pipeline.
+/// This is because fonts cannot be direct loaded, and must be processed via the pipeline.
+and Loadable =
+/// key (how it is referenced) and path (full relative path to file)
+| Texture of key:string * path:string
+/// key (how it is referenced) and path (full relative path (without extension) to spriteFont)
+| Font of key:string * path:string
+
+type internal Content =
+    | TextureAsset of Texture2D
+    | FontAsset of SpriteFont
 
 type DrawState = internal {
     gameTime: GameTime
     keyboardState: KeyboardState
     mouseState: MouseState
     spriteBatch: SpriteBatch
+    textures: Map<string, Texture2D>
+    fonts: Map<string, SpriteFont>
 }
