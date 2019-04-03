@@ -37,11 +37,10 @@ and Loadable =
 /// key (how it is referenced) and path (full relative path (without extension) to spriteFont)
 | Font of key:string * path:string
 
-type DrawState = internal {
-    gameTime: GameTime
+type GameState = internal {
     keyboardState: KeyboardState
     mouseState: MouseState
-    spriteBatch: SpriteBatch
+    lastMouseState: MouseState
     textures: Map<string, Texture2D>
     fonts: Map<string, SpriteFont>
 }

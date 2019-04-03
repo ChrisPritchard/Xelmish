@@ -1,12 +1,12 @@
 ﻿module internal Xelmish.XnaCore
 
+open System.IO
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 
 open Model
 open Viewables
-open System.IO
 
 type GameLoop (config: GameConfig) as this = 
     inherit Game ()
@@ -16,15 +16,16 @@ type GameLoop (config: GameConfig) as this =
 
     let mutable view: (Viewable list) option = None
 
-    let mutable keyboardState = Unchecked.defaultof<KeyboardState>
-    let mutable mouseState = Unchecked.defaultof<MouseState>
-
     let clearColor = Option.map xnaColor config.clearColour
     let defaultBounds = 0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight
     
-    let mutable fonts = Map.empty<string, SpriteFont>
-    let mutable textures = Map.empty<string, Texture2D>
-    //let mutable whiteTexture: Texture2D = null
+    let mutable gameState = {
+        keyboardState = Unchecked.defaultof<KeyboardState>
+        mouseState = Unchecked.defaultof<MouseState>
+        lastMouseState = Unchecked.defaultof<MouseState>
+        textures = Map.empty<string, Texture2D>
+        fonts = Map.empty<string, SpriteFont>
+    }
 
     do 
         match config.resolution with
@@ -42,20 +43,25 @@ type GameLoop (config: GameConfig) as this =
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch (this.GraphicsDevice)
-        config.assetsToLoad
-        |> List.iter (
-            function
-            | Texture (key, path) -> 
-                use stream = File.OpenRead path
-                let texture = Texture2D.FromStream (this.GraphicsDevice, stream)
-                textures <- Map.add key texture textures
-            | Font (key, path) -> 
-                let font = this.Content.Load<SpriteFont> path
-                fonts <- Map.add key font fonts)
+        let (textures, fonts) =
+            ((Map.empty, Map.empty), config.assetsToLoad)
+            ||> List.fold (fun (textures, fonts) ->
+                function
+                | Texture (key, path) -> 
+                    use stream = File.OpenRead path
+                    let texture = Texture2D.FromStream (this.GraphicsDevice, stream)
+                    Map.add key texture textures, fonts
+                | Font (key, path) -> 
+                    let font = this.Content.Load<SpriteFont> path
+                    textures, Map.add key font fonts)
+        gameState <- { gameState with textures = textures; fonts = fonts }
 
     override __.Update _ =
-        keyboardState <- Keyboard.GetState ()
-        mouseState <- Mouse.GetState ()
+        gameState <- 
+            { gameState with 
+                keyboardState = Keyboard.GetState ()
+                lastMouseState = gameState.mouseState
+                mouseState = Mouse.GetState () }
 
     override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear clearColor
@@ -63,14 +69,6 @@ type GameLoop (config: GameConfig) as this =
 
         match view with
         | None -> __.Exit ()
-        | Some v -> 
-            let drawState = { 
-                gameTime = gameTime
-                keyboardState = keyboardState
-                mouseState = mouseState 
-                spriteBatch = spriteBatch
-                textures = textures
-                fonts = fonts }
-            List.iter (renderViewable drawState defaultBounds) v
+        | Some v -> List.iter (renderViewable spriteBatch gameTime gameState defaultBounds) v
 
         spriteBatch.End ()
