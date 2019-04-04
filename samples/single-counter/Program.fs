@@ -54,5 +54,6 @@ let main _ =
     }
 
     Program.mkSimple init update view
+    |> Program.withConsoleTrace
     |> Xelmish.Program.runGameLoop config
     0

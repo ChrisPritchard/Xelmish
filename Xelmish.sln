@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Xelmish", "src\Xelmish.fsproj", "{3D17E2DE-01DE-49CF-8E15-DCF836EBFCA1}"
 EndProject
@@ -16,11 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{376DD74C-0
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{38883E56-16DE-49DC-8EAB-74AD7F005771}"
-EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Fable.Elmish", "lib\Elmish\Fable.Elmish.fsproj", "{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "single-counter", "samples\single-counter\single-counter.fsproj", "{AC38ED44-CC94-45D9-8909-A889CC6E7131}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "single-counter", "samples\single-counter\single-counter.fsproj", "{AC38ED44-CC94-45D9-8909-A889CC6E7131}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,18 +40,6 @@ Global
 		{3D17E2DE-01DE-49CF-8E15-DCF836EBFCA1}.Release|x64.Build.0 = Release|Any CPU
 		{3D17E2DE-01DE-49CF-8E15-DCF836EBFCA1}.Release|x86.ActiveCfg = Release|Any CPU
 		{3D17E2DE-01DE-49CF-8E15-DCF836EBFCA1}.Release|x86.Build.0 = Release|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Debug|x64.Build.0 = Debug|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Debug|x86.Build.0 = Debug|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Release|x64.ActiveCfg = Release|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Release|x64.Build.0 = Release|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Release|x86.ActiveCfg = Release|Any CPU
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930}.Release|x86.Build.0 = Release|Any CPU
 		{AC38ED44-CC94-45D9-8909-A889CC6E7131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AC38ED44-CC94-45D9-8909-A889CC6E7131}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC38ED44-CC94-45D9-8909-A889CC6E7131}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -74,7 +58,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3D17E2DE-01DE-49CF-8E15-DCF836EBFCA1} = {B9ABEDC0-D2D9-4892-BEB6-7C2B26F8DC25}
-		{FFC2D4E6-83C9-4F93-87E1-B20BEC228930} = {38883E56-16DE-49DC-8EAB-74AD7F005771}
 		{AC38ED44-CC94-45D9-8909-A889CC6E7131} = {E0C3EC12-893D-4F20-B609-F38FA0F896B6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
