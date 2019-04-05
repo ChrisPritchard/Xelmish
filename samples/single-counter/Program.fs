@@ -23,41 +23,23 @@ let update msg m =
   | SetStepSize x -> { m with StepSize = x }
   | Reset -> init ()
 
-//let view model dispatch =
-//    [
-//        Position (100, 50, 400, 50, 
-//            Text ("connection", sprintf "Counter value: %i" model.Count))
-
-//        Window (100, 100, 600, 200, [
-//            Row [
-//                Button ("connection", "- counter", fun () -> dispatch Decrement)
-//                Button ("connection", "+ counter", fun () -> dispatch Increment)
-//            ]
-//            Text ("connection", sprintf "Step size: %i" model.StepSize)
-//            Row [
-//                Button ("connection", "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
-//                Button ("connection", "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
-//            ]
-//            Button ("connection", "reset", fun () -> dispatch Reset)
-//        ])
-//    ]
-
 let view model dispatch =
     [
-        text (sprintf "Counter value: %i" model.Count)
+        Position (100, 50, 400, 50, 
+            Text ("connection", sprintf "Counter value: %i" model.Count))
 
-        column [
-            row [ 
-                button (fun () -> dispatch Decrement) "- counter"
-                button (fun () -> dispatch Increment) "+ counter"
+        Window (100, 100, 600, 200, [
+            Row [
+                Button ("connection", "- counter", fun () -> dispatch Decrement)
+                Button ("connection", "+ counter", fun () -> dispatch Increment)
             ]
-            text (sprintf "Step size: %i" model.StepSize)
-            row [ 
-                button (fun () -> dispatch (SetStepSize (model.StepSize - 1))) "- step size"
-                button (fun () -> dispatch (SetStepSize (model.StepSize + 1))) "+ step size"
+            Text ("connection", sprintf "Step size: %i" model.StepSize)
+            Row [
+                Button ("connection", "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
+                Button ("connection", "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
             ]
-            button (fun () -> dispatch Reset) "reset"
-        ]
+            Button ("connection", "reset", fun () -> dispatch Reset)
+        ])
     ]
 
 [<EntryPoint>]

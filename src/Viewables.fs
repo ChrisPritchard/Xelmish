@@ -1,64 +1,45 @@
 ﻿module Xelmish.Viewables
 
 open Model
+open Microsoft.Xna.Framework
+open Microsoft.Xna.Framework.Graphics
+open Microsoft.Xna.Framework.Input
 
-type Viewable = { kind: ViewableType; rect: Rectangle; children: Viewable list }
-and ViewableType =
-    | Colour of colour: Colour
-    | Image of texture: string * colour: Colour
-    | Text of font: string * text: string * colour: Colour
-    | Clickable of onClick: (unit -> unit)
+type Viewable =
+| Position of x: int * y: int * width: int * height: int * Viewable
+| Window of x: int * y: int * width: int * height: int * Viewable list
+| Row of Viewable list
+| Text of font: string * text: string
+| Button of font: string * text: string * onClick: (unit -> unit)
 
-type Style = {
-    font: string
-    foreColour: Colour
-    backColour: Colour
-    borderWidth: int
-}
+//let private buttonBack: Texture2D = null
 
-let text (text: string) =
-    fun x y style drawState ->
-        let spriteFont = drawState.fonts.[style.font]
-        let textSize = spriteFont.MeasureString (text)
-        { 
-            kind = Text (style.font, text, style.foreColour)
-            rect = rect x y (int textSize.X) (int textSize.Y)
-            children = []
-        }
+let private vector2 x y = Vector2(float32 x, float32 y)
+//let private rectangle x y w h = Rectangle(x, y, w, h)
+let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
-let button onClick (text: string) =
-    fun x y style drawState ->
-        let spriteFont = drawState.fonts.[style.font]
-        let textSize = spriteFont.MeasureString (text)
-        let bs = style.borderWidth
-        let innerText = { 
-            kind = Text (style.font, text, style.foreColour)
-            rect = rect (x + bs) (y + bs) (int textSize.X) (int textSize.Y)
-            children = []
-        }
-        { 
-            kind = Clickable onClick
-            rect = rect x y (int textSize.X + bs*2) (int textSize.Y + bs*2)
-            children = [
-                { 
-                    kind = Colour style.backColour
-                    rect = rect x y (int textSize.X + bs*2) (int textSize.Y + bs*2)
-                    children = [ innerText ] 
-                }
-            ]
-        }
-
-let renderView spriteBatch gameTime gameState view =
-    
-    let rec processItems sx sy sf items =
-        let mutable x, y, font = sx, sy, sf
-        for item in items do
-            ()
-
-    processItems 0 0 None view
-        
-    // for each item, derive new position
-    // position can be overriden by explicit x, y options
-
-    // [x y w h] becomes set x x; set y y etc. then contents gets rendered at that position. x y then gets appended by parent
-    // set x; set y; render; add w to x if row else add h to y if column
+let rec internal renderViewable (spriteBatch: SpriteBatch) gameTime gameState (px, py, pw, ph) viewable =
+    match viewable with
+    | Position (x, y, w, h, sv) ->
+        renderViewable spriteBatch gameTime gameState (px + x, py + y, w, h) sv
+    | Window (x, y, w, h, svl) ->
+        let div = h / svl.Length
+        svl 
+        |> List.iteri (fun i -> 
+            renderViewable spriteBatch gameTime gameState (px + x, py + y + (i * div), w, div))
+    | Row svl ->
+        let div = pw / svl.Length
+        svl 
+        |> List.iteri (fun i -> 
+            renderViewable spriteBatch gameTime gameState (px + (i * div), py, div, ph))
+    | Text (f, s) ->
+        let font = Map.find f gameState.fonts
+        spriteBatch.DrawString(font, s, vector2 px py, Color.White)
+    | Button (f, s, evt) ->
+        //drawState.spriteBatch.Draw(buttonBack, rectangle px py pw ph, Color.White)
+        let font = Map.find f gameState.fonts
+        spriteBatch.DrawString(font, s, vector2 px py, Color.White)
+        if (gameState.mouseState.X, gameState.mouseState.Y) ||> isInside px py pw ph then
+            if gameState.mouseState.LeftButton = ButtonState.Pressed 
+            && gameState.lastMouseState.LeftButton <> ButtonState.Pressed then
+                evt ()
