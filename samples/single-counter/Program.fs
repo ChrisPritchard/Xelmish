@@ -44,19 +44,19 @@ let update msg m =
 
 let view model dispatch =
     [
-        text [ font "connection"; x 100; y 50; width 400; height 50 ] [ rawText (sprintf "Counter value: %i" model.Count)) ]
-            
+        text [ font "connection"; x 100; y 50; width 400; height 50 ] (sprintf "Counter value: %i" model.Count)
+
         column [ font "connection"; x 100; y 100; width 600; height 200 ] [
             row [] [ 
-                button [ click (fun () -> dispatch Decrement) ] [ rawText "- counter" ]
-                button [ click (fun () -> dispatch Increment) ] [ rawText "+ counter" ]
+                clickable (fun () -> dispatch Decrement) (text [] "- counter")
+                clickable (fun () -> dispatch Increment) (text [] "+ counter")
             ]
-            text [] [ rawText (sprintf "Step size: %i" model.StepSize) ]
+            text [] (sprintf "Step size: %i" model.StepSize)
             row [] [ 
-                button [ click (fun () -> dispatch (SetStepSize (model.StepSize - 1))) ] [ rawText "- step size" ]
-                button [ click (fun () -> dispatch (SetStepSize (model.StepSize + 1))) ] [ rawText "+ step size" ]
+                clickable (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (text [] "- step size")
+                clickable (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (text [] "+ step size")
             ]
-            button [ click (fun () -> dispatch Reset) ] [ rawText "reset" ]
+            clickable (fun () -> dispatch Reset) (text [] "reset")
         ]
     ]
 
