@@ -1,18 +1,14 @@
 ﻿module Xelmish.Viewables
 
 open Model
-open Microsoft.Xna.Framework
-open Microsoft.Xna.Framework.Graphics
-open Microsoft.Xna.Framework.Input
 
 type Viewable = 
-    | Column of Attribute list * Viewable list
-    | Row of Attribute list * Viewable list
-    | Text of Attribute list * string
-    | Clickable of (unit -> unit) * Viewable
-
-let button attr contents =
-    Colour (rgb 200uy 200uy 200uy)
+    | Colour of colour: Colour * rect: Rectangle * children: Viewable
+    | Image of texture: string * colour: Colour * rect: Rectangle * children: Viewable
+    | Text of font: string * text: string * colour: Colour * rect: Rectangle
+    | Clickable of onClick: (unit -> unit) * rect: Rectangle * children: Viewable
+    
+let backgroundColour = rgb 150uy 150uy 150uy
 
 let renderView spriteBatch gameTime gameState view =
     

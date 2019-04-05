@@ -13,6 +13,11 @@ let rgba r g b a = { r = r; g = g; b = b; a = a }
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)
 
+/// Represents a rectangle on the screen, used for destinations like
+/// where to draw a colour
+type Rectangle = { x: int; y: int; width: int; height: int }
+let rect x y w h = { x = x; y = y; width = w; height = h }
+
 type GameConfig = {
     /// If specified, each draw will be blanked by the colour specified
     clearColour: Colour option
