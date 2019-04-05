@@ -46,13 +46,13 @@ let view model dispatch =
     [
         text [ font "connection"; x 100; y 50; width 400; height 50 ] [ rawText (sprintf "Counter value: %i" model.Count)) ]
             
-        columnSet [ font "connection"; x 100; y 100; width 600; height 200 ] [
-            rowSet [] [ 
+        column [ font "connection"; x 100; y 100; width 600; height 200 ] [
+            row [] [ 
                 button [ click (fun () -> dispatch Decrement) ] [ rawText "- counter" ]
                 button [ click (fun () -> dispatch Increment) ] [ rawText "+ counter" ]
             ]
             text [] [ rawText (sprintf "Step size: %i" model.StepSize) ]
-            rowSet [] [ 
+            row [] [ 
                 button [ click (fun () -> dispatch (SetStepSize (model.StepSize - 1))) ] [ rawText "- step size" ]
                 button [ click (fun () -> dispatch (SetStepSize (model.StepSize + 1))) ] [ rawText "+ step size" ]
             ]
