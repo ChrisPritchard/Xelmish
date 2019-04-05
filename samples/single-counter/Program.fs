@@ -24,21 +24,23 @@ let update msg m =
   | Reset -> init ()
 
 let view model dispatch =
+    let textStyle = { font = "connection"; colour = rgb 255uy 255uy 255uy }
+    let buttonStyle = { font = "connection"; colour = rgb 0uy 0uy 0uy; backColour = rgb 200uy 200uy 200uy }
     [
         Position (100, 50, 400, 50, 
-            Text ("connection", sprintf "Counter value: %i" model.Count))
+            Text (textStyle, sprintf "Counter value: %i" model.Count))
 
         Window (100, 100, 600, 200, [
             Row [
-                Button ("connection", "- counter", fun () -> dispatch Decrement)
-                Button ("connection", "+ counter", fun () -> dispatch Increment)
+                Button (buttonStyle, "- counter", fun () -> dispatch Decrement)
+                Button (buttonStyle, "+ counter", fun () -> dispatch Increment)
             ]
-            Text ("connection", sprintf "Step size: %i" model.StepSize)
+            Text (textStyle, sprintf "Step size: %i" model.StepSize)
             Row [
-                Button ("connection", "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
-                Button ("connection", "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
+                Button (buttonStyle, "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
+                Button (buttonStyle, "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
             ]
-            Button ("connection", "reset", fun () -> dispatch Reset)
+            Button (buttonStyle, "reset", fun () -> dispatch Reset)
         ])
     ]
 

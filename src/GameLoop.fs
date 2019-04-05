@@ -24,6 +24,7 @@ type GameLoop (config: GameConfig) as this =
         mouseState = Unchecked.defaultof<MouseState>
         lastMouseState = Unchecked.defaultof<MouseState>
         textures = Map.empty<string, Texture2D>
+        whiteTexture = Unchecked.defaultof<Texture2D>
         fonts = Map.empty<string, SpriteFont>
     }
 
@@ -42,7 +43,10 @@ type GameLoop (config: GameConfig) as this =
             view <- value
 
     override __.LoadContent () = 
-        spriteBatch <- new SpriteBatch (this.GraphicsDevice)
+        spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
+        gameState <- { gameState with whiteTexture = new Texture2D(this.GraphicsDevice, 1, 1) }
+        gameState.whiteTexture.SetData<Color> [|Color.White|]
+
         let (textures, fonts) =
             ((Map.empty, Map.empty), config.assetsToLoad)
             ||> List.fold (fun (textures, fonts) ->

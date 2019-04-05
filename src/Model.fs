@@ -18,6 +18,9 @@ let internal xnaColor colour =
 type Rectangle = { x: int; y: int; width: int; height: int }
 let rect x y w h = { x = x; y = y; width = w; height = h }
 
+let internal xnaRect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
+let internal rectToXnaRect r = new Microsoft.Xna.Framework.Rectangle(r.x, r.y, r.width, r.height)
+
 type GameConfig = {
     /// If specified, each draw will be blanked by the colour specified
     clearColour: Colour option
@@ -47,5 +50,6 @@ type GameState = internal {
     mouseState: MouseState
     lastMouseState: MouseState
     textures: Map<string, Texture2D>
+    whiteTexture: Texture2D
     fonts: Map<string, SpriteFont>
 }
