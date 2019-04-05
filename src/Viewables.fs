@@ -9,21 +9,43 @@ and ViewableType =
     | Text of font: string * text: string * colour: Colour
     | Clickable of onClick: (unit -> unit)
 
-let bs = 2 // possibly have a mutable style map?
-    
-let button onClick (text: string) =
-    fun x y font fc bc drawState ->
-        let spriteFont = drawState.fonts.[font]
+type Style = {
+    font: string
+    foreColour: Colour
+    backColour: Colour
+    borderWidth: int
+}
+
+let text (text: string) =
+    fun x y style drawState ->
+        let spriteFont = drawState.fonts.[style.font]
         let textSize = spriteFont.MeasureString (text)
+        { 
+            kind = Text (style.font, text, style.foreColour)
+            rect = rect x y (int textSize.X) (int textSize.Y)
+            children = []
+        }
+
+let button onClick (text: string) =
+    fun x y style drawState ->
+        let spriteFont = drawState.fonts.[style.font]
+        let textSize = spriteFont.MeasureString (text)
+        let bs = style.borderWidth
         let innerText = { 
-            kind = Text (font, text, fc)
+            kind = Text (style.font, text, style.foreColour)
             rect = rect (x + bs) (y + bs) (int textSize.X) (int textSize.Y)
             children = []
         }
         { 
-            kind = Colour bc
+            kind = Clickable onClick
             rect = rect x y (int textSize.X + bs*2) (int textSize.Y + bs*2)
-            children = [ innerText ] 
+            children = [
+                { 
+                    kind = Colour style.backColour
+                    rect = rect x y (int textSize.X + bs*2) (int textSize.Y + bs*2)
+                    children = [ innerText ] 
+                }
+            ]
         }
 
 let renderView spriteBatch gameTime gameState view =
