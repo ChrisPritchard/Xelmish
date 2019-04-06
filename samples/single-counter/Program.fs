@@ -24,24 +24,24 @@ let update msg m =
   | Reset -> init ()
 
 let view model dispatch =
-    let textStyle = { font = "connection"; colour = rgb 255uy 255uy 255uy }
-    let buttonStyle = { font = "connection"; colour = rgb 0uy 0uy 0uy; backColour = rgb 200uy 200uy 200uy }
+    let text = text "connection" 16. (rgb 255uy 255uy 255uy)
     [
-        Position (100, 50, 400, 50, 
-            Text (textStyle, sprintf "Counter value: %i" model.Count))
+        yield text (sprintf "Counter value: %i" model.Count) (100, 50)
 
-        Window (100, 100, 600, 200, [
-            Row [
-                Button (buttonStyle, "- counter", fun () -> dispatch Decrement)
-                Button (buttonStyle, "+ counter", fun () -> dispatch Increment)
-            ]
-            Text (textStyle, sprintf "Step size: %i" model.StepSize)
-            Row [
-                Button (buttonStyle, "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
-                Button (buttonStyle, "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
-            ]
-            Button (buttonStyle, "reset", fun () -> dispatch Reset)
-        ])
+        yield! 
+            stack 200 [
+                yield
+                    row 600 [
+                        Button (buttonStyle, "- counter", fun () -> dispatch Decrement)
+                        Button (buttonStyle, "+ counter", fun () -> dispatch Increment)
+                    ]
+                yield text (sprintf "Step size: %i" model.StepSize)
+                Row [
+                    Button (buttonStyle, "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
+                    Button (buttonStyle, "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
+                ]
+                Button (buttonStyle, "reset", fun () -> dispatch Reset)
+            ] (100, 100)
     ]
 
 [<EntryPoint>]

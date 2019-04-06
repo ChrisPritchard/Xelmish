@@ -13,11 +13,9 @@ type GameLoop (config: GameConfig) as this =
 
     let graphics = new GraphicsDeviceManager (this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
+    let clearColor = Option.map xnaColor config.clearColour
 
     let mutable view: (Viewable list) option = None
-
-    let clearColor = Option.map xnaColor config.clearColour
-    let defaultBounds = 0, 0, graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight
     
     let mutable gameState = {
         keyboardState = Unchecked.defaultof<KeyboardState>
@@ -68,12 +66,12 @@ type GameLoop (config: GameConfig) as this =
                 lastMouseState = gameState.mouseState
                 mouseState = Mouse.GetState () }
 
-    override __.Draw gameTime =
+    override __.Draw _ =
         Option.iter this.GraphicsDevice.Clear clearColor
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
         match view with
         | None -> __.Exit ()
-        | Some v -> List.iter (renderViewable spriteBatch gameTime gameState defaultBounds) v
+        | Some v -> List.iter (renderViewable spriteBatch gameState) v
 
         spriteBatch.End ()
