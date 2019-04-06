@@ -51,5 +51,5 @@ type GameState = internal {
     lastMouseState: MouseState
     textures: Map<string, Texture2D>
     whiteTexture: Texture2D
-    fonts: Map<string, SpriteFont>
+    fonts: Map<string, SpriteFont * Vector2>
 }
