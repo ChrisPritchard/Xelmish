@@ -3,7 +3,6 @@
 open Model
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
-open Microsoft.Xna.Framework.Input
 
 type Viewable =
 | Colour of colour: Colour * size: (int * int) * pos: (int * int)
@@ -20,36 +19,28 @@ let stack (x, y) height (children: ((int * int) -> Viewable) list) =
         let pos = (x, y + i * div)
         child pos)
 
-//let private buttonBack: Texture2D = null
+let row (x, y) width (children: ((int * int) -> Viewable) list) =
+    let div = width / children.Length
+    children |> List.mapi (fun i child ->
+        let pos = (x + i * div, y)
+        child pos)
+
 
 let private vector2 x y = Vector2(float32 x, float32 y)
-//let private rectangle x y w h = Rectangle(x, y, w, h)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
 let rec internal renderViewable (spriteBatch: SpriteBatch) gameTime gameState (px, py, pw, ph) viewable =
     match viewable with
-    | Position (x, y, w, h, sv) ->
-        renderViewable spriteBatch gameTime gameState (px + x, py + y, w, h) sv
-    | Window (x, y, w, h, svl) ->
-        let div = h / svl.Length
-        svl 
-        |> List.iteri (fun i -> 
-            renderViewable spriteBatch gameTime gameState (px + x, py + y + (i * div), w, div))
-    | Row svl ->
-        let div = pw / svl.Length
-        svl 
-        |> List.iteri (fun i -> 
-            renderViewable spriteBatch gameTime gameState (px + (i * div), py, div, ph))
-    | Text (ts, s) ->
-        let font = Map.find ts.font gameState.fonts
-        spriteBatch.DrawString(font, s, vector2 px py, xnaColor ts.colour)
-    | Button (bs, s, evt) ->
-        spriteBatch.Draw(gameState.whiteTexture, xnaRect px py pw ph, xnaColor bs.backColour)
+    | Colour (colour, (width, height), (x, y)) ->
+        spriteBatch.Draw(gameState.whiteTexture, xnaRect x y width height, xnaColor colour)
+    | Image (key, colour, (width, height), (x, y)) ->
+        spriteBatch.Draw(gameState.textures.[key], xnaRect x y width height, xnaColor colour)
+    | Text (text, font, size, colour, (x, y)) ->
+        let font = gameState.fonts.[font]
+        //let scale = scaleFor size font
+        spriteBatch.DrawString(font, text, vector2 x y, xnaColor colour)
 
-        let font = Map.find bs.font gameState.fonts
-        spriteBatch.DrawString(font, s, vector2 px py, xnaColor bs.colour)
-
-        if (gameState.mouseState.X, gameState.mouseState.Y) ||> isInside px py pw ph then
-            if gameState.mouseState.LeftButton = ButtonState.Pressed 
-            && gameState.lastMouseState.LeftButton <> ButtonState.Pressed then
-                evt ()
+        //if (gameState.mouseState.X, gameState.mouseState.Y) ||> isInside px py pw ph then
+        //    if gameState.mouseState.LeftButton = ButtonState.Pressed 
+        //    && gameState.lastMouseState.LeftButton <> ButtonState.Pressed then
+        //        evt ()
