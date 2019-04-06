@@ -6,19 +6,17 @@ open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 
 type Viewable =
-| Position of x: int * y: int * width: int * height: int * Viewable
-| Window of x: int * y: int * width: int * height: int * Viewable list
-| Row of Viewable list
-| Text of textStyle: TextStyle * text: string
-| Button of buttonStyle: ButtonStyle * text: string * onClick: (unit -> unit)
-and TextStyle = {
-    font: string
-    colour: Colour
-} and ButtonStyle = {
-    font: string
-    colour: Colour
-    backColour: Colour
-}
+| Colour of colour: Colour * dest: Rectangle
+| Image of key: string * colour: Colour * dest: Rectangle
+| Text of text: string * font: string * size: float * colour: Colour * x: int * y: int
+
+let colour colour destination = Colour (colour, destination)
+let image key colour destination = Image (key, colour, destination)
+let text text font size colour x y = Text(text, font, size, colour, x, y)
+
+let stack x y height (children: ((int * int) -> Viewable) list) =
+    let div = height / children.Length
+
 
 //let private buttonBack: Texture2D = null
 
