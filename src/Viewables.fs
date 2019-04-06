@@ -6,17 +6,19 @@ open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 
 type Viewable =
-| Colour of colour: Colour * dest: Rectangle
-| Image of key: string * colour: Colour * dest: Rectangle
-| Text of text: string * font: string * size: float * colour: Colour * x: int * y: int
+| Colour of colour: Colour * size: (int * int) * pos: (int * int)
+| Image of key: string * colour: Colour * size: (int * int) * pos: (int * int)
+| Text of text: string * font: string * size: float * colour: Colour * pos: (int * int)
 
-let colour colour destination = Colour (colour, destination)
-let image key colour destination = Image (key, colour, destination)
-let text text font size colour x y = Text(text, font, size, colour, x, y)
+let colour colour size pos = Colour (colour, size, pos)
+let image key colour size pos = Image (key, colour, size, pos)
+let text text font size colour pos = Text(text, font, size, colour, pos)
 
-let stack x y height (children: ((int * int) -> Viewable) list) =
+let stack (x, y) height (children: ((int * int) -> Viewable) list) =
     let div = height / children.Length
-
+    children |> List.mapi (fun i child ->
+        let pos = (x, y + i * div)
+        child pos)
 
 //let private buttonBack: Texture2D = null
 
