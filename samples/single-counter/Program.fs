@@ -34,20 +34,18 @@ let view model dispatch =
         yield text (sprintf "Counter value: %i" model.Count) (100, 50)
 
         yield! 
-            stack 200 ([
-                (fun p ->
-                    row 600 [
-                        button "- counter" (fun () -> dispatch Decrement)
-                        button "+ counter" (fun () -> dispatch Increment)
-                    ] p)
+            stack 200 [
+                row 600 [
+                    button "- counter" (fun () -> dispatch Decrement) (100, 20)
+                    button "+ counter" (fun () -> dispatch Increment) (100, 20)
+                ]
                 fun p -> [text (sprintf "Step size: %i" model.StepSize) p]
-                (fun p ->
-                    row 600 [
-                        button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1)))
-                        button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1)))
-                    ] p)
-                fun p -> [button (sprintf "Step size: %i" model.StepSize) (fun () -> dispatch Reset) p]
-            ] |> List.collect id) (100, 100)
+                row 600 [
+                    button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 20)
+                    button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (100, 20)
+                ]
+                button "reset" (fun () -> dispatch Reset) (100, 20)
+            ] (100, 100)
     ]
 
 [<EntryPoint>]

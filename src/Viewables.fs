@@ -18,17 +18,21 @@ let image key colour size pos = Image (key, colour, size, pos)
 let text font size colour text pos = Text (text, font, size, colour, pos)
 let clickable event size pos = Clickable (event, size, pos)
 
-let stack height (children: ((int * int) -> Viewable) list) (x, y) =
+let stack height (children: ((int * int) -> Viewable list) list) (x, y) =
     let div = height / children.Length
-    children |> List.mapi (fun i child ->
+    children 
+    |> List.mapi (fun i child ->
         let pos = (x, y + i * div)
         child pos)
+    |> List.collect id
 
-let row width (children: ((int * int) -> Viewable) list) (x, y) =
+let row width (children: ((int * int) -> Viewable list) list) (x, y) =
     let div = width / children.Length
-    children |> List.mapi (fun i child ->
+    children 
+    |> List.mapi (fun i child ->
         let pos = (x + i * div, y)
         child pos)
+    |> List.collect id
 
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
