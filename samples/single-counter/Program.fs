@@ -25,23 +25,29 @@ let update msg m =
 
 let view model dispatch =
     let text = text "connection" 16. (rgb 255uy 255uy 255uy)
+    let button s event size pos = [
+        colour (rgb 0uy 0uy 255uy) size pos
+        text s pos
+        clickable event size pos
+    ]
     [
         yield text (sprintf "Counter value: %i" model.Count) (100, 50)
 
         yield! 
-            stack 200 [
-                yield
+            stack 200 ([
+                (fun p ->
                     row 600 [
-                        Button (buttonStyle, "- counter", fun () -> dispatch Decrement)
-                        Button (buttonStyle, "+ counter", fun () -> dispatch Increment)
-                    ]
-                yield text (sprintf "Step size: %i" model.StepSize)
-                Row [
-                    Button (buttonStyle, "- step size", fun () -> dispatch (SetStepSize (model.StepSize - 1)))
-                    Button (buttonStyle, "+ step size", fun () -> dispatch (SetStepSize (model.StepSize + 1)))
-                ]
-                Button (buttonStyle, "reset", fun () -> dispatch Reset)
-            ] (100, 100)
+                        button "- counter" (fun () -> dispatch Decrement)
+                        button "+ counter" (fun () -> dispatch Increment)
+                    ] p)
+                fun p -> [text (sprintf "Step size: %i" model.StepSize) p]
+                (fun p ->
+                    row 600 [
+                        button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1)))
+                        button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1)))
+                    ] p)
+                fun p -> [button (sprintf "Step size: %i" model.StepSize) (fun () -> dispatch Reset) p]
+            ] |> List.collect id) (100, 100)
     ]
 
 [<EntryPoint>]

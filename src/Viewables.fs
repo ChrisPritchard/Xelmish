@@ -15,7 +15,8 @@ type Viewable =
 
 let colour colour size pos = Colour (colour, size, pos)
 let image key colour size pos = Image (key, colour, size, pos)
-let text font size colour text pos = Text(text, font, size, colour, pos)
+let text font size colour text pos = Text (text, font, size, colour, pos)
+let clickable event size pos = Clickable (event, size, pos)
 
 let stack height (children: ((int * int) -> Viewable) list) (x, y) =
     let div = height / children.Length
