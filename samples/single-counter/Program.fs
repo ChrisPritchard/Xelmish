@@ -25,11 +25,12 @@ let update msg m =
 
 let view model dispatch =
     let text = text "connection" 16. (rgb 255uy 255uy 255uy)
-    let button s event size pos = [
-        colour (rgb 0uy 0uy 255uy) size pos
-        text s pos
-        clickable event size pos
+    let button s event (width, height) (x, y) = [
+        colour (rgb 0uy 0uy 255uy) (width, height) (x, y)
+        text (-0.5, -0.5) s (x + width/2, y+height/2)
+        clickable event (width, height) (x, y)
     ]
+    let text = text (0., 0.)
     [
         yield text (sprintf "Counter value: %i" model.Count) (100, 50)
 

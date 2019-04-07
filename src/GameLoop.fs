@@ -23,7 +23,7 @@ type GameLoop (config: GameConfig) as this =
         lastMouseState = Unchecked.defaultof<MouseState>
         textures = Map.empty<string, Texture2D>
         whiteTexture = Unchecked.defaultof<Texture2D>
-        fonts = Map.empty<string, SpriteFont * Vector2>
+        fonts = Map.empty<string, SpriteFont>
     }
 
     do 
@@ -55,8 +55,7 @@ type GameLoop (config: GameConfig) as this =
                     Map.add key texture textures, fonts
                 | Font (key, path) -> 
                     let font = this.Content.Load<SpriteFont> path
-                    let fontSize = font.MeasureString("A")
-                    textures, Map.add key (font, fontSize) fonts)
+                    textures, Map.add key font fonts)
         gameState <- { gameState with textures = textures; fonts = fonts }
 
     override __.Update _ =
