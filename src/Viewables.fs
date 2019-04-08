@@ -41,19 +41,26 @@ let private sizesFor maxSize definitions =
     remainder |> Seq.iter (fun (i, _) -> sizes.[i] <- divided)
     sizes
 
-let private positionsFor rows cols =
-    let array = Array2D.create (Array.length rows) (Array.length cols) (0, 0)
-    array
-
 let private viewablesFrom rows cols cells (width, height) (x, y) =
     let rowSizes = sizesFor height rows
     let colSizes = sizesFor width cols
-    let positions = positionsFor rowSizes colSizes
-    // take total size
-        // remove exacts and percents
-        // if remainder divided is less than mins, remove mins
-        // set the rest to divided
-    []
+    let rowStarts = fst (Array.mapFold (fun acc n -> acc, acc + n) y rowSizes)
+    let colStarts = fst (Array.mapFold (fun acc n -> acc, acc + n) x colSizes)
+
+    let bounded r c = 
+        (if r < 0 || r >= rowSizes.Length then 0 else r),
+        (if c < 0 || c >= colSizes.Length then 0 else c)
+
+    let cellMapper = 
+        function
+        | TextCell (r, c, v) ->
+            let r, c = bounded r c
+            v (colStarts.[c], rowStarts.[r])
+        | RectCell (r, c, v) -> 
+            let r, c = bounded r c
+            v (colSizes.[c], rowSizes.[r]) (colStarts.[c], rowStarts.[r])
+
+    cells |> List.map cellMapper
 
 let rec internal renderViewable (spriteBatch: SpriteBatch) gameState viewable =
     match viewable with
