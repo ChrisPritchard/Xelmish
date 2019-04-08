@@ -15,6 +15,7 @@ and Definition = Exact of int | Percent of float | Even
 and Cell = 
     | TextCell of row: int * col: int * content: ((int * int) -> Viewable)
     | RectCell of row: int * col: int * content: ((int * int) -> (int * int) -> Viewable)
+    | ListCell of row: int * col: int * content: ((int * int) -> (int * int) -> Viewable list) 
 
 let colour colour size pos = Colour (colour, size, pos)
 let image key colour size pos = Image (key, colour, size, pos)
@@ -55,12 +56,15 @@ let private viewablesFrom rows cols cells (width, height) (x, y) =
         function
         | TextCell (r, c, v) ->
             let r, c = bounded r c
-            v (colStarts.[c], rowStarts.[r])
+            [v (colStarts.[c], rowStarts.[r])]
         | RectCell (r, c, v) -> 
+            let r, c = bounded r c
+            [v (colSizes.[c], rowSizes.[r]) (colStarts.[c], rowStarts.[r])]
+        | ListCell (r, c, v) ->
             let r, c = bounded r c
             v (colSizes.[c], rowSizes.[r]) (colStarts.[c], rowStarts.[r])
 
-    cells |> List.map cellMapper
+    cells |> List.collect cellMapper
 
 let rec internal renderViewable (spriteBatch: SpriteBatch) gameState viewable =
     match viewable with
