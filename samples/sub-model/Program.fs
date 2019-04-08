@@ -4,11 +4,13 @@ open Xelmish.Model
 open Xelmish.Viewables
 
 let text = text "connection"
-let button s event (width, height) (x, y) = [
-    colour Colours.blue (width, height) (x, y)
-    text 16. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
-    clickable event (width, height) (x, y)
-]
+let button s event (x, y) = 
+    let width, height = 100, 30 
+    [
+        colour Colours.blue (width, height) (x, y)
+        text 20. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
+        clickable event (width, height) (x, y)
+    ]
 
 module Clock =
 
@@ -29,15 +31,15 @@ module Clock =
         | Tick t -> { m with Time = t }
         | ToggleUtc -> { m with UseUtc = not m.UseUtc }
 
-    let view model dispatch =
+    let view model dispatch (x, y) =
         let timeFormat = fun (date: DateTime) -> 
             System.String.Format("Today is {0:MMMM dd, yyyy}. The time is {0:HH:mm:ssK}. It is {0:dddd}.", date)
         let timeString = 
             if model.UseUtc then timeFormat model.Time.UtcDateTime 
             else timeFormat model.Time.LocalDateTime
         [
-            yield text 20. Colours.white (0., 0.) timeString (0, 0)
-            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (100, 20) (200, 0)
+            yield text 20. Colours.white (0., 0.) timeString (x, y)
+            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x + 200, y)
         ]
 
 module CounterWithClock =
@@ -67,22 +69,17 @@ module CounterWithClock =
         | Reset -> { m with Count = 0; StepSize = 1 }
         | ClockMsg msg -> { m with Clock = Clock.update msg m.Clock }
 
-  //let bindings () =
-  //  [
-  //    "CounterValue" |> Binding.oneWay (fun m -> m.Count)
-  //    "Increment" |> Binding.cmd (fun m -> Increment)
-  //    "Decrement" |> Binding.cmd (fun m -> Decrement)
-  //    "StepSize" |> Binding.twoWay 
-  //      (fun m -> float m.StepSize)
-  //      (fun v m -> int v |> SetStepSize)
-  //    "Reset" |> Binding.cmdIf
-  //      (fun m -> Reset)
-  //      (fun m ->
-  //        let i = init ()
-  //        m.Count <> i.Count || m.StepSize <> i.StepSize
-  //      )
-  //    "Clock" |> Binding.subModel (fun m -> m.Clock) Clock.bindings ClockMsg
-  //  ]
+    let view model dispatch (x, y) =
+        [
+            yield text 30. Colours.black (0., 0.) (sprintf "Counter value: %i" model.Count) (x, y)
+            yield! button "- counter" (fun () -> dispatch Decrement) (x, y + 40)
+            yield! button "+ counter" (fun () -> dispatch Increment) (x + 120, y + 40)
+            yield text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize) (x, y + 80)
+            yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (x, y + 120)
+            yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (x + 120, y + 120)
+            yield! button "reset" (fun () -> dispatch Reset) (x, y + 140)
+            yield! Clock.view model.Clock dispatch (x, y + 180)
+        ]
 
 module App =
 
