@@ -11,7 +11,7 @@ type Viewable =
 | Text of text: string * font: string * size: float * colour: Colour * origin: (float * float) * pos: (int * int)
 | Clickable of event: (Unit -> Unit) * size: (int * int) * pos: (int * int)
 | Layout of rowDefinitions: Definition list * colDefinitions: Definition list * cells: Cell list * size: (int * int) * pos: (int * int)
-and Definition = Exact of int | Min of int | Percent of float
+and Definition = Exact of int | Min of int | Percent of float | Even
 and Cell = 
     | TextCell of row: int * col: int * content: ((int * int) -> Viewable)
     | RectCell of row: int * col: int * content: ((int * int) -> (int * int) -> Viewable)
@@ -26,6 +26,10 @@ let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
 let private viewablesFrom rows cols cells size pos =
+    // take total size
+        // remove exacts and percents
+        // if remainder divided is less than mins, remove mins
+        // set the rest to divided
     []
 
 let rec internal renderViewable (spriteBatch: SpriteBatch) gameState viewable =
