@@ -11,7 +11,7 @@ type Viewable =
 | Text of text: string * font: string * size: float * colour: Colour * origin: (float * float) * pos: (int * int)
 | Clickable of event: (Unit -> Unit) * size: (int * int) * pos: (int * int)
 | Layout of rowDefinitions: Definition list * colDefinitions: Definition list * cells: Cell list * size: (int * int) * pos: (int * int)
-and Definition = Exact of int | Min of int | Percent of float | Even
+and Definition = Exact of int | Percent of float | Even
 and Cell = 
     | TextCell of row: int * col: int * content: ((int * int) -> Viewable)
     | RectCell of row: int * col: int * content: ((int * int) -> (int * int) -> Viewable)
@@ -25,7 +25,30 @@ let layout rows cols cells size pos = Layout (rows, cols, cells, size, pos)
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
-let private viewablesFrom rows cols cells size pos =
+let private sizesFor maxSize definitions =
+    let sizes = Array.create (List.length definitions) 0
+    let folder (rest, sizeLeft) (i, item) =
+        match item with
+        | Even -> (i, item)::rest, sizeLeft
+        | Exact s -> sizes.[i] <- s; rest, sizeLeft - s
+        | Percent p -> 
+            let calc = int (p * float maxSize)
+            sizes.[i] <- calc; rest, sizeLeft - calc
+    let remainder, sizeLeft = 
+        Seq.indexed definitions 
+        |> Seq.fold folder ([], maxSize)
+    let divided = sizeLeft / remainder.Length
+    remainder |> Seq.iter (fun (i, _) -> sizes.[i] <- divided)
+    sizes
+
+let private positionsFor rows cols =
+    let array = Array2D.create (Array.length rows) (Array.length cols) (0, 0)
+    array
+
+let private viewablesFrom rows cols cells (width, height) (x, y) =
+    let rowSizes = sizesFor height rows
+    let colSizes = sizesFor width cols
+    let positions = positionsFor rowSizes colSizes
     // take total size
         // remove exacts and percents
         // if remainder divided is less than mins, remove mins
