@@ -10,6 +10,17 @@ type Colour = { r: byte; g: byte; b: byte; a: byte }
 let rgb r g b = { r = r; g = g; b = b; a = 255uy }
 let rgba r g b a = { r = r; g = g; b = b; a = a }
 
+module Colours =
+    let white = rgb 255uy 255uy 255uy
+    let red = rgb 255uy 0uy 0uy
+    let orange = rgb 255uy 165uy 0uy
+    let yellow = rgb 255uy 255uy 0uy
+    let green = rgb 0uy 255uy 0uy
+    let indigo = rgb 75uy 0uy 130uy
+    let violet = rgb 238uy 130uy 238uy
+    let blue = rgb 0uy 0uy 255uy
+    let black = rgb 0uy 0uy 0uy
+
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)
 

@@ -24,18 +24,16 @@ let update msg m =
   | Reset -> init ()
 
 let view model dispatch =
-    let white = rgb 255uy 255uy 255uy
-    let black = rgb 0uy 0uy 0uy
 
     let text = text "connection"
     let button s event (width, height) (x, y) = [
-        colour (rgb 0uy 0uy 255uy) (width, height) (x, y)
-        text 16. white (-0.5, -0.5) s (x + width/2, y+height/2)
+        colour Colours.blue (width, height) (x, y)
+        text 16. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
         clickable event (width, height) (x, y)
     ]
 
     [
-        yield text 30. black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
+        yield text 30. Colours.black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
 
         yield! 
             stack 100 [
@@ -43,7 +41,7 @@ let view model dispatch =
                     button "- counter" (fun () -> dispatch Decrement) (100, 20)
                     button "+ counter" (fun () -> dispatch Increment) (100, 20)
                 ]
-                fun p -> [text 20. black (0., 0.) (sprintf "Step size: %i" model.StepSize) p]
+                fun p -> [text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize) p]
                 row 220 [
                     button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 20)
                     button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (100, 20)
@@ -55,8 +53,8 @@ let view model dispatch =
 [<EntryPoint>]
 let main _ =
     let config = {
-        resolution = Windowed (800, 600)
-        clearColour = Some (rgb 200uy 200uy 200uy)
+        resolution = Windowed (420, 300)
+        clearColour = Some Colours.white
         mouseVisible = true
         assetsToLoad = [
             Font ("connection", "./connection")
