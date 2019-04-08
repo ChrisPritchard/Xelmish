@@ -22,6 +22,9 @@ let image key colour size pos = Image (key, colour, size, pos)
 let text font size colour origin text pos = Text (text, font, size, colour, origin, pos)
 let clickable event size pos = Clickable (event, size, pos)
 let layout rows cols cells size pos = Layout (rows, cols, cells, size, pos)
+let textCell row col content = TextCell (row, col, content)
+let rectCell row col content = RectCell (row, col, content)
+let listCell row col content = ListCell (row, col, content)
 
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th

@@ -33,21 +33,15 @@ let view model dispatch =
     ]
 
     [
-        yield text 30. Colours.black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
-
-        yield! 
-            stack 100 [
-                row 220 [
-                    button "- counter" (fun () -> dispatch Decrement) (100, 20)
-                    button "+ counter" (fun () -> dispatch Increment) (100, 20)
-                ]
-                fun p -> [text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize) p]
-                row 220 [
-                    button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 20)
-                    button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (100, 20)
-                ]
-                button "reset" (fun () -> dispatch Reset) (100, 20)
-            ] (100, 100)
+        text 30. Colours.black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
+        layout [ Even; Even; Even; Even ] [ Even; Even; ] [
+            listCell 0 0 (button "- counter" (fun () -> dispatch Decrement))
+            listCell 0 1 (button "+ counter" (fun () -> dispatch Increment))
+            textCell 1 0 (text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize))
+            listCell 2 0 (button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))))
+            listCell 2 1 (button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))))
+            listCell 3 0 (button "reset" (fun () -> dispatch Reset))
+        ] (220, 100) (100, 100)
     ]
 
 [<EntryPoint>]
