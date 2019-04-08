@@ -1,6 +1,14 @@
 ﻿open System
 open Elmish
 open Xelmish.Model
+open Xelmish.Viewables
+
+let text = text "connection"
+let button s event (width, height) (x, y) = [
+    colour Colours.blue (width, height) (x, y)
+    text 16. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
+    clickable event (width, height) (x, y)
+]
 
 module Clock =
 
@@ -21,12 +29,16 @@ module Clock =
         | Tick t -> { m with Time = t }
         | ToggleUtc -> { m with UseUtc = not m.UseUtc }
 
-    //let bindings () =
-    //    [ 
-    //        "Time" |> Binding.oneWay 
-    //        (fun m -> if m.UseUtc then m.Time.UtcDateTime else m.Time.LocalDateTime)
-    //        "ToggleUtc" |> Binding.cmd (fun m -> ToggleUtc)
-    //    ]
+    let view model dispatch =
+        let timeFormat = fun (date: DateTime) -> 
+            System.String.Format("Today is {0:MMMM dd, yyyy}. The time is {0:HH:mm:ssK}. It is {0:dddd}.", date)
+        let timeString = 
+            if model.UseUtc then timeFormat model.Time.UtcDateTime 
+            else timeFormat model.Time.LocalDateTime
+        [
+            yield text 20. Colours.white (0., 0.) timeString (0, 0)
+            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (100, 20) (200, 0)
+        ]
 
 module CounterWithClock =
 
