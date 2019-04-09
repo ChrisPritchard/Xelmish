@@ -39,7 +39,7 @@ module Clock =
             else timeFormat model.Time.LocalDateTime
         [
             yield text 20. Colours.white (0., 0.) timeString (x, y)
-            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x + 200, y)
+            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x + 550, y)
         ]
 
 module CounterWithClock =
@@ -78,7 +78,7 @@ module CounterWithClock =
             yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (x, y + 120)
             yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (x + 120, y + 120)
             yield! button "reset" (fun () -> dispatch Reset) (x, y + 140)
-            yield! Clock.view model.Clock dispatch (x, y + 180)
+            yield! Clock.view model.Clock (ClockMsg >> dispatch) (x, y + 180)
         ]
 
 module App =
@@ -102,13 +102,11 @@ module App =
         | ClockCounter2Msg msg ->
             { m with ClockCounter2 = CounterWithClock.update msg m.ClockCounter2 }
 
-    //let bindings model dispatch =
-    //    [
-    //        "ClockCounter1" |> Binding.subModel
-    //        (fun m -> m.ClockCounter1) CounterWithClock.bindings ClockCounter1Msg
-    //        "ClockCounter2" |> Binding.subModel
-    //        (fun m -> m.ClockCounter2) CounterWithClock.bindings ClockCounter2Msg
-    //    ]
+    let view model dispatch =
+        [
+            yield! CounterWithClock.view model.ClockCounter1 (ClockCounter1Msg >> dispatch) (100, 100)
+            yield! CounterWithClock.view model.ClockCounter2 (ClockCounter2Msg >> dispatch) (100, 320)
+        ]
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(1000.)
