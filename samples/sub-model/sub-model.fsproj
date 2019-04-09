@@ -6,16 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Connection.otf" />
-    <None Include="Connection.spritefont" />
-    <None Include="Content.mgcb" />
+    <Content Include="..\..\shared\Connection.otf" Link="Connection.otf" />
+    <None Include="..\..\shared\Connection.spritefont" Link="Connection.spritefont" />
+    <None Include="..\..\shared\Content.mgcb" Link="Content.mgcb" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <!-- Processed by content pipeline on build into xnb files -->
   <ItemGroup>
-    <None Include="Content.mgcb" />
-    <None Include="Connection.spritefont" />
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
 
