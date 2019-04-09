@@ -9,6 +9,7 @@
     <Content Include="..\..\shared\Connection.otf" Link="Connection.otf" />
     <None Include="..\..\shared\Connection.spritefont" Link="Connection.spritefont" />
     <None Include="..\..\shared\Content.mgcb" Link="Content.mgcb" />
+    <Compile Include="Model.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -16,7 +17,6 @@
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup />
 
   <ItemGroup>
