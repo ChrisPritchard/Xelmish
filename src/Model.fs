@@ -24,6 +24,8 @@ module Colours =
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)
 
+type Keys = Microsoft.Xna.Framework.Input.Keys
+
 /// Represents a rectangle on the screen, used for destinations like
 /// where to draw a colour
 type Rectangle = { x: int; y: int; width: int; height: int }

@@ -31,7 +31,7 @@ let view model dispatch =
         [
             colour Colours.blue (width, height) (x, y)
             text 20. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
-            clickable event (width, height) (x, y)
+            onclick event (width, height) (x, y)
         ]
 
     [
