@@ -77,8 +77,8 @@ module CounterWithClock =
             yield text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize) (x, y + 80)
             yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (x, y + 120)
             yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (x + 120, y + 120)
-            yield! button "reset" (fun () -> dispatch Reset) (x, y + 140)
-            yield! Clock.view model.Clock (ClockMsg >> dispatch) (x, y + 180)
+            yield! button "reset" (fun () -> dispatch Reset) (x, y + 160)
+            yield! Clock.view model.Clock (ClockMsg >> dispatch) (x, y + 200)
         ]
 
 module App =
@@ -104,8 +104,8 @@ module App =
 
     let view model dispatch =
         [
-            yield! CounterWithClock.view model.ClockCounter1 (ClockCounter1Msg >> dispatch) (100, 100)
-            yield! CounterWithClock.view model.ClockCounter2 (ClockCounter2Msg >> dispatch) (100, 320)
+            yield! CounterWithClock.view model.ClockCounter1 (ClockCounter1Msg >> dispatch) (100, 50)
+            yield! CounterWithClock.view model.ClockCounter2 (ClockCounter2Msg >> dispatch) (100, 290)
         ]
 
 let timerTick dispatch =
