@@ -20,6 +20,9 @@ module Colours =
     let violet = rgb 238uy 130uy 238uy
     let blue = rgb 0uy 0uy 255uy
     let black = rgb 0uy 0uy 0uy
+    let cyan = rgb 0uy 255uy 255uy
+    let magenta = rgb 255uy 0uy 255uy
+    let silver = rgb 192uy 192uy 192uy
 
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)

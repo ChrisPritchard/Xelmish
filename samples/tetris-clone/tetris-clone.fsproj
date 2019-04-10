@@ -16,7 +16,6 @@
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
-  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
