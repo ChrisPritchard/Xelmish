@@ -69,8 +69,11 @@ let tilesFor model =
     model.shapeType.rotations.[model.rotationIndex] 
     |> List.map (fun (dx, dy) -> x + dx, y + dy)
 
-let outOfBounds (x, y) =
-    x < 0 || x >= gridWidth || y < 0 || y >= gridHeight
+let outOfBounds =
+    List.exists (fun (x, y) -> x < 0 || x >= gridWidth || y < 0)
+
+let belowFloor =
+    List.exists (fun (_, y) -> y >= gridHeight)
 
 let overlap staticBlocks tiles =
     tiles |> List.exists (fun tile -> 
@@ -80,17 +83,14 @@ let moveShape (dx, dy) model =
     let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y + dy }
     let newTiles = tilesFor newModel
 
-    if List.exists outOfBounds newTiles then model, Cmd.none
-    elif overlap model.staticBlocks newTiles then
+    if outOfBounds newTiles then model, Cmd.none
+    elif overlap model.staticBlocks newTiles || belowFloor newTiles then
         let oldTiles = tilesFor model
         let newStatics = 
             (model.staticBlocks, oldTiles) 
             ||> List.fold (fun statics tile -> 
                 Map.add tile model.shapeType.colour statics)
-        { model with
-            staticBlocks = newStatics
-            rotationIndex = 0
-            blockPosition = startPos }, Cmd.ofMsg CheckLines
+        { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines
     else
         newModel, Cmd.none
 
@@ -98,7 +98,8 @@ let rotateShape model =
     let newModel = { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
     let newTiles = tilesFor newModel
 
-    if  List.exists outOfBounds newTiles 
+    if  outOfBounds newTiles 
+        || belowFloor newTiles
         || overlap model.staticBlocks newTiles then
         model, Cmd.none
     else
@@ -131,7 +132,11 @@ let checkLines model =
     { model with staticBlocks = newStatics; score = newScore }, Cmd.ofMsg SpawnBlock
 
 let spawnBlock model gameOver =
-    let newModel = { model with shapeType = shapes.[random.Next(shapes.Length)] }
+    let newModel = 
+        { model with 
+            blockPosition = startPos
+            shapeType = shapes.[random.Next(shapes.Length)]
+            rotationIndex = 0 }
     let spawnedTiles = tilesFor newModel
     if overlap model.staticBlocks spawnedTiles then gameOver ()
     newModel, Cmd.none

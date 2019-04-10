@@ -18,6 +18,6 @@ let main _ =
 
     Program.mkProgram Playing.init (Playing.update quit) Playing.view
     //|> Program.withSubscription (fun m -> Cmd.ofSub timerTick)
-    |> Program.withConsoleTrace
+    //|> Program.withConsoleTrace
     |> Xelmish.Program.runGameLoop config
     0
