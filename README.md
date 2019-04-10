@@ -4,8 +4,12 @@ Xelmish is a small project that creates an XNA Game loop (via Mono Game) and con
 
 ## Simple Example of Usage
 
+## Development Info
+
 ## Samples description
 
 ## History and Reasoning
 
 ## License
+
+Xelmish is provided under the **MIT** license. PLease contact me if you have issue with this. In addition, many if not all of the sample projects use fonts that are provided under the **SIL Open Font License**, a copy of which is in the root of the solution.
