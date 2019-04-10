@@ -1,6 +1,7 @@
 ﻿module Playing
 
 open Xelmish.Model
+open Elmish
 
 let gridWidth = 10
 let gridHeight = 20
@@ -58,6 +59,8 @@ type Message =
 | Left
 | Right
 | Rotate
+| CheckLines
+| SpawnBlock
 
 let tilesFor model =
     let x, y = model.blockPosition
@@ -67,38 +70,52 @@ let tilesFor model =
 let outOfBounds (x, y) =
     x < 0 || x >= gridWidth || y < 0 || y >= gridHeight
 
+let overlap staticBlocks tiles =
+    tiles |> List.exists (fun tile -> 
+        Map.containsKey tile staticBlocks)
+
 let moveShape (dx, dy) model =
     let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y + dy }
     let newTiles = tilesFor newModel
 
-    if List.exists outOfBounds newTiles then model
-    elif List.exists (fun tile -> Map.containsKey tile model.staticBlocks) newTiles then
+    if List.exists outOfBounds newTiles then model, Cmd.none
+    elif overlap model.staticBlocks newTiles then
         let oldTiles = tilesFor model
         let newStatics = 
             (model.staticBlocks, oldTiles) 
             ||> List.fold (fun statics tile -> 
-                Map.add tile model.shapeType.colour statics) // TODO: check for line removal
+                Map.add tile model.shapeType.colour statics)
         { model with
             staticBlocks = newStatics
-            shapeType = shapes.[random.Next(shapes.Length)]
             rotationIndex = 0
-            blockPosition = startPos } // TODO: check for game over
+            blockPosition = startPos }, Cmd.ofMsg CheckLines
     else
-        newModel
+        newModel, Cmd.none
 
 let rotateShape model =
     let newModel = { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
     let newTiles = tilesFor newModel
 
     if  List.exists outOfBounds newTiles 
-        || List.exists (fun tile -> Map.containsKey tile model.staticBlocks) newTiles then
-        model
+        || overlap model.staticBlocks newTiles then
+        model, Cmd.none
     else
-        newModel
+        newModel, Cmd.none
 
-let update message model =
+let checkLines model = // TODO remove lines and add score
+    model, Cmd.ofMsg SpawnBlock
+
+let spawnBlock model gameOver =
+    let newModel = { model with shapeType = shapes.[random.Next(shapes.Length)] }
+    let spawnedTiles = tilesFor newModel
+    if overlap model.staticBlocks spawnedTiles then gameOver ()
+    newModel, Cmd.none
+
+let update message model gameOver =
     match message with
     | Tick | Drop -> moveShape (0, 1) model
     | Left -> moveShape (-1, 0) model
     | Right -> moveShape (1, 0) model
     | Rotate -> rotateShape model
+    | CheckLines -> checkLines model
+    | SpawnBlock -> spawnBlock model gameOver
