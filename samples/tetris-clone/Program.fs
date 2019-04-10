@@ -3,6 +3,11 @@ open System
 open Elmish
 open Xelmish.Model
 
+let timerTick dispatch =
+    let timer = new System.Timers.Timer(1000.)
+    timer.Elapsed.Add (fun _ -> dispatch Playing.Tick)
+    timer.Start ()
+
 [<EntryPoint; STAThread>]
 let main _ =
     let config = {
@@ -17,7 +22,7 @@ let main _ =
     let quit () = ()
 
     Program.mkProgram Playing.init (Playing.update quit) Playing.view
-    //|> Program.withSubscription (fun m -> Cmd.ofSub timerTick)
+    |> Program.withSubscription (fun m -> Cmd.ofSub timerTick)
     //|> Program.withConsoleTrace
     |> Xelmish.Program.runGameLoop config
     0
