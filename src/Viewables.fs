@@ -40,4 +40,5 @@ let rec internal renderViewable (spriteBatch: SpriteBatch) gameState viewable =
             && gameState.lastMouseState.LeftButton <> ButtonState.Pressed then
                 event ()
     | OnKeyDown (key, event) ->
-        if gameState.keyboardState.IsKeyDown key then event ()
+        if gameState.keyboardState.IsKeyDown key 
+           && not (gameState.lastKeyboardState.IsKeyDown key) then event ()

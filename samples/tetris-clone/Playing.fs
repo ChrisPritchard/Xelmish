@@ -1,6 +1,7 @@
 ﻿module Playing
 
 open Xelmish.Model
+open Xelmish.Viewables
 open Elmish
 
 let gridWidth = 10
@@ -45,13 +46,14 @@ let shapes = [
         colour = Colours.silver }
 ]
 
-let init () = {
+let init () = 
+    {
         staticBlocks = Map.empty
         blockPosition = startPos
         shapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
         score = 0
-    }
+    }, Cmd.none
 
 type Message = 
 | Tick
@@ -110,7 +112,7 @@ let scoreFor count =
     | 4 -> 100
     | _ -> 0
 
-let checkLines model = // TODO remove lines and add score
+let checkLines model =
     let (_, y) = model.blockPosition
     let complete =
         [y..y+3] 
@@ -134,7 +136,7 @@ let spawnBlock model gameOver =
     if overlap model.staticBlocks spawnedTiles then gameOver ()
     newModel, Cmd.none
 
-let update message model gameOver =
+let update gameOver message model =
     match message with
     | Tick | Drop -> moveShape (0, 1) model
     | Left -> moveShape (-1, 0) model
@@ -142,3 +144,26 @@ let update message model gameOver =
     | Rotate -> rotateShape model
     | CheckLines -> checkLines model
     | SpawnBlock -> spawnBlock model gameOver
+
+let view model dispatch =
+    let gridX, gridY = 30, 30
+    let tileW, tileH = 20, 20
+    let blockTiles = tilesFor model |> Set.ofList
+    [
+        for x = 0 to gridWidth - 1 do
+            for y = 0 to gridHeight - 1 do
+                let tx, ty = gridX + x * tileW, gridY + y * tileH
+                if blockTiles.Contains (x, y) then
+                    yield colour model.shapeType.colour (tileW, tileH) (tx, ty)
+                else
+                    match Map.tryFind (x, y) model.staticBlocks with
+                    | Some c ->
+                        yield colour c (tileW, tileH) (tx, ty)
+                    | _ ->
+                        yield colour Colours.whiteSmoke (tileW, tileH) (tx, ty)
+
+        yield onkeydown Keys.Left (fun () -> dispatch Left)
+        yield onkeydown Keys.Right (fun () -> dispatch Right)
+        yield onkeydown Keys.Up (fun () -> dispatch Rotate)
+        yield onkeydown Keys.Down (fun () -> dispatch Drop)
+    ]

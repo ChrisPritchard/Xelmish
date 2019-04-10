@@ -23,6 +23,7 @@ module Colours =
     let cyan = rgb 0uy 255uy 255uy
     let magenta = rgb 255uy 0uy 255uy
     let silver = rgb 192uy 192uy 192uy
+    let whiteSmoke = rgb 245uy 245uy 245uy
 
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)
@@ -63,6 +64,7 @@ and Loadable =
 
 type GameState = internal {
     keyboardState: KeyboardState
+    lastKeyboardState: KeyboardState
     mouseState: MouseState
     lastMouseState: MouseState
     textures: Map<string, Texture2D>

@@ -1,16 +1,23 @@
 ﻿
 open System
+open Elmish
 open Xelmish.Model
 
-type Model = {
-    state: State
-} and State =
-    | StartPage
-    | Playing of Playing.Model
-    | GameOver of score:int
-    | Quit
+[<EntryPoint; STAThread>]
+let main _ =
+    let config = {
+        resolution = Windowed (400, 600)
+        clearColour = Some (rgb 100uy 100uy 100uy)
+        mouseVisible = true
+        assetsToLoad = [
+            Font ("connection", "./connection")
+        ]
+    }
 
-[<EntryPoint>]
-let main argv =
-    printfn "Hello World from F#!"
-    0 // return an integer exit code
+    let quit () = ()
+
+    Program.mkProgram Playing.init (Playing.update quit) Playing.view
+    //|> Program.withSubscription (fun m -> Cmd.ofSub timerTick)
+    |> Program.withConsoleTrace
+    |> Xelmish.Program.runGameLoop config
+    0

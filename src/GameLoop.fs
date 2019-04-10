@@ -19,6 +19,7 @@ type GameLoop (config: GameConfig) as this =
     
     let mutable gameState = {
         keyboardState = Unchecked.defaultof<KeyboardState>
+        lastKeyboardState = Unchecked.defaultof<KeyboardState>
         mouseState = Unchecked.defaultof<MouseState>
         lastMouseState = Unchecked.defaultof<MouseState>
         textures = Map.empty<string, Texture2D>
@@ -61,6 +62,7 @@ type GameLoop (config: GameConfig) as this =
     override __.Update _ =
         gameState <- 
             { gameState with 
+                lastKeyboardState = gameState.keyboardState
                 keyboardState = Keyboard.GetState ()
                 lastMouseState = gameState.mouseState
                 mouseState = Mouse.GetState () }
