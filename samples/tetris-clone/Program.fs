@@ -106,7 +106,7 @@ let rotateShape model =
         // calculate tiles
         // if out of bounds, ignore
         // if overlap, add prior position to grid and spawn new
-        // else set new position
+        // else set new rotation
         model
     | _ -> model
 
