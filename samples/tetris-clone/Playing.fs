@@ -102,8 +102,31 @@ let rotateShape model =
     else
         newModel, Cmd.none
 
+let scoreFor count =
+    match count with
+    | 1 -> 10
+    | 2 -> 30
+    | 3 -> 60
+    | 4 -> 100
+    | _ -> 0
+
 let checkLines model = // TODO remove lines and add score
-    model, Cmd.ofMsg SpawnBlock
+    let (_, y) = model.blockPosition
+    let complete =
+        [y..y+3] 
+        |> List.filter (fun line ->
+            line < gridHeight
+            && List.forall (fun x -> 
+                Map.containsKey (x, line) model.staticBlocks) [0..gridWidth-1])
+    let dropAbove staticBlocks line =
+        staticBlocks 
+        |> Map.toList
+        |> List.map (fun ((x, y), v) -> 
+            if y > line then ((x, y), v) else ((x, y + 1), v))
+        |> Map.ofList
+    let newStatics = (model.staticBlocks, complete) ||> List.fold dropAbove
+    let newScore = model.score + scoreFor complete.Length
+    { model with staticBlocks = newStatics; score = newScore }, Cmd.ofMsg SpawnBlock
 
 let spawnBlock model gameOver =
     let newModel = { model with shapeType = shapes.[random.Next(shapes.Length)] }
