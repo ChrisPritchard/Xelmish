@@ -77,7 +77,7 @@ let moveShape (dx, dy) model =
         let newStatics = 
             (model.staticBlocks, oldTiles) 
             ||> List.fold (fun statics tile -> 
-                Map.add tile model.shapeType.colour statics)
+                Map.add tile model.shapeType.colour statics) // TODO: check for line removal
         { model with
             staticBlocks = newStatics
             shapeType = shapes.[random.Next(shapes.Length)]
