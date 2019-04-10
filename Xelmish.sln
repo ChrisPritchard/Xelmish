@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{376DD74C-0
 		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
+		SIL Open Font License.txt = SIL Open Font License.txt
 	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "single-counter", "samples\single-counter\single-counter.fsproj", "{AC38ED44-CC94-45D9-8909-A889CC6E7131}"
