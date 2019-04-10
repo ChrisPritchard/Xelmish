@@ -18,16 +18,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{376DD74C-0
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "single-counter", "samples\single-counter\single-counter.fsproj", "{AC38ED44-CC94-45D9-8909-A889CC6E7131}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "sub-model", "samples\sub-model\sub-model.fsproj", "{22D97351-784C-48D6-9CC7-206397293865}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "sub-model", "samples\sub-model\sub-model.fsproj", "{22D97351-784C-48D6-9CC7-206397293865}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "tetris-clone", "samples\tetris-clone\tetris-clone.fsproj", "{D3DDC88F-ED11-4D1D-8F72-36D7E96EB5F7}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{12A04279-FEC9-406E-AD4E-EB688558D24E}"
-	ProjectSection(SolutionItems) = preProject
-		shared\Connection.otf = shared\Connection.otf
-		shared\Connection.spritefont = shared\Connection.spritefont
-		shared\Content.mgcb = shared\Content.mgcb
-	EndProjectSection
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "tetris-clone", "samples\tetris-clone\tetris-clone.fsproj", "{D3DDC88F-ED11-4D1D-8F72-36D7E96EB5F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
