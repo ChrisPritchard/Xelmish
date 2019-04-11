@@ -12,6 +12,7 @@ type Model = {
     staticBlocks: Map<int * int, Colour>
     blockPosition: (int * int)
     shapeType: Shape
+    nextShapeType: Shape
     rotationIndex: int
     score: int
 }
@@ -21,6 +22,7 @@ let init () =
         staticBlocks = Map.empty
         blockPosition = startPos
         shapeType = shapes.[random.Next(shapes.Length)]
+        nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
         score = 0
     }, Cmd.none
@@ -34,10 +36,11 @@ type Message =
 | CheckLines
 | SpawnBlock
 
-let tilesFor model =
-    let x, y = model.blockPosition
-    model.shapeType.rotations.[model.rotationIndex] 
+let tilesFor (x, y) shape rotation =
+    shape.rotations.[rotation]
     |> List.map (fun (dx, dy) -> x + dx, y + dy)
+
+let tilesForModel model = tilesFor model.blockPosition model.shapeType model.rotationIndex
 
 let outOfBounds =
     List.exists (fun (x, y) -> x < 0 || x >= gridWidth || y < 0)
@@ -51,11 +54,11 @@ let overlap staticBlocks tiles =
 
 let moveShape (dx, dy) model =
     let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y + dy }
-    let newTiles = tilesFor newModel
+    let newTiles = tilesForModel newModel
 
     if outOfBounds newTiles then model, Cmd.none
     elif overlap model.staticBlocks newTiles || belowFloor newTiles then
-        let oldTiles = tilesFor model
+        let oldTiles = tilesForModel model
         let newStatics = 
             (model.staticBlocks, oldTiles) 
             ||> List.fold (fun statics tile -> 
@@ -66,7 +69,7 @@ let moveShape (dx, dy) model =
 
 let rotateShape model =
     let newModel = { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
-    let newTiles = tilesFor newModel
+    let newTiles = tilesForModel newModel
 
     if  outOfBounds newTiles 
         || belowFloor newTiles
@@ -105,9 +108,10 @@ let spawnBlock model gameOver =
     let newModel = 
         { model with 
             blockPosition = startPos
-            shapeType = shapes.[random.Next(shapes.Length)]
+            shapeType = model.nextShapeType
+            nextShapeType = shapes.[random.Next(shapes.Length)]
             rotationIndex = 0 }
-    let spawnedTiles = tilesFor newModel
+    let spawnedTiles = tilesForModel newModel
     if overlap model.staticBlocks spawnedTiles then gameOver ()
     newModel, Cmd.none
 
@@ -121,8 +125,8 @@ let update gameOver message model =
     | SpawnBlock -> spawnBlock model gameOver
 
 let view model dispatch =
-    let blockTiles = tilesFor model |> Set.ofList
     [
+        let blockTiles = tilesForModel model |> Set.ofList
         for x = 0 to gridWidth - 1 do
             for y = 0 to gridHeight - 1 do
                 let tx, ty = padding + x * tiledim, padding + y * tiledim
@@ -134,6 +138,16 @@ let view model dispatch =
                         yield colour c (tiledim, tiledim) (tx, ty)
                     | _ ->
                         yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
+
+        let previewStart = (padding * 2) + (tiledim * gridWidth)
+        let nextBlockTiles = tilesFor (1, 1) model.nextShapeType 0 |> Set.ofList
+        for x = 0 to 5 do
+            for y = 0 to 3 do
+                let tx, ty = previewStart + x * tiledim, padding + y * tiledim
+                if nextBlockTiles.Contains (x, y) then
+                    yield colour model.nextShapeType.colour (tiledim, tiledim) (tx, ty)
+                else
+                    yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
 
         yield onkeydown Keys.Left (fun () -> dispatch Left)
         yield onkeydown Keys.Right (fun () -> dispatch Right)
