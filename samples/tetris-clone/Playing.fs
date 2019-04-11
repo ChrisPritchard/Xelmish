@@ -25,7 +25,7 @@ let init () =
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
         score = 0
-    }, Cmd.none
+    }
 
 type Message = 
 | Tick
@@ -35,6 +35,12 @@ type Message =
 | Rotate
 | CheckLines
 | SpawnBlock
+| QuitGame
+
+type ParentMessage = 
+| NoOp
+| Quit
+| GameOver
 
 let tilesFor (x, y) shape rotation =
     shape.rotations.[rotation]
@@ -56,16 +62,16 @@ let moveShape (dx, dy) model =
     let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y + dy }
     let newTiles = tilesForModel newModel
 
-    if outOfBounds newTiles then model, Cmd.none
+    if outOfBounds newTiles then model, Cmd.none, NoOp
     elif overlap model.staticBlocks newTiles || belowFloor newTiles then
         let oldTiles = tilesForModel model
         let newStatics = 
             (model.staticBlocks, oldTiles) 
             ||> List.fold (fun statics tile -> 
                 Map.add tile model.shapeType.colour statics)
-        { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines
+        { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines, NoOp
     else
-        newModel, Cmd.none
+        newModel, Cmd.none, NoOp
 
 let rotateShape model =
     let newModel = { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
@@ -74,9 +80,9 @@ let rotateShape model =
     if  outOfBounds newTiles 
         || belowFloor newTiles
         || overlap model.staticBlocks newTiles then
-        model, Cmd.none
+        model, Cmd.none, NoOp
     else
-        newModel, Cmd.none
+        newModel, Cmd.none, NoOp
 
 let scoreFor count =
     match count with
@@ -102,9 +108,9 @@ let checkLines model =
         |> Map.ofList
     let newStatics = (model.staticBlocks, complete) ||> List.fold dropAbove
     let newScore = model.score + scoreFor complete.Length
-    { model with staticBlocks = newStatics; score = newScore }, Cmd.ofMsg SpawnBlock
+    { model with staticBlocks = newStatics; score = newScore }, Cmd.ofMsg SpawnBlock, NoOp
 
-let spawnBlock model gameOver =
+let spawnBlock model =
     let newModel = 
         { model with 
             blockPosition = startPos
@@ -112,17 +118,20 @@ let spawnBlock model gameOver =
             nextShapeType = shapes.[random.Next(shapes.Length)]
             rotationIndex = 0 }
     let spawnedTiles = tilesForModel newModel
-    if overlap model.staticBlocks spawnedTiles then gameOver ()
-    newModel, Cmd.none
+    let parentMessage =
+        if overlap model.staticBlocks spawnedTiles then GameOver
+        else NoOp
+    newModel, Cmd.none, parentMessage
 
-let update gameOver message model =
+let update message model =
     match message with
     | Tick | Drop -> moveShape (0, 1) model
     | Left -> moveShape (-1, 0) model
     | Right -> moveShape (1, 0) model
     | Rotate -> rotateShape model
     | CheckLines -> checkLines model
-    | SpawnBlock -> spawnBlock model gameOver
+    | SpawnBlock -> spawnBlock model
+    | QuitGame -> model, Cmd.none, Quit
 
 let view model dispatch =
     [
@@ -154,4 +163,5 @@ let view model dispatch =
         yield onkeydown Keys.Right (fun () -> dispatch Right)
         yield onkeydown Keys.Up (fun () -> dispatch Rotate)
         yield onkeydown Keys.Down (fun () -> dispatch Drop)
+        yield onkeydown Keys.Escape (fun () -> dispatch QuitGame)
     ]

@@ -7,9 +7,12 @@ open Microsoft.Xna.Framework.Graphics
 /// Represents colour, best constructed via the rgb and rgba helper methods
 type Colour = { r: byte; g: byte; b: byte; a: byte }
 
+/// Takes a rgb value (three bytes for red, green and blue) and produces a colour record, with no transparency
 let rgb r g b = { r = r; g = g; b = b; a = 255uy }
+/// Takes a rgb value (three bytes for red, green and blue) plus a byte for transparency and produces a colour record
 let rgba r g b a = { r = r; g = g; b = b; a = a }
 
+/// Common colours, e.g. white, black, the rainbow and extras
 module Colours =
     let white = rgb 255uy 255uy 255uy
     let red = rgb 255uy 0uy 0uy
@@ -28,16 +31,20 @@ module Colours =
 let internal xnaColor colour =
     new Color(colour.r, colour.g, colour.b, colour.a)
 
+/// Possible keys on the keyboard
 type Keys = Microsoft.Xna.Framework.Input.Keys
 
 /// Represents a rectangle on the screen, used for destinations like
 /// where to draw a colour
 type Rectangle = { x: int; y: int; width: int; height: int }
+
+/// Produces a rectangle record for given x, y, width and height values
 let rect x y w h = { x = x; y = y; width = w; height = h }
 
 let internal xnaRect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
 let internal rectToXnaRect r = new Microsoft.Xna.Framework.Rectangle(r.x, r.y, r.width, r.height)
 
+/// The broad config for the game loop, e.g. resolution and clear colour, plus assets to load at startup
 type GameConfig = {
     /// If specified, each draw will be blanked by the colour specified
     clearColour: Colour option
@@ -71,3 +78,10 @@ type GameState = internal {
     whiteTexture: Texture2D
     fonts: Map<string, SpriteFont>
 }
+
+/// Messages from the elmish view methods that should effect the game engine, e.g. tell it to quit.
+type GameMessage =
+/// Do nothing
+| NoOp
+/// Exit the loop, and thus the program
+| Exit

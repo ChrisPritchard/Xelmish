@@ -15,7 +15,7 @@ type GameLoop (config: GameConfig) as this =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
     let clearColor = Option.map xnaColor config.clearColour
 
-    let mutable view: (Viewable list) option = None
+    let mutable view: Viewable list = []
     
     let mutable gameState = {
         keyboardState = Unchecked.defaultof<KeyboardState>
@@ -40,6 +40,10 @@ type GameLoop (config: GameConfig) as this =
     member __.View
         with set value = 
             view <- value
+
+    member __.dispatch message =
+        match message with
+        | Exit -> __.Exit ()
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
@@ -71,8 +75,6 @@ type GameLoop (config: GameConfig) as this =
         Option.iter this.GraphicsDevice.Clear clearColor
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
-        match view with
-        | None -> __.Exit ()
-        | Some v -> List.iter (renderViewable spriteBatch gameState) v
+        List.iter (renderViewable spriteBatch gameState) view
 
         spriteBatch.End ()

@@ -106,7 +106,7 @@ module App =
         [
             yield! CounterWithClock.view model.ClockCounter1 (ClockCounter1Msg >> dispatch) (100, 50)
             yield! CounterWithClock.view model.ClockCounter2 (ClockCounter2Msg >> dispatch) (100, 290)
-        ]
+        ], NoOp
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(1000.)
