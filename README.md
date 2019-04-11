@@ -16,6 +16,12 @@ It has been built with pure dotnet core 2.2, and you will need to have this inst
 
 ## History and Reasoning
 
+Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine. 
+
+While I have successfully built several small games with gamecore, I was finding that as my games increased in complexity the very simplistic model/view architecture in gamecore started to get stretched and warp. Things which were view-specific started to leak into model, and vice versa. 
+
+In contrast the battle-tested Elmish model has, so far, proved a pleasure to work with. Much more elegant, and it has also achieved in a far better way my goal of having games being purely functional (where performance permits) and agnostic of engine. The MVU architecture, and parent-child relationships that the Elm architecture handles so well, mean that a game can be designed and theorised without having the engine get in the way, which is (in my opinion) ideal.
+
 ## License
 
 Xelmish is provided under the **MIT** license. PLease contact me if you have issue with this. In addition, many if not all of the sample projects use fonts that are provided under the **SIL Open Font License**, a copy of which is in the root of the solution.
