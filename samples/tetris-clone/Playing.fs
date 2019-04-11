@@ -140,7 +140,8 @@ let view model dispatch =
                         yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
 
         let previewStart = (padding * 2) + (tiledim * gridWidth)
-        let nextBlockTiles = tilesFor (1, 1) model.nextShapeType 0 |> Set.ofList
+        let previewPos = if model.nextShapeType.rotations.Length = 1 then (2, 1) else (1, 1)
+        let nextBlockTiles = tilesFor previewPos model.nextShapeType 0 |> Set.ofList
         for x = 0 to 5 do
             for y = 0 to 3 do
                 let tx, ty = previewStart + x * tiledim, padding + y * tiledim

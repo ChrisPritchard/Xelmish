@@ -15,7 +15,8 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
     - tick controlled by a subscription tied to update?
 - present score and lines. maybe level?
   - change tick rate by level to min of 100ms
-- present next shape (precalculate next)
+- DONE present next shape (precalculate next)
 - start screen (show high score)
 - game over screen (show score vs high score)
 - sounds?
+- escape to exit game
