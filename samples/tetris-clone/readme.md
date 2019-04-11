@@ -9,3 +9,13 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
 ## Todo:
 
 - fix drop and tick overlap
+  - tick should be on a timer, and reset on drop
+  - drop should be on key down, or maybe double tick rate
+    - onkeydown, onkeyup changing a 'down flag'?
+    - tick controlled by a subscription tied to update?
+- present score and lines. maybe level?
+  - change tick rate by level to min of 100ms
+- present next shape (precalculate next)
+- start screen (show high score)
+- game over screen (show score vs high score)
+- sounds?
