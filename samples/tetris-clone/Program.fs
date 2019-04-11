@@ -2,6 +2,7 @@
 open System
 open Elmish
 open Xelmish.Model
+open Constants
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(1000.)
@@ -11,7 +12,7 @@ let timerTick dispatch =
 [<EntryPoint; STAThread>]
 let main _ =
     let config = {
-        resolution = Windowed (400, 600)
+        resolution = Windowed (resWidth, resHeight)
         clearColour = Some (rgb 100uy 100uy 100uy)
         mouseVisible = true
         assetsToLoad = [

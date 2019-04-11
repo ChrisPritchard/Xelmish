@@ -3,9 +3,8 @@
 open Xelmish.Model
 open Xelmish.Viewables
 open Elmish
+open Constants
 
-let gridWidth = 10
-let gridHeight = 20
 let startPos = (gridWidth / 2, 0)
 let random = System.Random ()
 
@@ -16,39 +15,6 @@ type Model = {
     rotationIndex: int
     score: int
 }
-and Shape = {
-    rotations: ((int * int) list) []
-    colour: Colour
-}
-
-let shapes = [
-    {   rotations = [|  [0,0; 1,0; 0,1; 1,1] |] // O
-        colour = Colours.cyan }
-    {   rotations = [|  [0,0; 1,0; 2,0; 3,0]    // I
-                        [2,0; 2,1; 2,2; 2,3] |]
-        colour = Colours.red }
-    {   rotations = [|  [0,0; 1,0; 1,1; 2,1]    // Z
-                        [2,0; 2,1; 1,1; 1,2] |] 
-        colour = Colours.green }
-    {   rotations = [|  [1,0; 2,0; 1,1; 0,1]    // S
-                        [1,0; 1,1; 2,1; 2,2] |] 
-        colour = Colours.blue }
-    {   rotations = [|  [0,0; 1,0; 2,0; 0,1]    // L
-                        [0,0; 1,0; 1,1; 1,2]
-                        [0,1; 1,1; 2,1; 2,0]
-                        [1,0; 1,1; 1,2; 2,2] |] 
-        colour = Colours.orange }
-    {   rotations = [|  [0,0; 1,0; 2,0; 2,1]    // J
-                        [1,0; 1,1; 1,2; 0,2]
-                        [0,0; 0,1; 1,1; 2,1]
-                        [1,0; 2,0; 1,1; 1,2] |] 
-        colour = Colours.magenta }
-    {   rotations = [|  [0,0; 1,0; 2,0; 1,1]    // T
-                        [1,0; 1,1; 1,2; 0,1]
-                        [0,1; 1,1; 2,1; 1,0]
-                        [1,0; 1,1; 1,2; 2,1] |]
-        colour = Colours.silver }
-]
 
 let init () = 
     {
@@ -155,21 +121,19 @@ let update gameOver message model =
     | SpawnBlock -> spawnBlock model gameOver
 
 let view model dispatch =
-    let gridX, gridY = 30, 30
-    let tileW, tileH = 20, 20
     let blockTiles = tilesFor model |> Set.ofList
     [
         for x = 0 to gridWidth - 1 do
             for y = 0 to gridHeight - 1 do
-                let tx, ty = gridX + x * tileW, gridY + y * tileH
+                let tx, ty = padding + x * tiledim, padding + y * tiledim
                 if blockTiles.Contains (x, y) then
-                    yield colour model.shapeType.colour (tileW, tileH) (tx, ty)
+                    yield colour model.shapeType.colour (tiledim, tiledim) (tx, ty)
                 else
                     match Map.tryFind (x, y) model.staticBlocks with
                     | Some c ->
-                        yield colour c (tileW, tileH) (tx, ty)
+                        yield colour c (tiledim, tiledim) (tx, ty)
                     | _ ->
-                        yield colour Colours.whiteSmoke (tileW, tileH) (tx, ty)
+                        yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
 
         yield onkeydown Keys.Left (fun () -> dispatch Left)
         yield onkeydown Keys.Right (fun () -> dispatch Right)

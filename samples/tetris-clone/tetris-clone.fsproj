@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <None Include="readme.md" />
+    <Compile Include="Constants.fs" />
     <Compile Include="Playing.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -15,7 +16,6 @@
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
-  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
