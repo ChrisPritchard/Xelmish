@@ -20,4 +20,4 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
 - game over screen (show score vs high score)
 - sounds?
 - DONE escape to exit game
-- side overlaps should not stop a shape, just block move
+- DONE side overlaps should not stop a shape, just block move

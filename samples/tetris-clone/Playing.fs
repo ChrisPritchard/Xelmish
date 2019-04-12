@@ -64,8 +64,23 @@ let overlap staticBlocks tiles =
     tiles |> List.exists (fun tile -> 
         Map.containsKey tile staticBlocks)
 
-let moveShape (dx, dy) model =
-    let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y + dy }
+let ifValid model newModel =
+    let newTiles = tilesForModel newModel
+    if  outOfBounds newTiles 
+        || belowFloor newTiles
+        || overlap model.staticBlocks newTiles then
+        model, Cmd.none, NoOp
+    else
+        newModel, Cmd.none, NoOp
+
+let moveShape dx model =
+    ifValid model { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y }
+
+let rotateShape model =
+    ifValid model { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
+
+let dropShape model =
+    let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x, y + 1 }
     let newTiles = tilesForModel newModel
 
     if outOfBounds newTiles then model, Cmd.none, NoOp
@@ -79,24 +94,13 @@ let moveShape (dx, dy) model =
     else
         newModel, Cmd.none, NoOp
 
-let timedDrop model =
+let checkForDrop model =
     let interval = if model.dropPressed then 100 else model.dropInterval
     let time = int (System.DateTime.Now.Ticks / 10000L)
     if time - model.lastDrop > interval then
-        moveShape (0, 1) { model with lastDrop = time }
+        dropShape { model with lastDrop = time }
     else
         model, Cmd.none, NoOp
-
-let rotateShape model =
-    let newModel = { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
-    let newTiles = tilesForModel newModel
-
-    if  outOfBounds newTiles 
-        || belowFloor newTiles
-        || overlap model.staticBlocks newTiles then
-        model, Cmd.none, NoOp
-    else
-        newModel, Cmd.none, NoOp
 
 let scoreFor count =
     match count with
@@ -139,9 +143,9 @@ let spawnBlock model =
 
 let update message model =
     match message with
-    | Tick -> timedDrop model
-    | Left -> moveShape (-1, 0) model
-    | Right -> moveShape (1, 0) model
+    | Tick -> checkForDrop model
+    | Left -> moveShape -1 model
+    | Right -> moveShape 1 model
     | Rotate -> rotateShape model
     | Drop v -> { model with dropPressed = v }, Cmd.none, NoOp
     | CheckLines -> checkLines model
