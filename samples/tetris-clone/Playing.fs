@@ -114,18 +114,20 @@ let checkForDrop model =
     else
         model, Cmd.none, NoOp
 
-let dropAbove staticBlocks line =
+let removeLine staticBlocks line =
     staticBlocks 
     |> Map.toList
-    |> List.map (fun ((x, y), v) -> 
-        if y > line then ((x, y), v) else ((x, y + 1), v))
+    |> List.choose (fun ((x, y), v) -> 
+        if y = line then None
+        elif y > line then Some ((x, y), v)
+        else Some ((x, y + 1), v))
     |> Map.ofList
 
 let removeLines toRemove model =
-    let newStatics = (model.staticBlocks, toRemove) ||> List.fold dropAbove
+    let newStatics = (model.staticBlocks, toRemove) ||> List.fold removeLine
     let newScore = model.score + scoreFor toRemove.Length
     let newDrop = 
-        if newScore / scorePerLevel > model.score / scorePerLevel 
+        if level newScore > level model.score 
         then max minDrop (model.dropInterval - dropPerLevel)
         else model.dropInterval
     { model with 
@@ -205,7 +207,7 @@ let view model dispatch =
         let textTop = (padding * 2) + (tiledim * 5)
         yield text (sprintf "lines: %i" model.lines) (textMid, textTop)
         yield text (sprintf "score: %i" model.score) (textMid, textTop + (tiledim + padding))        
-        yield text (sprintf "level: %i" (model.score / scorePerLevel)) (textMid, textTop + (tiledim + padding) * 2)
+        yield text (sprintf "level: %i" (level model.score)) (textMid, textTop + (tiledim + padding) * 2)
 
         // game controls
         yield onkeydown Keys.Left (fun () -> dispatch Left)
