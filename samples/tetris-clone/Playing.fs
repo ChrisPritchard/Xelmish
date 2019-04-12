@@ -48,7 +48,7 @@ type Message =
 type ParentMessage = 
 | NoOp
 | Quit
-| GameOver
+| GameOver of int
 
 let tilesFor (x, y) shape rotation =
     shape.rotations.[rotation]
@@ -158,7 +158,7 @@ let spawnBlock model =
             rotationIndex = 0 }
     let spawnedTiles = tilesForModel newModel
     let parentMessage =
-        if overlap model.staticBlocks spawnedTiles then GameOver
+        if overlap model.staticBlocks spawnedTiles then GameOver model.score
         else NoOp
     newModel, Cmd.none, parentMessage
 

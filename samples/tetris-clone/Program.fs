@@ -5,28 +5,31 @@ open Xelmish.Model
 open Constants
 
 type Model = {
-    playing: Playing.Model
+    screen: Screen
     shouldQuit: bool
-}
+} and Screen = 
+    | Playing of Playing.Model
 
 type Message = 
 | PlayingMessage of Playing.Message
 
 let init () =
-    { playing = Playing.init (); shouldQuit = false }, Cmd.none
+    { screen = Playing (Playing.init ()); shouldQuit = false }, Cmd.none
 
 let update message model =
-    match message with
-    | PlayingMessage msg -> 
-        let newPlaying, newMessage, parentMessage = Playing.update msg model.playing
+    match model.screen, message with
+    | Playing playScreen, PlayingMessage msg -> 
+        let newPlaying, newMessage, parentMessage = Playing.update msg playScreen
         match parentMessage with
-        | Playing.NoOp -> { model with playing = newPlaying }, Cmd.map PlayingMessage newMessage
+        | Playing.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayingMessage newMessage
         | Playing.Quit -> { model with shouldQuit = true }, Cmd.none
-        | Playing.GameOver -> { model with shouldQuit = true }, Cmd.none
+        | Playing.GameOver score -> { model with shouldQuit = true }, Cmd.none
 
 let view model dispatch =
     let gameMessage = if model.shouldQuit then Exit else NoOp
-    Playing.view model.playing (PlayingMessage >> dispatch), gameMessage
+    match model.screen with
+    | Playing playScreen ->
+        Playing.view playScreen (PlayingMessage >> dispatch), gameMessage
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(50.)
