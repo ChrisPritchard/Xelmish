@@ -17,6 +17,7 @@ type Model = {
     lastDrop: int
     dropInterval: int
     dropPressed: bool
+    lines: int
     score: int
 }
 
@@ -27,10 +28,11 @@ let init () =
         shapeType = shapes.[random.Next(shapes.Length)]
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
-        score = 0
         lastDrop = 0
         dropInterval = 1000
         dropPressed = false
+        lines = 0
+        score = 0
     }
 
 type Message = 
@@ -117,6 +119,7 @@ let removeLines toRemove model =
         then max minDrop (model.dropInterval - dropPerLevel)
         else model.dropInterval
     { model with 
+        lines = model.lines + List.length toRemove
         staticBlocks = newStatics
         score = newScore
         dropInterval = newDrop }, Cmd.ofMsg SpawnBlock, NoOp
@@ -183,6 +186,14 @@ let view model dispatch =
                     yield colour model.nextShapeType.colour (tiledim, tiledim) (tx, ty)
                 else
                     yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
+
+        let text = text "connection" (float tiledim) Colours.white (0.5, 0.)
+        let textMid = (padding * 2) + (tiledim * (gridWidth + 3))
+        let textTop = (padding * 2) + (tiledim * 5)
+        yield colour Colours.red (10, 10) (textMid, textTop)
+        yield text (sprintf "lines: %i" model.lines) (textMid, textTop)
+        yield text (sprintf "score: %i" model.score) (textMid, textTop + (tiledim + padding))        
+        yield text (sprintf "level: %i" (model.score / perLevel)) (textMid, textTop + (tiledim + padding) * 2)
 
         yield onkeydown Keys.Left (fun () -> dispatch Left)
         yield onkeydown Keys.Right (fun () -> dispatch Right)
