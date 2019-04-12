@@ -8,7 +8,7 @@
   <ItemGroup>
     <None Include="readme.md" />
     <Compile Include="Constants.fs" />
-    <Compile Include="Playing.fs" />
+    <Compile Include="PlayScreen.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

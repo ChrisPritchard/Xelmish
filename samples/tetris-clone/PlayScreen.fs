@@ -1,4 +1,4 @@
-﻿module Playing
+﻿module PlayScreen
 
 open Xelmish.Model
 open Xelmish.Viewables

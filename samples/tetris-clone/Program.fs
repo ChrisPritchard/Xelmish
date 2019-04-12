@@ -8,32 +8,32 @@ type Model = {
     screen: Screen
     shouldQuit: bool
 } and Screen = 
-    | Playing of Playing.Model
+    | Playing of PlayScreen.Model
 
 type Message = 
-| PlayingMessage of Playing.Message
+| PlayingMessage of PlayScreen.Message
 
 let init () =
-    { screen = Playing (Playing.init ()); shouldQuit = false }, Cmd.none
+    { screen = Playing (PlayScreen.init ()); shouldQuit = false }, Cmd.none
 
 let update message model =
     match model.screen, message with
     | Playing playScreen, PlayingMessage msg -> 
-        let newPlaying, newMessage, parentMessage = Playing.update msg playScreen
+        let newPlaying, newMessage, parentMessage = PlayScreen.update msg playScreen
         match parentMessage with
-        | Playing.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayingMessage newMessage
-        | Playing.Quit -> { model with shouldQuit = true }, Cmd.none
-        | Playing.GameOver score -> { model with shouldQuit = true }, Cmd.none
+        | PlayScreen.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayingMessage newMessage
+        | PlayScreen.Quit -> { model with shouldQuit = true }, Cmd.none
+        | PlayScreen.GameOver score -> { model with shouldQuit = true }, Cmd.none
 
 let view model dispatch =
     let gameMessage = if model.shouldQuit then Exit else NoOp
     match model.screen with
     | Playing playScreen ->
-        Playing.view playScreen (PlayingMessage >> dispatch), gameMessage
+        PlayScreen.view playScreen (PlayingMessage >> dispatch), gameMessage
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(50.)
-    timer.Elapsed.Add (fun _ -> dispatch (PlayingMessage Playing.Tick))
+    timer.Elapsed.Add (fun _ -> dispatch (PlayingMessage PlayScreen.Tick))
     timer.Start ()
 
 [<EntryPoint; STAThread>]
