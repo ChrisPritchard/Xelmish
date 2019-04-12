@@ -29,7 +29,7 @@ let view model dispatch =
     Playing.view model.playing (PlayingMessage >> dispatch), gameMessage
 
 let timerTick dispatch =
-    let timer = new System.Timers.Timer(1000.)
+    let timer = new System.Timers.Timer(100.)
     timer.Elapsed.Add (fun _ -> dispatch (PlayingMessage Playing.Tick))
     timer.Start ()
 

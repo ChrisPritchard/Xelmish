@@ -11,12 +11,14 @@ type Viewable =
 | Text of text: string * font: string * size: float * colour: Colour * origin: (float * float) * pos: (int * int)
 | OnClick of event: (Unit -> Unit) * size: (int * int) * pos: (int * int)
 | OnKeyDown of key: Model.Keys * event: (Unit -> Unit)
+| OnKeyUp of key: Model.Keys * event: (Unit -> Unit)
 
 let colour colour size pos = Colour (colour, size, pos)
 let image key colour size pos = Image (key, colour, size, pos)
 let text font size colour origin text pos = Text (text, font, size, colour, origin, pos)
 let onclick event size pos = OnClick (event, size, pos)
 let onkeydown keyCode event = OnKeyDown (keyCode, event)
+let onkeyup keyCode event = OnKeyUp (keyCode, event)
 
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
@@ -42,3 +44,6 @@ let rec internal renderViewable (spriteBatch: SpriteBatch) gameState viewable =
     | OnKeyDown (key, event) ->
         if gameState.keyboardState.IsKeyDown key 
            && not (gameState.lastKeyboardState.IsKeyDown key) then event ()
+    | OnKeyUp (key, event) ->
+        if not (gameState.keyboardState.IsKeyDown key)
+           && gameState.lastKeyboardState.IsKeyDown key then event ()

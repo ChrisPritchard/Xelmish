@@ -14,6 +14,9 @@ type Model = {
     shapeType: Shape
     nextShapeType: Shape
     rotationIndex: int
+    lastDrop: int
+    dropInterval: int
+    dropPressed: bool
     score: int
 }
 
@@ -25,11 +28,14 @@ let init () =
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
         score = 0
+        lastDrop = 0
+        dropInterval = 1000
+        dropPressed = false
     }
 
 type Message = 
 | Tick
-| Drop
+| Drop of bool
 | Left
 | Right
 | Rotate
@@ -72,6 +78,14 @@ let moveShape (dx, dy) model =
         { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines, NoOp
     else
         newModel, Cmd.none, NoOp
+
+let timedDrop model =
+    let interval = if model.dropPressed then 100 else model.dropInterval
+    let time = int (System.DateTime.Now.Ticks / 10000L)
+    if time - model.lastDrop > interval then
+        moveShape (0, 1) { model with lastDrop = time }
+    else
+        model, Cmd.none, NoOp
 
 let rotateShape model =
     let newModel = { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
@@ -125,10 +139,11 @@ let spawnBlock model =
 
 let update message model =
     match message with
-    | Tick | Drop -> moveShape (0, 1) model
+    | Tick -> timedDrop model
     | Left -> moveShape (-1, 0) model
     | Right -> moveShape (1, 0) model
     | Rotate -> rotateShape model
+    | Drop v -> { model with dropPressed = v }, Cmd.none, NoOp
     | CheckLines -> checkLines model
     | SpawnBlock -> spawnBlock model
     | QuitGame -> model, Cmd.none, Quit
@@ -162,6 +177,7 @@ let view model dispatch =
         yield onkeydown Keys.Left (fun () -> dispatch Left)
         yield onkeydown Keys.Right (fun () -> dispatch Right)
         yield onkeydown Keys.Up (fun () -> dispatch Rotate)
-        yield onkeydown Keys.Down (fun () -> dispatch Drop)
+        yield onkeydown Keys.Down (fun () -> dispatch (Drop true))
+        yield onkeyup Keys.Down (fun () -> dispatch (Drop false))
         yield onkeydown Keys.Escape (fun () -> dispatch QuitGame)
     ]

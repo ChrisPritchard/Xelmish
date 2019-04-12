@@ -11,7 +11,7 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
 - fix drop and tick overlap
   - tick should be on a timer, and reset on drop
   - drop should be on key down, or maybe double tick rate
-    - onkeydown, onkeyup changing a 'down flag'?
+    - DONE onkeydown, onkeyup changing a 'down flag'?
     - tick controlled by a subscription tied to update?
 - present score and lines. maybe level?
   - change tick rate by level to min of 100ms
@@ -19,4 +19,5 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
 - start screen (show high score)
 - game over screen (show score vs high score)
 - sounds?
-- escape to exit game
+- DONE escape to exit game
+- side overlaps should not stop a shape, just block move
