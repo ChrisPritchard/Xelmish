@@ -16,7 +16,7 @@ let scoreFor count =
     | 3 -> 60
     | 4 -> 100
     | _ -> 0
-let perLevel = 1000
+let scorePerLevel = 200
 let minDrop = 100
 let dropPerLevel = 100
 

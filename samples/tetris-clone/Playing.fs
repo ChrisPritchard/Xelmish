@@ -75,11 +75,21 @@ let ifValid model newModel =
     else
         newModel, Cmd.none, NoOp
 
+let currentTime () = int (System.DateTime.Now.Ticks / 10000L)
+
 let moveShape dx model =
-    ifValid model { model with blockPosition = let (x, y) = model.blockPosition in x + dx, y }
+    let proposed = 
+        { model with 
+            lastDrop = currentTime ()
+            blockPosition = let (x, y) = model.blockPosition in x + dx, y }
+    ifValid model proposed
 
 let rotateShape model =
-    ifValid model { model with rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
+    let proposed = 
+        { model with 
+            lastDrop = currentTime ()
+            rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
+    ifValid model proposed
 
 let dropShape model =
     let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x, y + 1 }
@@ -98,7 +108,7 @@ let dropShape model =
 
 let checkForDrop model =
     let interval = if model.dropPressed then 100 else model.dropInterval
-    let time = int (System.DateTime.Now.Ticks / 10000L)
+    let time = currentTime ()
     if time - model.lastDrop > interval then
         dropShape { model with lastDrop = time }
     else
@@ -115,7 +125,7 @@ let removeLines toRemove model =
     let newStatics = (model.staticBlocks, toRemove) ||> List.fold dropAbove
     let newScore = model.score + scoreFor toRemove.Length
     let newDrop = 
-        if newScore / perLevel > model.score / perLevel 
+        if newScore / scorePerLevel > model.score / scorePerLevel 
         then max minDrop (model.dropInterval - dropPerLevel)
         else model.dropInterval
     { model with 
@@ -163,6 +173,7 @@ let update message model =
 
 let view model dispatch =
     [
+        // main falling blocks area
         let blockTiles = tilesForModel model |> Set.ofList
         for x = 0 to gridWidth - 1 do
             for y = 0 to gridHeight - 1 do
@@ -176,6 +187,7 @@ let view model dispatch =
                     | _ ->
                         yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
 
+        // preview window for next shape
         let previewStart = (padding * 2) + (tiledim * gridWidth)
         let previewPos = if model.nextShapeType.rotations.Length = 1 then (2, 1) else (1, 1)
         let nextBlockTiles = tilesFor previewPos model.nextShapeType 0 |> Set.ofList
@@ -187,14 +199,15 @@ let view model dispatch =
                 else
                     yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
 
-        let text = text "connection" (float tiledim) Colours.white (0.5, 0.)
+        // score and line text
+        let text = text "connection" 25. Colours.white (-0.5, 0.)
         let textMid = (padding * 2) + (tiledim * (gridWidth + 3))
         let textTop = (padding * 2) + (tiledim * 5)
-        yield colour Colours.red (10, 10) (textMid, textTop)
         yield text (sprintf "lines: %i" model.lines) (textMid, textTop)
         yield text (sprintf "score: %i" model.score) (textMid, textTop + (tiledim + padding))        
-        yield text (sprintf "level: %i" (model.score / perLevel)) (textMid, textTop + (tiledim + padding) * 2)
+        yield text (sprintf "level: %i" (model.score / scorePerLevel)) (textMid, textTop + (tiledim + padding) * 2)
 
+        // game controls
         yield onkeydown Keys.Left (fun () -> dispatch Left)
         yield onkeydown Keys.Right (fun () -> dispatch Right)
         yield onkeydown Keys.Up (fun () -> dispatch Rotate)
