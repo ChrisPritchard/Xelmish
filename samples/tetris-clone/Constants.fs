@@ -9,6 +9,17 @@ let tiledim = 20
 let resWidth = padding + (tiledim * gridWidth) + padding + (tiledim * 6) + padding
 let resHeight = padding + (tiledim * gridHeight) + padding
 
+let scoreFor count =
+    match count with
+    | 1 -> 10
+    | 2 -> 30
+    | 3 -> 60
+    | 4 -> 100
+    | _ -> 0
+let perLevel = 1000
+let minDrop = 100
+let dropPerLevel = 100
+
 type Shape = {
     rotations: ((int * int) list) []
     colour: Colour

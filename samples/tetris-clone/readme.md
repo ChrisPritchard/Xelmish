@@ -8,7 +8,7 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
 
 ## Todo:
 
-- fix drop and tick overlap
+- DONE fix drop and tick overlap
   - tick should be on a timer, and reset on drop
   - drop should be on key down, or maybe double tick rate
     - DONE onkeydown, onkeyup changing a 'down flag'?
