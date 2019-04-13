@@ -4,6 +4,10 @@
 
 In this way, you can develop games using the excellent Elmish architecture, with all the power of an XNA renderer! You can also convert existing Elmish applications to use Xelmish by rewriting their view functions.
 
+To use Xelmish, the Elmish program must provide a view function that returns a list of 'viewables', functions which take an XNA SpriteBatch. A set of common such functions like colour, image and text are provided in the Xelmish Viewables helper module.
+
+Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not rendering vertices). Hopefully it allows users to develop such games rapidly using the Elm architecture and F#!
+
 ## Simple Example of Usage
 
 ## Development Info
