@@ -1,9 +1,9 @@
 ﻿module Xelmish.Viewables
 
-open Model
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
+open Model
 
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th

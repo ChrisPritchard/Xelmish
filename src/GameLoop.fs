@@ -1,12 +1,10 @@
-﻿module internal Xelmish.XnaCore
+﻿module internal Xelmish.GameLoop
 
 open System.IO
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
-
 open Model
-open Viewables
 
 type GameLoop (config: GameConfig) as this = 
     inherit Game ()

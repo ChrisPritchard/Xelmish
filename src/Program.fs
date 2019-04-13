@@ -2,9 +2,8 @@
 module Xelmish.Program
 
 open Elmish
-open XnaCore
-open Xelmish.Viewables
-open Xelmish.Model
+open GameLoop
+open Model
 
 let runGameLoop config (program: Program<_, _, _, (Viewable list) * GameMessage>) =
     use loop = new GameLoop (config)
