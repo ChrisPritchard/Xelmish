@@ -14,6 +14,20 @@ It has been built with pure dotnet core 2.2, and you will need to have this inst
 
 ## Samples description
 
+Under /samples, there are numerous projects that use Elmish and Xelmish. These are described below, in their order of complexity.
+
+### 1. Simple-Counter
+
+The 'hello world' of Elmish, this sample should be almost identical (except for the Xelmish view) to other counters in other Elmish-* projects
+
+### 2. Sub-Model
+
+An app with two sub components, each containing a counter and a clock. Pretty similar to other samples in Elmish projects, but with Xelmish views
+
+### 3. Tetris-Clone
+
+The game tetris, implemented using several elmish components for screens, with a relatively simple Xelmish view. Much more involved than prior samples, but still simple enough to follow easily I hope.
+
 ## History and Reasoning
 
 Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine. 
