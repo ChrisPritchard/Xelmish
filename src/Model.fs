@@ -69,7 +69,8 @@ and Loadable =
 /// key (how it is referenced) and path (full relative path (without extension) to spriteFont)
 | Font of key:string * path:string
 
-type GameState = internal {
+/// Loaded assets and the state of inputs
+type GameState = {
     keyboardState: KeyboardState
     lastKeyboardState: KeyboardState
     mouseState: MouseState

@@ -44,6 +44,7 @@ type GameLoop (config: GameConfig) as this =
     member __.dispatch message =
         match message with
         | Exit -> __.Exit ()
+        | NoOp -> ()
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
@@ -75,6 +76,6 @@ type GameLoop (config: GameConfig) as this =
         Option.iter this.GraphicsDevice.Clear clearColor
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
-        List.iter (renderViewable spriteBatch gameState) view
+        List.iter (fun v -> v gameState spriteBatch) view
 
         spriteBatch.End ()
