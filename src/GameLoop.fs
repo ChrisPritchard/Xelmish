@@ -15,17 +15,16 @@ type GameLoop (config: GameConfig) as this =
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
     let clearColor = Option.map xnaColor config.clearColour
 
-    let mutable view: Viewable list = []
+    let mutable assets = Unchecked.defaultof<LoadedAssets>
     
-    let mutable gameState = {
+    let mutable inputs = {
         keyboardState = Unchecked.defaultof<KeyboardState>
         lastKeyboardState = Unchecked.defaultof<KeyboardState>
         mouseState = Unchecked.defaultof<MouseState>
         lastMouseState = Unchecked.defaultof<MouseState>
-        textures = Map.empty<string, Texture2D>
-        whiteTexture = Unchecked.defaultof<Texture2D>
-        fonts = Map.empty<string, SpriteFont>
     }
+
+    let mutable view: Viewable list = []
 
     do 
         match config.resolution with
@@ -48,8 +47,8 @@ type GameLoop (config: GameConfig) as this =
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
-        gameState <- { gameState with whiteTexture = new Texture2D(this.GraphicsDevice, 1, 1) }
-        gameState.whiteTexture.SetData<Color> [|Color.White|]
+        let whiteTexture = new Texture2D(this.GraphicsDevice, 1, 1)
+        whiteTexture.SetData<Color> [|Color.White|]
 
         let (textures, fonts) =
             ((Map.empty, Map.empty), config.assetsToLoad)
@@ -62,20 +61,20 @@ type GameLoop (config: GameConfig) as this =
                 | Font (key, path) -> 
                     let font = this.Content.Load<SpriteFont> path
                     textures, Map.add key font fonts)
-        gameState <- { gameState with textures = textures; fonts = fonts }
+        assets <- { textures = textures; fonts = fonts; whiteTexture = whiteTexture }
 
     override __.Update _ =
-        gameState <- 
-            { gameState with 
-                lastKeyboardState = gameState.keyboardState
+        inputs <- 
+            {   lastKeyboardState = inputs.keyboardState
                 keyboardState = Keyboard.GetState ()
-                lastMouseState = gameState.mouseState
+                lastMouseState = inputs.mouseState
                 mouseState = Mouse.GetState () }
 
     override __.Draw _ =
         Option.iter this.GraphicsDevice.Clear clearColor
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
-        List.iter (fun v -> v gameState spriteBatch) view
+        for viewable in view do
+            viewable assets inputs spriteBatch
 
         spriteBatch.End ()
