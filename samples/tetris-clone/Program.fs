@@ -51,11 +51,6 @@ let view model dispatch =
     | GameOver gameOverScreen ->
         GameOverScreen.view gameOverScreen (GameOverScreenMessage >> dispatch), gameMessage
 
-let timerTick dispatch =
-    let timer = new System.Timers.Timer(50.)
-    timer.Elapsed.Add (fun _ -> dispatch (PlayScreenMessage PlayScreen.Tick))
-    timer.Start ()
-
 [<EntryPoint; STAThread>]
 let main _ =
     let config = {
@@ -68,7 +63,6 @@ let main _ =
     }
 
     Program.mkProgram init update view
-    |> Program.withSubscription (fun m -> Cmd.ofSub timerTick)
     //|> Program.withConsoleTrace
     |> Xelmish.Program.runGameLoop config
     0

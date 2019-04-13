@@ -18,9 +18,9 @@ let scoreFor count =
     | 3 -> 60
     | 4 -> 100
     | _ -> 0
-let level score = int (floor (float score / 150.))
-let minDrop = 100
-let dropPerLevel = 100
+let level score = int (floor (float score / 150.)) + 1
+let minDrop = 100L
+let dropPerLevel = 100L
 
 type Shape = {
     rotations: ((int * int) list) []

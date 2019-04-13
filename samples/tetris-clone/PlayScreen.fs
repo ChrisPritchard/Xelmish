@@ -4,9 +4,11 @@ open Xelmish.Model
 open Xelmish.Viewables
 open Elmish
 open Constants
+open System.Diagnostics
 
 let startPos = ((gridWidth / 2) - 1, 0)
 let random = System.Random ()
+let dropTimer = Stopwatch.StartNew ()
 
 type Model = {
     staticBlocks: Map<int * int, Colour>
@@ -14,8 +16,8 @@ type Model = {
     shapeType: Shape
     nextShapeType: Shape
     rotationIndex: int
-    lastDrop: int
-    dropInterval: int
+    lastDrop: int64
+    dropInterval: int64
     dropPressed: bool
     lines: int
     score: int
@@ -28,8 +30,8 @@ let init () =
         shapeType = shapes.[random.Next(shapes.Length)]
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
-        lastDrop = 0
-        dropInterval = 1000
+        lastDrop = 0L
+        dropInterval = 1000L
         dropPressed = false
         lines = 0
         score = 0
@@ -75,24 +77,25 @@ let ifValid model newModel =
     else
         newModel, Cmd.none, NoOp
 
-let currentTime () = int (System.DateTime.Now.Ticks / 10000L)
-
 let moveShape dx model =
     let proposed = 
         { model with 
-            lastDrop = currentTime ()
+            lastDrop = dropTimer.ElapsedMilliseconds
             blockPosition = let (x, y) = model.blockPosition in x + dx, y }
     ifValid model proposed
 
 let rotateShape model =
     let proposed = 
         { model with 
-            lastDrop = currentTime ()
+            lastDrop = dropTimer.ElapsedMilliseconds
             rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
     ifValid model proposed
 
 let dropShape model =
-    let newModel = { model with blockPosition = let (x, y) = model.blockPosition in x, y + 1 }
+    let newModel = 
+        { model with 
+            blockPosition = let (x, y) = model.blockPosition in x, y + 1
+            lastDrop = dropTimer.ElapsedMilliseconds }
     let newTiles = tilesForModel newModel
 
     if outOfBounds newTiles then model, Cmd.none, NoOp
@@ -105,14 +108,6 @@ let dropShape model =
         { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines, NoOp
     else
         newModel, Cmd.none, NoOp
-
-let checkForDrop model =
-    let interval = if model.dropPressed then 100 else model.dropInterval
-    let time = currentTime ()
-    if time - model.lastDrop > interval then
-        dropShape { model with lastDrop = time }
-    else
-        model, Cmd.none, NoOp
 
 let removeLine staticBlocks line =
     staticBlocks 
@@ -164,7 +159,7 @@ let spawnBlock model =
 
 let update message model =
     match message with
-    | Tick -> checkForDrop model
+    | Tick -> dropShape model
     | Left -> moveShape -1 model
     | Right -> moveShape 1 model
     | Rotate -> rotateShape model
@@ -216,4 +211,13 @@ let view model dispatch =
         yield onkeydown Keys.Down (fun () -> dispatch (Drop true))
         yield onkeyup Keys.Down (fun () -> dispatch (Drop false))
         yield onkeydown Keys.Escape (fun () -> dispatch QuitGame)
+
+        // by placing the below code in a viewable function, it will get evaluated on every game draw
+        // This can be more effective than using an Elmish subscription, especially if smoothness is needed
+        yield fun _ _ _ ->
+            // check to see if a drop tick is due
+            let interval = if model.dropPressed then 100L else model.dropInterval
+            let time = dropTimer.ElapsedMilliseconds
+            if time - model.lastDrop > interval then
+                dispatch Tick
     ]
