@@ -5,7 +5,7 @@ open Xelmish.Viewables
 open Elmish
 open Constants
 
-let startPos = (gridWidth / 2, 0)
+let startPos = ((gridWidth / 2) - 1, 0)
 let random = System.Random ()
 
 type Model = {

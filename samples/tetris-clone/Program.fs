@@ -8,12 +8,14 @@ type Model = {
     screen: Screen
     shouldQuit: bool
 } and Screen = 
-    | Playing of PlayScreen.Model
     | Start of StartScreen.Model
+    | Playing of PlayScreen.Model
+    | GameOver of GameOverScreen.Model
 
 type Message = 
-| PlayScreenMessage of PlayScreen.Message
-| StartScreenMessage of StartScreen.Message
+    | StartScreenMessage of StartScreen.Message
+    | PlayScreenMessage of PlayScreen.Message
+    | GameOverScreenMessage of GameOverScreen.Message
 
 let init () =
     { screen = Start (StartScreen.init ()); shouldQuit = false }, Cmd.none
@@ -22,14 +24,21 @@ let update message model =
     match model.screen, message with
     | Start _, StartScreenMessage msg ->
         match StartScreen.update msg with
-        | StartScreen.Start -> { screen = Playing (PlayScreen.init ()); shouldQuit = false }, Cmd.none
+        | StartScreen.Start -> { model with screen = Playing (PlayScreen.init ()) }, Cmd.none
         | StartScreen.Quit -> { model with shouldQuit = true }, Cmd.none
+
     | Playing playScreen, PlayScreenMessage msg -> 
         let newPlaying, newMessage, parentMessage = PlayScreen.update msg playScreen
         match parentMessage with
         | PlayScreen.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayScreenMessage newMessage
         | PlayScreen.Quit -> { model with shouldQuit = true }, Cmd.none
-        | PlayScreen.GameOver score -> { model with shouldQuit = true }, Cmd.none
+        | PlayScreen.GameOver score -> { model with screen = GameOver (GameOverScreen.init score) }, Cmd.none
+
+    | GameOver _, GameOverScreenMessage msg ->
+        match GameOverScreen.update msg with
+        | GameOverScreen.Start -> { model with screen = Playing (PlayScreen.init ()) }, Cmd.none
+        | GameOverScreen.Quit -> { model with shouldQuit = true }, Cmd.none
+
     | _ -> model, Cmd.none // invalid combination
 
 let view model dispatch =
@@ -39,6 +48,8 @@ let view model dispatch =
         StartScreen.view startScreen (StartScreenMessage >> dispatch), gameMessage
     | Playing playScreen ->
         PlayScreen.view playScreen (PlayScreenMessage >> dispatch), gameMessage
+    | GameOver gameOverScreen ->
+        GameOverScreen.view gameOverScreen (GameOverScreenMessage >> dispatch), gameMessage
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(50.)
