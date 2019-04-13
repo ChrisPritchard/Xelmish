@@ -2,6 +2,8 @@
 
 open Xelmish.Model
 
+let highScoreFile = "highscore.txt"
+
 let gridWidth = 10
 let gridHeight = 20
 let padding = 30

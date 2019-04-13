@@ -8,7 +8,9 @@
   <ItemGroup>
     <None Include="readme.md" />
     <Compile Include="Constants.fs" />
+    <Compile Include="StartScreen.fs" />
     <Compile Include="PlayScreen.fs" />
+    <Compile Include="GameOverScreen.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

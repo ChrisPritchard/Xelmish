@@ -36,19 +36,19 @@ let init () =
     }
 
 type Message = 
-| Tick
-| Drop of bool
-| Left
-| Right
-| Rotate
-| CheckLines
-| SpawnBlock
-| QuitGame
+    | Tick
+    | Drop of bool
+    | Left
+    | Right
+    | Rotate
+    | CheckLines
+    | SpawnBlock
+    | QuitGame
 
 type ParentMessage = 
-| NoOp
-| Quit
-| GameOver of int
+    | NoOp
+    | Quit
+    | GameOver of int
 
 let tilesFor (x, y) shape rotation =
     shape.rotations.[rotation]

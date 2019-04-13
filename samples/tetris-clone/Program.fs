@@ -9,31 +9,40 @@ type Model = {
     shouldQuit: bool
 } and Screen = 
     | Playing of PlayScreen.Model
+    | Start of StartScreen.Model
 
 type Message = 
-| PlayingMessage of PlayScreen.Message
+| PlayScreenMessage of PlayScreen.Message
+| StartScreenMessage of StartScreen.Message
 
 let init () =
-    { screen = Playing (PlayScreen.init ()); shouldQuit = false }, Cmd.none
+    { screen = Start (StartScreen.init ()); shouldQuit = false }, Cmd.none
 
 let update message model =
     match model.screen, message with
-    | Playing playScreen, PlayingMessage msg -> 
+    | Start _, StartScreenMessage msg ->
+        match StartScreen.update msg with
+        | StartScreen.Start -> { screen = Playing (PlayScreen.init ()); shouldQuit = false }, Cmd.none
+        | StartScreen.Quit -> { model with shouldQuit = true }, Cmd.none
+    | Playing playScreen, PlayScreenMessage msg -> 
         let newPlaying, newMessage, parentMessage = PlayScreen.update msg playScreen
         match parentMessage with
-        | PlayScreen.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayingMessage newMessage
+        | PlayScreen.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayScreenMessage newMessage
         | PlayScreen.Quit -> { model with shouldQuit = true }, Cmd.none
         | PlayScreen.GameOver score -> { model with shouldQuit = true }, Cmd.none
+    | _ -> model, Cmd.none // invalid combination
 
 let view model dispatch =
     let gameMessage = if model.shouldQuit then Exit else NoOp
     match model.screen with
+    | Start startScreen ->
+        StartScreen.view startScreen (StartScreenMessage >> dispatch), gameMessage
     | Playing playScreen ->
-        PlayScreen.view playScreen (PlayingMessage >> dispatch), gameMessage
+        PlayScreen.view playScreen (PlayScreenMessage >> dispatch), gameMessage
 
 let timerTick dispatch =
     let timer = new System.Timers.Timer(50.)
-    timer.Elapsed.Add (fun _ -> dispatch (PlayingMessage PlayScreen.Tick))
+    timer.Elapsed.Add (fun _ -> dispatch (PlayScreenMessage PlayScreen.Tick))
     timer.Start ()
 
 [<EntryPoint; STAThread>]
