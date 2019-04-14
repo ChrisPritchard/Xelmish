@@ -11,7 +11,7 @@ type GameLoop (config: GameConfig) as this =
 
     let graphics = new GraphicsDeviceManager (this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
-    let clearColor = Option.map xnaColor config.clearColour
+    let clearColor = config.clearColour |> Option.map (fun c -> c.toXnaColor ())
 
     let mutable assets = Unchecked.defaultof<LoadedAssets>
     let mutable inputs = {

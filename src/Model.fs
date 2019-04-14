@@ -6,6 +6,8 @@ open Microsoft.Xna.Framework.Graphics
 
 /// Represents colour, best constructed via the rgb and rgba helper methods
 type Colour = { r: byte; g: byte; b: byte; a: byte }
+/// When invoking the XNA spritebatch, a XNA color class instance is required
+with member __.toXnaColor () = Color(__.r, __.g, __.b, __.a)
 
 /// Takes a rgb value (three bytes for red, green and blue) and produces a colour record, with no transparency
 let rgb r g b = { r = r; g = g; b = b; a = 255uy }
@@ -27,9 +29,6 @@ module Colours =
     let magenta = rgb 255uy 0uy 255uy
     let silver = rgb 192uy 192uy 192uy
     let whiteSmoke = rgb 245uy 245uy 245uy
-
-let internal xnaColor colour =
-    new Color(colour.r, colour.g, colour.b, colour.a)
 
 /// Possible keys on the keyboard
 type Keys = Microsoft.Xna.Framework.Input.Keys
