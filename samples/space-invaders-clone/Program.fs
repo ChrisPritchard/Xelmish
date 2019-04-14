@@ -88,14 +88,26 @@ let view model dispatch =
 
         yield colour Colours.red (playerDim, playerDim) (model.playerX, resHeight - (playerDim + padding))
 
+        yield!
+            model.projectiles
+            |> List.map (fun (x, y, _) ->
+                colour Colours.white (1, projectileHeight) (x, y))
+
         yield 
             fun _ inputs _ -> 
                 let time = int64 inputs.gameTime.TotalGameTime.TotalMilliseconds
                 if time - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders time)
 
+        yield fun _ _ _ -> dispatch MoveProjectiles
+
         yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
         yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
+
+        yield onkeydown Keys.Space (fun () -> 
+            let x = model.playerX + playerDim / 2
+            let y = resHeight - (playerDim + padding) - projectileHeight - 1
+            dispatch (FireProjectile (x, y, -projectileSpeed)))
 
         yield onkeydown Keys.Escape exit
     ]
