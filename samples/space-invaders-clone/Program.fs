@@ -3,12 +3,15 @@ open Xelmish.Model
 
 let resWidth = 800
 let resHeight = 600
-let playerSpeed = 2
+let playerSpeed = 5
 let minX = 30
 let maxX = resWidth - 30
-let invaderdim = 40
-let playerdim = 40
+let invaderDim = 40
+let invaderSpacing = 20
+let invaderSpeed = 3
+let playerDim = 40
 let projectileHeight = 10
+let projectileSpeed = 10
 
 type Model = {
     playerX: int
@@ -19,9 +22,14 @@ type Model = {
 }
 
 let init () = {
-    playerX = 0
-    invaders = []
-    invaderSpeed = 0
+    playerX = resWidth / 2 - (playerDim / 2)
+    invaders = 
+        [0..8*5-1] 
+        |> List.map (fun i ->
+            let y = (i / 8) * (invaderDim + invaderSpacing)
+            let x = (i % 8) * (invaderDim + invaderSpacing)
+            x, y)
+    invaderSpeed = invaderSpeed
     bunkers = []
     projectiles = []
 }
@@ -46,7 +54,7 @@ let update message model =
                 if not valid then (acc, valid)
                 else
                     let nx = x + model.invaderSpeed
-                    if nx < minX || nx + invaderdim > maxX then acc, false
+                    if nx < minX || nx + invaderDim > maxX then acc, false
                     else (nx, y)::acc, true)
         if not valid then
             // drop invaders
