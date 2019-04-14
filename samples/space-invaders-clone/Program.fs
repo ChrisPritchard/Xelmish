@@ -84,14 +84,14 @@ let view model dispatch =
         yield! 
             model.invaders 
             |> List.map (fun invaderPos ->
-                colour Colours.green (invaderDim, invaderDim) invaderPos)
+                colour Colour.Green (invaderDim, invaderDim) invaderPos)
 
-        yield colour Colours.red (playerDim, playerDim) (model.playerX, resHeight - (playerDim + padding))
+        yield colour Colour.Red (playerDim, playerDim) (model.playerX, resHeight - (playerDim + padding))
 
         yield!
             model.projectiles
             |> List.map (fun (x, y, _) ->
-                colour Colours.white (1, projectileHeight) (x, y))
+                colour Colour.White (1, projectileHeight) (x, y))
 
         yield 
             fun _ inputs _ -> 
@@ -115,7 +115,7 @@ let view model dispatch =
 [<EntryPoint>]
 let main _ =
     let config: GameConfig = {
-        clearColour = Some Colours.black
+        clearColour = Some Colour.Black
         resolution = Windowed (resWidth, resHeight)
         assetsToLoad = []
         mouseVisible = false

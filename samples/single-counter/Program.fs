@@ -29,16 +29,16 @@ let view model dispatch =
     let button s event (x, y) = 
         let width, height = 100, 30 
         [
-            colour Colours.blue (width, height) (x, y)
-            text 20. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
+            colour Colour.Blue (width, height) (x, y)
+            text 20. Colour.White (-0.5, -0.5) s (x + width/2, y+height/2)
             onclick event (width, height) (x, y)
         ]
 
     [
-        yield text 30. Colours.black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
+        yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
         yield! button "- counter" (fun () -> dispatch Decrement) (100, 100)
         yield! button "+ counter" (fun () -> dispatch Increment) (220, 100)
-        yield text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize) (100, 140)
+        yield text 20. Colour.Black (0., 0.) (sprintf "Step size: %i" model.StepSize) (100, 140)
         yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 180)
         yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (220, 180)
         yield! button "reset" (fun () -> dispatch Reset) (100, 220)
@@ -50,7 +50,7 @@ let view model dispatch =
 let main _ =
     let config = {
         resolution = Windowed (420, 300)
-        clearColour = Some Colours.white
+        clearColour = Some Colour.White
         mouseVisible = true
         assetsToLoad = [
             Font ("connection", "./connection")

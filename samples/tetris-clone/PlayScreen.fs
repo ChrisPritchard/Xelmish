@@ -174,7 +174,7 @@ let view model dispatch =
                     | Some c ->
                         yield colour c (tiledim, tiledim) (tx, ty)
                     | _ ->
-                        yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
+                        yield colour Colour.WhiteSmoke (tiledim, tiledim) (tx, ty)
 
         // preview window for next shape
         let previewStart = (padding * 2) + (tiledim * gridWidth)
@@ -186,10 +186,10 @@ let view model dispatch =
                 if nextBlockTiles.Contains (x, y) then
                     yield colour model.nextShapeType.colour (tiledim, tiledim) (tx, ty)
                 else
-                    yield colour Colours.whiteSmoke (tiledim, tiledim) (tx, ty)
+                    yield colour Colour.WhiteSmoke (tiledim, tiledim) (tx, ty)
 
         // score and line text
-        let text = text "connection" 25. Colours.white (-0.5, 0.)
+        let text = text "connection" 25. Colour.White (-0.5, 0.)
         let textMid = (padding * 2) + (tiledim * (gridWidth + 3))
         let textTop = (padding * 2) + (tiledim * 5)
         yield text (sprintf "lines: %i" model.lines) (textMid, textTop)

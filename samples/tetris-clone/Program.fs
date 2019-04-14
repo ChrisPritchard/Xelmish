@@ -49,7 +49,7 @@ let view model dispatch =
 let main _ =
     let config = {
         resolution = Windowed (resWidth, resHeight)
-        clearColour = Some (rgb 100uy 100uy 100uy)
+        clearColour = Some Colour.Gray
         mouseVisible = true
         assetsToLoad = [
             Font ("connection", "./connection")

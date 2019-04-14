@@ -4,34 +4,10 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
 
-/// Represents colour, best constructed via the rgb and rgba helper methods
-type Colour = { r: byte; g: byte; b: byte; a: byte }
-/// When invoking the XNA spritebatch, a XNA color class instance is required
-with member __.toXnaColor () = Color(__.r, __.g, __.b, __.a)
-
-/// Takes a rgb value (three bytes for red, green and blue) and produces a colour record, with no transparency
-let rgb r g b = { r = r; g = g; b = b; a = 255uy }
-/// Takes a rgb value (three bytes for red, green and blue) plus a byte for transparency and produces a colour record
-let rgba r g b a = { r = r; g = g; b = b; a = a }
-
-/// Common colours, e.g. white, black, the rainbow and extras
-module Colours =
-    let white = rgb 255uy 255uy 255uy
-    let red = rgb 255uy 0uy 0uy
-    let orange = rgb 255uy 165uy 0uy
-    let yellow = rgb 255uy 255uy 0uy
-    let green = rgb 0uy 255uy 0uy
-    let indigo = rgb 75uy 0uy 130uy
-    let violet = rgb 238uy 130uy 238uy
-    let blue = rgb 0uy 0uy 255uy
-    let black = rgb 0uy 0uy 0uy
-    let cyan = rgb 0uy 255uy 255uy
-    let magenta = rgb 255uy 0uy 255uy
-    let silver = rgb 192uy 192uy 192uy
-    let whiteSmoke = rgb 245uy 245uy 245uy
-
-/// Possible keys on the keyboard
+/// Possible keys on the keyboard - aliased here so games don't need to understand/reference XNA namespaces
 type Keys = Microsoft.Xna.Framework.Input.Keys
+/// Colours - aliased here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
+type Colour = Microsoft.Xna.Framework.Color
 
 /// Represents a rectangle on the screen, used for destinations like
 /// where to draw a colour

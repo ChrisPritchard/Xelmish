@@ -11,7 +11,6 @@ type GameLoop (config: GameConfig) as this =
 
     let graphics = new GraphicsDeviceManager (this)
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
-    let clearColor = config.clearColour |> Option.map (fun c -> c.toXnaColor ())
 
     let mutable assets = Unchecked.defaultof<LoadedAssets>
     let mutable inputs = {
@@ -65,7 +64,7 @@ type GameLoop (config: GameConfig) as this =
                 gameTime = gameTime }
 
     override __.Draw _ =
-        Option.iter this.GraphicsDevice.Clear clearColor
+        Option.iter this.GraphicsDevice.Clear config.clearColour
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
         try

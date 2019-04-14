@@ -7,8 +7,8 @@ let text = text "connection"
 let button s event (x, y) = 
     let width, height = 100, 30 
     [
-        colour Colours.blue (width, height) (x, y)
-        text 20. Colours.white (-0.5, -0.5) s (x + width/2, y+height/2)
+        colour Colour.Blue (width, height) (x, y)
+        text 20. Colour.White (-0.5, -0.5) s (x + width/2, y+height/2)
         onclick event (width, height) (x, y)
     ]
 
@@ -38,7 +38,7 @@ module Clock =
             if model.UseUtc then timeFormat model.Time.UtcDateTime 
             else timeFormat model.Time.LocalDateTime
         [
-            yield text 20. Colours.white (0., 0.) timeString (x, y)
+            yield text 20. Colour.White (0., 0.) timeString (x, y)
             yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x + 550, y)
         ]
 
@@ -71,10 +71,10 @@ module CounterWithClock =
 
     let view model dispatch (x, y) =
         [
-            yield text 30. Colours.black (0., 0.) (sprintf "Counter value: %i" model.Count) (x, y)
+            yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (x, y)
             yield! button "- counter" (fun () -> dispatch Decrement) (x, y + 40)
             yield! button "+ counter" (fun () -> dispatch Increment) (x + 120, y + 40)
-            yield text 20. Colours.black (0., 0.) (sprintf "Step size: %i" model.StepSize) (x, y + 80)
+            yield text 20. Colour.Black (0., 0.) (sprintf "Step size: %i" model.StepSize) (x, y + 80)
             yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (x, y + 120)
             yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (x + 120, y + 120)
             yield! button "reset" (fun () -> dispatch Reset) (x, y + 160)
@@ -125,7 +125,7 @@ let timerTick dispatch =
 let main _ =
     let config = {
         resolution = Windowed (800, 600)
-        clearColour = Some (rgb 200uy 200uy 200uy)
+        clearColour = Some Colour.White
         mouseVisible = true
         assetsToLoad = [
             Font ("connection", "./connection")

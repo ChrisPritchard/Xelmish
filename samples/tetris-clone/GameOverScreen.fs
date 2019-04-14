@@ -26,7 +26,7 @@ type Message =
     | StartGame
 
 let view model dispatch = 
-    let text size = text "connection" size Colours.white (-0.5, 0.)
+    let text size = text "connection" size Colour.White (-0.5, 0.)
     let textMid = resWidth / 2
     [
         yield text 80. "GAME OVER!" (textMid, 40)

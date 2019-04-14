@@ -29,29 +29,29 @@ type Shape = {
 
 let shapes = [
     {   rotations = [|  [0,0; 1,0; 0,1; 1,1] |] // O
-        colour = Colours.cyan }
+        colour = Colour.Cyan }
     {   rotations = [|  [0,0; 1,0; 2,0; 3,0]    // I
                         [2,0; 2,1; 2,2; 2,3] |]
-        colour = Colours.red }
+        colour = Colour.Red }
     {   rotations = [|  [0,0; 1,0; 1,1; 2,1]    // Z
                         [2,0; 2,1; 1,1; 1,2] |] 
-        colour = Colours.green }
+        colour = Colour.Green }
     {   rotations = [|  [1,0; 2,0; 1,1; 0,1]    // S
                         [1,0; 1,1; 2,1; 2,2] |] 
-        colour = Colours.blue }
+        colour = Colour.Blue }
     {   rotations = [|  [0,0; 1,0; 2,0; 0,1]    // L
                         [0,0; 1,0; 1,1; 1,2]
                         [0,1; 1,1; 2,1; 2,0]
                         [1,0; 1,1; 1,2; 2,2] |] 
-        colour = Colours.orange }
+        colour = Colour.Orange }
     {   rotations = [|  [0,0; 1,0; 2,0; 2,1]    // J
                         [1,0; 1,1; 1,2; 0,2]
                         [0,0; 0,1; 1,1; 2,1]
                         [1,0; 2,0; 1,1; 1,2] |] 
-        colour = Colours.magenta }
+        colour = Colour.Magenta }
     {   rotations = [|  [0,0; 1,0; 2,0; 1,1]    // T
                         [1,0; 1,1; 1,2; 0,1]
                         [0,1; 1,1; 2,1; 1,0]
                         [1,0; 1,1; 1,2; 2,1] |]
-        colour = Colours.silver }
+        colour = Colour.Silver }
 ]
