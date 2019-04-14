@@ -8,6 +8,7 @@ let minX = 30
 let maxX = resWidth - 30
 let invaderdim = 40
 let playerdim = 40
+let projectileHeight = 10
 
 type Model = {
     playerX: int
@@ -30,8 +31,6 @@ type Message =
     | FireProjectile of x: int * y: int * velocity: int
     | ShuffleInvaders
     | MoveProjectiles
-    | Victory
-    | GameOver
 
 let update message model =
     match message with
@@ -55,6 +54,16 @@ let update message model =
             { model with invaderSpeed = model.invaderSpeed * -1 }, Cmd.none, NoOp
         else
             { model with invaders = newInvaders }, Cmd.none, NoOp
+    | MoveProjectiles ->
+        let newProjectiles =
+            ([], model.projectiles)
+            ||> List.fold (fun acc (x, y, v) ->
+                let newY = y + v
+                if newY > resHeight || newY < -projectileHeight then acc
+                else (x, newY, v)::acc)
+        // check for player inpact
+        // check for invader inpact
+        { model with projectiles = newProjectiles }, Cmd.none, NoOp
 
 [<EntryPoint>]
 let main argv =
