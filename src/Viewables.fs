@@ -38,6 +38,12 @@ let onkeydown key event: Viewable =
         && not (inputs.lastKeyboardState.IsKeyDown key) then 
             event ()
 
+let whilekeydown key event: Viewable =
+   fun _ inputs _ -> 
+        if inputs.keyboardState.IsKeyDown key 
+        && inputs.lastKeyboardState.IsKeyDown key then 
+            event ()
+
 let onkeyup key event : Viewable =
     fun _ inputs _ ->
         if not (inputs.keyboardState.IsKeyDown key)

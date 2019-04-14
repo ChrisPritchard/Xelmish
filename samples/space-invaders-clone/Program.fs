@@ -1,11 +1,11 @@
 ﻿open Elmish
 open Xelmish.Model
+open Xelmish.Viewables
 
 let resWidth = 800
 let resHeight = 600
 let playerSpeed = 5
-let minX = 30
-let maxX = resWidth - 30
+let padding = 30
 let invaderDim = 40
 let invaderSpacing = 20
 let invaderSpeed = 3
@@ -21,18 +21,19 @@ type Model = {
     projectiles: (int * int * int) list
 }
 
-let init () = {
-    playerX = resWidth / 2 - (playerDim / 2)
-    invaders = 
-        [0..8*5-1] 
-        |> List.map (fun i ->
-            let y = (i / 8) * (invaderDim + invaderSpacing)
-            let x = (i % 8) * (invaderDim + invaderSpacing)
-            x, y)
-    invaderSpeed = invaderSpeed
-    bunkers = []
-    projectiles = []
-}
+let init () = 
+    {
+        playerX = resWidth / 2 - (playerDim / 2)
+        invaders = 
+            [0..8*5-1] 
+            |> List.map (fun i ->
+                let y = (i / 8) * (invaderDim + invaderSpacing)
+                let x = (i % 8) * (invaderDim + invaderSpacing)
+                x, y)
+        invaderSpeed = invaderSpeed
+        bunkers = []
+        projectiles = []
+    }, Cmd.none
 
 type Message = 
     | MovePlayer of dir: int
@@ -43,10 +44,10 @@ type Message =
 let update message model =
     match message with
     | MovePlayer dir ->
-        let newPos = min maxX (max minX (model.playerX + dir * playerSpeed))
-        { model with playerX = newPos }, Cmd.none, NoOp
+        let newPos = min (resWidth - padding - playerDim) (max padding (model.playerX + dir * playerSpeed))
+        { model with playerX = newPos }, Cmd.none
     | FireProjectile (x, y, v) ->
-        { model with projectiles = (x, y, v)::model.projectiles }, Cmd.none, NoOp
+        { model with projectiles = (x, y, v)::model.projectiles }, Cmd.none
     | ShuffleInvaders ->
         let (newInvaders, valid) = 
             (([], true), model.invaders)
@@ -54,14 +55,14 @@ let update message model =
                 if not valid then (acc, valid)
                 else
                     let nx = x + model.invaderSpeed
-                    if nx < minX || nx + invaderDim > maxX then acc, false
+                    if nx < padding || nx + invaderDim > (resWidth - padding) then acc, false
                     else (nx, y)::acc, true)
         if not valid then
             // drop invaders
             // check for player impact
-            { model with invaderSpeed = model.invaderSpeed * -1 }, Cmd.none, NoOp
+            { model with invaderSpeed = model.invaderSpeed * -1 }, Cmd.none
         else
-            { model with invaders = newInvaders }, Cmd.none, NoOp
+            { model with invaders = newInvaders }, Cmd.none
     | MoveProjectiles ->
         let newProjectiles =
             ([], model.projectiles)
@@ -71,9 +72,25 @@ let update message model =
                 else (x, newY, v)::acc)
         // check for player inpact
         // check for invader inpact
-        { model with projectiles = newProjectiles }, Cmd.none, NoOp
+        { model with projectiles = newProjectiles }, Cmd.none
+
+let view model dispatch =
+    [
+        yield colour Colours.red (playerDim, playerDim) (model.playerX, resHeight - (playerDim + padding))
+
+        yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
+        yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
+    ], NoOp
 
 [<EntryPoint>]
 let main argv =
-    printfn "Hello World from F#!"
+    let config: GameConfig = {
+        clearColour = Some Colours.black
+        resolution = Windowed (resWidth, resHeight)
+        assetsToLoad = []
+        mouseVisible = false
+    }
+
+    Program.mkProgram init update view
+    |> Xelmish.Program.runGameLoop config
     0
