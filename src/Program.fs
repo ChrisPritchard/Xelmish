@@ -5,12 +5,9 @@ open Elmish
 open GameLoop
 open Model
 
-let runGameLoop config (program: Program<_, _, _, (Viewable list) * GameMessage>) =
+let runGameLoop config (program: Program<_, _, _, Viewable list>) =
     use loop = new GameLoop (config)
     let setState model dispatch =
-        let view, message = program.view model dispatch
-        match message with
-        | Exit -> loop.Exit ()
-        | NoOp -> loop.View <- view
+        loop.View <- program.view model dispatch
     Program.run { program with setState = setState }
     loop.Run ()

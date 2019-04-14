@@ -4,10 +4,7 @@ open Elmish
 open Xelmish.Model
 open Constants
 
-type Model = {
-    screen: Screen
-    shouldQuit: bool
-} and Screen = 
+type Model = 
     | Start of StartScreen.Model
     | Playing of PlayScreen.Model
     | GameOver of GameOverScreen.Model
@@ -18,38 +15,35 @@ type Message =
     | GameOverScreenMessage of GameOverScreen.Message
 
 let init () =
-    { screen = Start (StartScreen.init ()); shouldQuit = false }, Cmd.none
+    Start (StartScreen.init ()), Cmd.none
 
 let update message model =
-    match model.screen, message with
+    match model, message with
     | Start _, StartScreenMessage msg ->
-        match StartScreen.update msg with
-        | StartScreen.Start -> { model with screen = Playing (PlayScreen.init ()) }, Cmd.none
-        | StartScreen.Quit -> { model with shouldQuit = true }, Cmd.none
+        match msg with
+        | StartScreen.StartGame -> Playing (PlayScreen.init ()), Cmd.none
 
     | Playing playScreen, PlayScreenMessage msg -> 
-        let newPlaying, newMessage, parentMessage = PlayScreen.update msg playScreen
-        match parentMessage with
-        | PlayScreen.NoOp -> { model with screen = Playing newPlaying }, Cmd.map PlayScreenMessage newMessage
-        | PlayScreen.Quit -> { model with shouldQuit = true }, Cmd.none
-        | PlayScreen.GameOver score -> { model with screen = GameOver (GameOverScreen.init score) }, Cmd.none
+        match msg with
+        | PlayScreen.GameOver score -> GameOver (GameOverScreen.init score), Cmd.none
+        | _ -> 
+            let newModel, newCommand = PlayScreen.update msg playScreen
+            Playing newModel, Cmd.map PlayScreenMessage newCommand
 
     | GameOver _, GameOverScreenMessage msg ->
-        match GameOverScreen.update msg with
-        | GameOverScreen.Start -> { model with screen = Playing (PlayScreen.init ()) }, Cmd.none
-        | GameOverScreen.Quit -> { model with shouldQuit = true }, Cmd.none
+        match msg with
+        | GameOverScreen.StartGame -> Playing (PlayScreen.init ()), Cmd.none
 
     | _ -> model, Cmd.none // invalid combination
 
 let view model dispatch =
-    let gameMessage = if model.shouldQuit then Exit else NoOp
-    match model.screen with
+    match model with
     | Start startScreen ->
-        StartScreen.view startScreen (StartScreenMessage >> dispatch), gameMessage
+        StartScreen.view startScreen (StartScreenMessage >> dispatch)
     | Playing playScreen ->
-        PlayScreen.view playScreen (PlayScreenMessage >> dispatch), gameMessage
+        PlayScreen.view playScreen (PlayScreenMessage >> dispatch)
     | GameOver gameOverScreen ->
-        GameOverScreen.view gameOverScreen (GameOverScreenMessage >> dispatch), gameMessage
+        GameOverScreen.view gameOverScreen (GameOverScreenMessage >> dispatch)
 
 [<EntryPoint; STAThread>]
 let main _ =

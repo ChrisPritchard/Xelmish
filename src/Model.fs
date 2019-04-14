@@ -90,9 +90,8 @@ type LoadedAssets = {
 /// In the Viewables module, there are functions that create viewables for common tasks, like drawing colours or images.
 type Viewable = LoadedAssets -> Inputs -> SpriteBatch -> unit
 
-/// Messages from the elmish view methods that should effect the game engine, e.g. tell it to quit.
-type GameMessage =
-/// Do nothing
-| NoOp
-/// Exit the loop, and thus the program
-| Exit
+/// If a game throws this exception, the gameloop will catch it and quit.
+type QuitGame() =
+    inherit System.Exception()
+
+let exit () = raise (QuitGame ())

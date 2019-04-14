@@ -43,11 +43,6 @@ type Message =
     | Rotate
     | CheckLines
     | SpawnBlock
-    | QuitGame
-
-type ParentMessage = 
-    | NoOp
-    | Quit
     | GameOver of int
 
 let tilesFor (x, y) shape rotation =
@@ -71,9 +66,9 @@ let ifValid model newModel =
     if  outOfBounds newTiles 
         || belowFloor newTiles
         || overlap model.staticBlocks newTiles then
-        model, Cmd.none, NoOp
+        model, Cmd.none
     else
-        newModel, Cmd.none, NoOp
+        newModel, Cmd.none
 
 let moveShape dx model =
     let proposed = 
@@ -94,16 +89,16 @@ let dropShape time model =
             lastDrop = time }
     let newTiles = tilesForModel newModel
 
-    if outOfBounds newTiles then model, Cmd.none, NoOp
+    if outOfBounds newTiles then model, Cmd.none
     elif overlap model.staticBlocks newTiles || belowFloor newTiles then
         let oldTiles = tilesForModel model
         let newStatics = 
             (model.staticBlocks, oldTiles) 
             ||> List.fold (fun statics tile -> 
                 Map.add tile model.shapeType.colour statics)
-        { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines, NoOp
+        { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines
     else
-        newModel, Cmd.none, NoOp
+        newModel, Cmd.none
 
 let removeLine staticBlocks line =
     staticBlocks 
@@ -125,7 +120,7 @@ let removeLines toRemove model =
         lines = model.lines + List.length toRemove
         staticBlocks = newStatics
         score = newScore
-        dropInterval = newDrop }, Cmd.ofMsg SpawnBlock, NoOp
+        dropInterval = newDrop }, Cmd.ofMsg SpawnBlock
 
 let checkLines model =
     let (_, y) = model.blockPosition
@@ -136,7 +131,7 @@ let checkLines model =
             && List.forall (fun x -> 
                 Map.containsKey (x, line) model.staticBlocks) [0..gridWidth-1])
     if List.isEmpty complete then
-        model, Cmd.ofMsg SpawnBlock, NoOp
+        model, Cmd.ofMsg SpawnBlock
     else
         removeLines complete model
 
@@ -148,10 +143,11 @@ let spawnBlock model =
             nextShapeType = shapes.[random.Next(shapes.Length)]
             rotationIndex = 0 }
     let spawnedTiles = tilesForModel newModel
-    let parentMessage =
-        if overlap model.staticBlocks spawnedTiles then GameOver model.score
-        else NoOp
-    newModel, Cmd.none, parentMessage
+    let command =
+        if overlap model.staticBlocks spawnedTiles 
+        then Cmd.ofMsg (GameOver model.score)
+        else Cmd.none
+    newModel, command
 
 let update message model =
     match message with
@@ -159,10 +155,10 @@ let update message model =
     | Left -> moveShape -1 model
     | Right -> moveShape 1 model
     | Rotate -> rotateShape model
-    | Drop v -> { model with dropPressed = v }, Cmd.none, NoOp
+    | Drop v -> { model with dropPressed = v }, Cmd.none
     | CheckLines -> checkLines model
     | SpawnBlock -> spawnBlock model
-    | QuitGame -> model, Cmd.none, Quit
+    | GameOver _ -> model, Cmd.none // caught by parent
 
 let view model dispatch =
     [
@@ -206,7 +202,7 @@ let view model dispatch =
         yield onkeydown Keys.Up (fun () -> dispatch Rotate)
         yield onkeydown Keys.Down (fun () -> dispatch (Drop true))
         yield onkeyup Keys.Down (fun () -> dispatch (Drop false))
-        yield onkeydown Keys.Escape (fun () -> dispatch QuitGame)
+        yield onkeydown Keys.Escape exit
 
         // by placing the below code in a viewable function, it will get evaluated on every game draw
         // This can be more effective than using an Elmish subscription, especially if smoothness is needed

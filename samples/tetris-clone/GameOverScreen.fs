@@ -24,16 +24,6 @@ let init score =
 
 type Message = 
     | StartGame
-    | QuitGame
-
-type ParentMessage = 
-    | Start
-    | Quit
-
-let update message =
-    match message with
-    | QuitGame -> Quit
-    | StartGame -> Start
 
 let view model dispatch = 
     let text size = text "connection" size Colours.white (-0.5, 0.)
@@ -57,5 +47,5 @@ let view model dispatch =
         yield text 25. "(Q)uit" (textMid, 380)
 
         yield onkeydown Keys.P (fun () -> dispatch StartGame)
-        yield onkeydown Keys.Q (fun () -> dispatch QuitGame)
+        yield onkeydown Keys.Q exit
     ]

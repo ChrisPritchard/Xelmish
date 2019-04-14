@@ -80,7 +80,9 @@ let view model dispatch =
 
         yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
         yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
-    ], NoOp
+
+        yield onkeydown Keys.Escape exit
+    ]
 
 [<EntryPoint>]
 let main argv =

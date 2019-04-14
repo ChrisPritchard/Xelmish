@@ -42,7 +42,9 @@ let view model dispatch =
         yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 180)
         yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (220, 180)
         yield! button "reset" (fun () -> dispatch Reset) (100, 220)
-    ], NoOp
+
+        yield onkeydown Keys.Escape exit
+    ]
 
 [<EntryPoint>]
 let main _ =

@@ -38,11 +38,6 @@ type GameLoop (config: GameConfig) as this =
         with set value = 
             view <- value
 
-    member __.dispatch message =
-        match message with
-        | Exit -> __.Exit ()
-        | NoOp -> ()
-
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
         let whiteTexture = new Texture2D(this.GraphicsDevice, 1, 1)
@@ -73,7 +68,10 @@ type GameLoop (config: GameConfig) as this =
         Option.iter this.GraphicsDevice.Clear clearColor
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
-        for viewable in view do
-            viewable assets inputs spriteBatch
+        try
+            for viewable in view do
+                viewable assets inputs spriteBatch
+        with
+            | :? QuitGame -> __.Exit()
 
         spriteBatch.End ()
