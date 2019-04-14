@@ -10,11 +10,11 @@ let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <
 
 let colour colour (width, height) (x, y) : Viewable = 
     fun loadedAssets _ spriteBatch -> 
-        spriteBatch.Draw(loadedAssets.whiteTexture, xnaRect x y width height, colour)
+        spriteBatch.Draw(loadedAssets.whiteTexture, rect x y width height, colour)
 
 let image key colour (width, height) (x, y) : Viewable = 
     fun loadedAssets _ spriteBatch -> 
-        spriteBatch.Draw(loadedAssets.textures.[key], xnaRect x y width height, colour)
+        spriteBatch.Draw(loadedAssets.textures.[key], rect x y width height, colour)
 
 let text font (fontSize: float) colour (ox, oy) (text: string) (x, y) : Viewable =
     fun loadedAssets _ spriteBatch -> 

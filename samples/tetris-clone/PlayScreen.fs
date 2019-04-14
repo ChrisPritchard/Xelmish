@@ -209,7 +209,6 @@ let view model dispatch =
         yield fun _ inputs _ ->
             // check to see if a drop tick is due
             let interval = if model.dropPressed then 100L else model.dropInterval
-            let time = int64 inputs.gameTime.TotalGameTime.TotalMilliseconds
-            if time - model.lastDrop > interval then
-                dispatch (Tick time)
+            if inputs.totalGameTime - model.lastDrop > interval then
+                dispatch (Tick inputs.totalGameTime)
     ]

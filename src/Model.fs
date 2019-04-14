@@ -8,16 +8,8 @@ open Microsoft.Xna.Framework.Graphics
 type Keys = Microsoft.Xna.Framework.Input.Keys
 /// Colours - aliased here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
 type Colour = Microsoft.Xna.Framework.Color
-
-/// Represents a rectangle on the screen, used for destinations like
-/// where to draw a colour
-type Rectangle = { x: int; y: int; width: int; height: int }
-
-/// Produces a rectangle record for given x, y, width and height values
-let rect x y w h = { x = x; y = y; width = w; height = h }
-
-let internal xnaRect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
-let internal rectToXnaRect r = new Microsoft.Xna.Framework.Rectangle(r.x, r.y, r.width, r.height)
+/// Creates an xna rect from x, y, w, h values
+let rect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
 
 /// The broad config for the game loop, e.g. resolution and clear colour, plus assets to load at startup
 type GameConfig = {
@@ -52,6 +44,7 @@ type Inputs = {
     lastMouseState: MouseState
     gameTime: GameTime
 }
+with member __.totalGameTime with get() = int64 __.gameTime.TotalGameTime.TotalMilliseconds
 
 /// Assets loaded at startup for use
 type LoadedAssets = {

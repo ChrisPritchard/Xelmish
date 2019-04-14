@@ -95,9 +95,8 @@ let view model dispatch =
 
         yield 
             fun _ inputs _ -> 
-                let time = int64 inputs.gameTime.TotalGameTime.TotalMilliseconds
-                if time - model.lastShuffle > model.shuffleInterval then
-                    dispatch (ShuffleInvaders time)
+                if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
+                    dispatch (ShuffleInvaders inputs.totalGameTime)
 
         yield fun _ _ _ -> dispatch MoveProjectiles
 
