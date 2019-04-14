@@ -4,11 +4,9 @@ open Xelmish.Model
 open Xelmish.Viewables
 open Elmish
 open Constants
-open System.Diagnostics
 
 let startPos = ((gridWidth / 2) - 1, 0)
 let random = System.Random ()
-let dropTimer = Stopwatch.StartNew ()
 
 type Model = {
     staticBlocks: Map<int * int, Colour>
@@ -38,7 +36,7 @@ let init () =
     }
 
 type Message = 
-    | Tick
+    | Tick of int64
     | Drop of bool
     | Left
     | Right
@@ -80,22 +78,20 @@ let ifValid model newModel =
 let moveShape dx model =
     let proposed = 
         { model with 
-            lastDrop = dropTimer.ElapsedMilliseconds
             blockPosition = let (x, y) = model.blockPosition in x + dx, y }
     ifValid model proposed
 
 let rotateShape model =
     let proposed = 
         { model with 
-            lastDrop = dropTimer.ElapsedMilliseconds
             rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
     ifValid model proposed
 
-let dropShape model =
+let dropShape time model =
     let newModel = 
         { model with 
             blockPosition = let (x, y) = model.blockPosition in x, y + 1
-            lastDrop = dropTimer.ElapsedMilliseconds }
+            lastDrop = time }
     let newTiles = tilesForModel newModel
 
     if outOfBounds newTiles then model, Cmd.none, NoOp
@@ -159,7 +155,7 @@ let spawnBlock model =
 
 let update message model =
     match message with
-    | Tick -> dropShape model
+    | Tick time -> dropShape time model
     | Left -> moveShape -1 model
     | Right -> moveShape 1 model
     | Rotate -> rotateShape model
@@ -214,10 +210,10 @@ let view model dispatch =
 
         // by placing the below code in a viewable function, it will get evaluated on every game draw
         // This can be more effective than using an Elmish subscription, especially if smoothness is needed
-        yield fun _ _ _ ->
+        yield fun _ inputs _ ->
             // check to see if a drop tick is due
             let interval = if model.dropPressed then 100L else model.dropInterval
-            let time = dropTimer.ElapsedMilliseconds
+            let time = int64 inputs.gameTime.TotalGameTime.TotalMilliseconds
             if time - model.lastDrop > interval then
-                dispatch Tick
+                dispatch (Tick time)
     ]

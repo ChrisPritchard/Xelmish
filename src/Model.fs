@@ -70,11 +70,12 @@ and Loadable =
 | Font of key:string * path:string
 
 /// Current and previous state of input devices
-type Input = {
+type Inputs = {
     keyboardState: KeyboardState
     lastKeyboardState: KeyboardState
     mouseState: MouseState
     lastMouseState: MouseState
+    gameTime: GameTime
 }
 
 /// Assets loaded at startup for use
@@ -87,7 +88,7 @@ type LoadedAssets = {
 /// On each draw, a list of viewables provided by the main Xelmish component will be run in the order provided.
 /// Each is given the set of loaded asseets (e.g. textures), the current input state, and the spriteBatch object to draw with.
 /// In the Viewables module, there are functions that create viewables for common tasks, like drawing colours or images.
-type Viewable = LoadedAssets -> Input -> SpriteBatch -> unit
+type Viewable = LoadedAssets -> Inputs -> SpriteBatch -> unit
 
 /// Messages from the elmish view methods that should effect the game engine, e.g. tell it to quit.
 type GameMessage =
