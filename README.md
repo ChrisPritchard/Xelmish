@@ -34,7 +34,7 @@ The game tetris, implemented using several elmish components for screens, with a
 
 ### 4. Space-Invaders-Clone
 
-A clone of 1979's space invaders, though not a hundred percent accurate to the old version. Space invaders is a little simpler than Tetris as a game, but requires a great deal more events, animations and individual enemies, so it serves as a good demonstration of how the bulky (compared to direct imperative style) Elmish eventing model performs in such a context.
+A clone of 1979's space invaders, though not a hundred percent accurate to the old version. Space invaders is a little simpler than Tetris as a game, but requires a great deal more events, animations and individual entities, so it serves as a good demonstration of how the bulky (compared to direct imperative style) Elmish eventing model performs in such a context.
 
 ## History and Reasoning
 
