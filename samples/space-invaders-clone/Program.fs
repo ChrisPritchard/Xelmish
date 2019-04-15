@@ -4,12 +4,13 @@ open Xelmish.Viewables
 
 let resWidth = 800
 let resHeight = 600
-let playerSpeed = 5
 let padding = 30
+let playerDim = 40
+let playerY = resHeight - (playerDim + padding)
+let playerSpeed = 5
 let invaderDim = 40
 let invaderSpacing = 20
 let invaderShuffleAmount = 20
-let playerDim = 40
 let projectileHeight = 10
 let projectileSpeed = 10
 
@@ -21,6 +22,7 @@ type Model = {
     projectiles: (int * int * int) list
     lastShuffle: int64
     shuffleInterval: int64
+    freeze: bool
 }
 
 let init () = 
@@ -37,6 +39,7 @@ let init () =
         projectiles = []
         lastShuffle = 0L
         shuffleInterval = 500L
+        freeze = false
     }, Cmd.none
 
 type Message = 
@@ -44,6 +47,45 @@ type Message =
     | FireProjectile of x: int * y: int * velocity: int
     | ShuffleInvaders of int64
     | MoveProjectiles
+    | PlayerHit
+
+let invaderHasHitPlayer playerX (ix, iy) =
+    (iy > playerY || iy + invaderDim > playerY)
+    && ((ix > playerX && ix < playerX + playerDim)
+    || (ix < playerX && ix + invaderDim > playerX))
+
+let shuffleInvaders time model = 
+    let (newInvaders, valid) = 
+        (([], true), model.invaders)
+        ||> List.fold (fun (acc, valid) (x, y) ->
+            if not valid then (acc, valid)
+            else
+                let nx = x + invaderShuffleAmount * model.invaderDirection
+                if nx < padding || nx + invaderDim > (resWidth - padding) then acc, false
+                else (nx, y)::acc, true)
+    if not valid then
+        { model with 
+            invaders = model.invaders |> List.map (fun (x, y) -> x, y + invaderDim / 2)
+            invaderDirection = model.invaderDirection * -1
+            lastShuffle = time
+            shuffleInterval = max 50L (model.shuffleInterval - 50L) }, 
+        Cmd.none
+    else
+        let command = 
+            if List.exists (invaderHasHitPlayer model.playerX) model.invaders 
+            then Cmd.ofMsg PlayerHit else Cmd.none
+        { model with invaders = newInvaders; lastShuffle = time }, command
+
+let moveProjectiles model =
+    let newProjectiles =
+        ([], model.projectiles)
+        ||> List.fold (fun acc (x, y, v) ->
+            let newY = y + v
+            if newY > resHeight || newY < -projectileHeight then acc
+            else (x, newY, v)::acc)
+    // check for player inpact
+    // check for invader inpact
+    { model with projectiles = newProjectiles }, Cmd.none
 
 let update message model =
     match message with
@@ -52,56 +94,31 @@ let update message model =
         { model with playerX = newPos }, Cmd.none
     | FireProjectile (x, y, v) ->
         { model with projectiles = (x, y, v)::model.projectiles }, Cmd.none
-    | ShuffleInvaders time ->
-        let (newInvaders, valid) = 
-            (([], true), model.invaders)
-            ||> List.fold (fun (acc, valid) (x, y) ->
-                if not valid then (acc, valid)
-                else
-                    let nx = x + invaderShuffleAmount * model.invaderDirection
-                    if nx < padding || nx + invaderDim > (resWidth - padding) then acc, false
-                    else (nx, y)::acc, true)
-        if not valid then
-            // drop invaders
-            // check for player impact
-            { model with invaderDirection = model.invaderDirection * -1; lastShuffle = time }, 
-            Cmd.ofMsg (ShuffleInvaders time)
-        else
-            { model with invaders = newInvaders; lastShuffle = time }, Cmd.none
-    | MoveProjectiles ->
-        let newProjectiles =
-            ([], model.projectiles)
-            ||> List.fold (fun acc (x, y, v) ->
-                let newY = y + v
-                if newY > resHeight || newY < -projectileHeight then acc
-                else (x, newY, v)::acc)
-        // check for player inpact
-        // check for invader inpact
-        { model with projectiles = newProjectiles }, Cmd.none
+    | ShuffleInvaders time -> shuffleInvaders time model        
+    | MoveProjectiles -> moveProjectiles model
+    | PlayerHit -> { model with freeze = true }, Cmd.none
 
 let view model dispatch =
     [
-        yield! 
-            model.invaders 
+        yield! model.invaders 
             |> List.map (fun invaderPos ->
                 colour Colour.Green (invaderDim, invaderDim) invaderPos)
 
-        yield colour Colour.Red (playerDim, playerDim) (model.playerX, resHeight - (playerDim + padding))
+        yield colour Colour.Red (playerDim, playerDim) (model.playerX, playerY)
 
-        yield!
-            model.projectiles
+        yield! model.projectiles
             |> List.map (fun (x, y, _) ->
                 colour Colour.White (1, projectileHeight) (x, y))
 
-        yield 
-            fun _ inputs _ -> 
+        if not model.freeze then
+            yield fun _ inputs _ -> 
                 if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders inputs.totalGameTime)
 
-        yield fun _ _ _ -> dispatch MoveProjectiles
+            yield fun _ _ _ -> dispatch MoveProjectiles
 
-        yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
-        yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
+            yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
+            yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
 
         yield onkeydown Keys.Space (fun () -> 
             let x = model.playerX + playerDim / 2
