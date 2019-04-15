@@ -32,6 +32,10 @@ An app with two sub components, each containing a counter and a clock. Pretty si
 
 The game tetris, implemented using several elmish components for screens, with a relatively simple Xelmish view. Much more involved than prior samples, but still simple enough to follow easily I hope.
 
+### 4. Space-Invaders-Clone
+
+A clone of 1979's space invaders, though not a hundred percent accurate to the old version. Space invaders is a little simpler than Tetris as a game, but requires a great deal more events, animations and individual enemies, so it serves as a good demonstration of how the bulky (compared to direct imperative style) Elmish eventing model performs in such a context.
+
 ## History and Reasoning
 
 Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine. 
