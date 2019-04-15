@@ -81,13 +81,16 @@ let moveProjectiles model =
             if newY > resHeight || newY < -projectileHeight then acc, playerHit, invadersHit
             else 
                 let overlapsPlayer = 
+                    v > 0 &&
                     x >= model.playerX && x < model.playerX + playerDim
                     && newY >= playerY
                 let projectileRect = rect x y 1 projectileHeight
                 let hitInvaders = 
-                    model.invaders 
-                    |> List.filter (fun (ix, iy) -> 
-                        projectileRect.Intersects(rect ix iy invaderDim invaderDim))
+                    if v > 0 then []
+                    else 
+                        model.invaders 
+                        |> List.filter (fun (ix, iy) -> 
+                            projectileRect.Intersects(rect ix iy invaderDim invaderDim))
                 if playerHit || hitInvaders <> [] then
                     acc, playerHit || overlapsPlayer, hitInvaders @ invadersHit
                 else
@@ -134,9 +137,10 @@ let view model dispatch =
             yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
 
         yield onkeydown Keys.Space (fun () -> 
-            let x = model.playerX + playerDim / 2
-            let y = resHeight - (playerDim + padding) - projectileHeight - 1
-            dispatch (FireProjectile (x, y, -projectileSpeed)))
+            if not (List.exists (fun (_, _, v) -> v < 0) model.projectiles) then
+                let x = model.playerX + playerDim / 2
+                let y = resHeight - (playerDim + padding) - projectileHeight - 1
+                dispatch (FireProjectile (x, y, -projectileSpeed)))
 
         yield onkeydown Keys.Escape exit
     ]
