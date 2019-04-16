@@ -78,21 +78,21 @@ let moveProjectiles model =
         (([], false, []), model.projectiles)
         ||> List.fold (fun (acc, playerHit, invadersHit) (x, y, v) ->
             let newY = y + v
-            if newY > resHeight || newY < -projectileHeight then acc, playerHit, invadersHit
-            else 
+            if newY > resHeight || newY < -projectileHeight then acc, playerHit, invadersHit // out of bounds
+            elif v > 0 then // invader projectile
                 let overlapsPlayer = 
-                    v > 0 &&
                     x >= model.playerX && x < model.playerX + playerDim
                     && newY >= playerY
+                if overlapsPlayer then acc, true, invadersHit
+                else (x, newY, v)::acc, playerHit, invadersHit
+            else // player projectile
                 let projectileRect = rect x y 1 projectileHeight
                 let hitInvaders = 
-                    if v > 0 then []
-                    else 
-                        model.invaders 
-                        |> List.filter (fun (ix, iy) -> 
-                            projectileRect.Intersects(rect ix iy invaderDim invaderDim))
-                if playerHit || hitInvaders <> [] then
-                    acc, playerHit || overlapsPlayer, hitInvaders @ invadersHit
+                    model.invaders 
+                    |> List.filter (fun (ix, iy) -> 
+                        projectileRect.Intersects(rect ix iy invaderDim invaderDim))
+                if hitInvaders <> [] then
+                    acc, playerHit, hitInvaders @ invadersHit
                 else
                     (x, newY, v)::acc, playerHit, invadersHit)
     let newInvaders = List.except invadersHit model.invaders
@@ -156,4 +156,5 @@ let main _ =
 
     Program.mkProgram init update view
     |> Xelmish.Program.runGameLoop config
+
     0
