@@ -16,7 +16,7 @@ type PlayingModel = {
 
 let init () = 
     {
-        playerX = resWidth / 2 - (playerDim / 2)
+        playerX = resWidth / 2 - (playerWidth / 2)
         invaders = 
             [0..invadersPerRow*invaderRows-1]
             |> List.map (fun i ->
@@ -61,7 +61,7 @@ let shuffleInvaders time model =
         Cmd.none
     else
         let command = 
-            let playerRect = rect model.playerX playerY playerDim playerDim
+            let playerRect = rect model.playerX playerY playerWidth playerHeight
             if List.exists (fun (x, y, w, h, _) -> (rect x y w h).Intersects(playerRect)) model.invaders 
             then Cmd.ofMsg PlayerHit else Cmd.none
         { model with invaders = newInvaders; lastShuffle = time }, command
@@ -86,7 +86,7 @@ let moveProjectiles model =
         if newY > resHeight then acc, false, invadersHit
         else
             let overlapsPlayer = 
-                x >= model.playerX && x < model.playerX + playerDim
+                x >= model.playerX && x < model.playerX + playerWidth
                 && newY >= playerY
             if overlapsPlayer then acc, true, invadersHit
             else (x, newY, v)::acc, playerHit, invadersHit
@@ -107,7 +107,7 @@ let moveProjectiles model =
 let update message model =
     match message with
     | MovePlayer dir ->
-        let newPos = min (resWidth - padding - playerDim) (max padding (model.playerX + dir * playerSpeed))
+        let newPos = min (resWidth - padding - playerWidth) (max padding (model.playerX + dir * playerSpeed))
         { model with playerX = newPos }, Cmd.none
     | FireProjectile (x, y, v) ->
         { model with projectiles = (x, y, v)::model.projectiles }, Cmd.none
@@ -116,13 +116,26 @@ let update message model =
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
 
+let invaderSprites = 
+    [
+        Small, "invader-small-0"
+        Medium, "invader-medium-0"
+        Large, "invader-large-0"
+    ] |> Map.ofList
+
+let sprite key (w, h) (x, y) colour =
+    let (sw, sh, sx, sy) = spritemap.[key]
+    fun loadedAssets _ (spriteBatch: SpriteBatch) ->
+        let texture = loadedAssets.textures.["sprites"]
+        spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour)
+
 let view model dispatch =
     [
         yield! model.invaders 
-            |> List.map (fun (x, y, w, h, _) ->
-                colour Colour.Green (w, h) (x, y))
+            |> List.map (fun (x, y, w, h, kind) ->
+                sprite (invaderSprites.[kind]) (w, h) (x, y) Colour.White)
 
-        yield colour Colour.Red (playerDim, playerDim) (model.playerX, playerY)
+        yield sprite "player" (playerWidth, playerHeight) (model.playerX, playerY) (rgba 0uy 255uy 0uy 255uy)
 
         yield! model.projectiles
             |> List.map (fun (x, y, _) ->
@@ -140,8 +153,8 @@ let view model dispatch =
 
         yield onkeydown Keys.Space (fun () -> 
             if not (List.exists (fun (_, _, v) -> v < 0) model.projectiles) then
-                let x = model.playerX + playerDim / 2
-                let y = resHeight - (playerDim + padding) - projectileHeight - 1
+                let x = model.playerX + playerWidth / 2
+                let y = resHeight - (playerHeight + padding) - projectileHeight - 1
                 dispatch (FireProjectile (x, y, -projectileSpeed)))
 
         yield onkeydown Keys.Escape exit
@@ -152,7 +165,7 @@ let main _ =
     let config: GameConfig = {
         clearColour = Some Colour.Black
         resolution = Windowed (resWidth, resHeight)
-        assetsToLoad = []
+        assetsToLoad = [ Texture ("sprites", "./sprites.png") ]
         mouseVisible = false
         showFpsInConsole = true
     }

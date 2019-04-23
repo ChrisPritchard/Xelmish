@@ -6,10 +6,6 @@ let resHeight = 600
 
 let padding = 30
 
-let playerDim = 40
-let playerY = resHeight - (playerDim + padding)
-let playerSpeed = 5
-
 let invaderSpacing = 10
 let invadersPerRow = 11
 let invaderRows = 5
@@ -29,3 +25,9 @@ let spritemap =
 let smallSize = let (w, h, _, _) = spritemap.["invader-small-0"] in w, h
 let mediumSize = let (w, h, _, _) = spritemap.["invader-medium-0"] in w, h
 let largeSize = let (w, h, _, _) = spritemap.["invader-large-0"] in w, h
+
+let animationSpeed = 100L
+
+let playerWidth, playerHeight = let (w, h, _, _) = spritemap.["player"] in w, h
+let playerY = resHeight - (playerHeight + padding)
+let playerSpeed = 5

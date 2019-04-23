@@ -8,8 +8,14 @@ open Microsoft.Xna.Framework.Graphics
 type Keys = Microsoft.Xna.Framework.Input.Keys
 /// Colours - aliased here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
 type Colour = Microsoft.Xna.Framework.Color
+
+let rgba (r: byte) (g: byte) (b: byte) (a: byte) = Colour (r, g, b, a)
+
 /// Creates an xna rect from x, y, w, h values
 let rect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
+
+/// Aliased version of XNA spritebatch
+type SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch
 
 /// The broad config for the game loop, e.g. resolution and clear colour, plus assets to load at startup
 type GameConfig = {
