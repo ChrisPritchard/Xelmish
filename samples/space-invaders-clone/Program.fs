@@ -1,31 +1,18 @@
 ﻿open Elmish
 open Xelmish.Model
 open Xelmish.Viewables
+open Config
 
-let resWidth = 800
-let resHeight = 600
-let padding = 30
-let playerDim = 40
-let playerY = resHeight - (playerDim + padding)
-let playerSpeed = 5
-let invaderDim = 40
-let invaderSpacing = 10
-let invadersPerRow = 11
-let invaderRows = 5
-let invaderShuffleAmount = 20
-let projectileHeight = 10
-let projectileSpeed = 6
-
-type Model = {
+type PlayingModel = {
     playerX: int
-    invaders: (int * int) list
+    invaders: (int * int * int * int * InvaderKind) list
     invaderDirection: int
     bunkers: (int * int) list
     projectiles: (int * int * int) list
     lastShuffle: int64
     shuffleInterval: int64
     freeze: bool
-}
+} and InvaderKind = Small | Medium | Large
 
 let init () = 
     {
@@ -33,9 +20,13 @@ let init () =
         invaders = 
             [0..invadersPerRow*invaderRows-1]
             |> List.map (fun i ->
-                let y = padding + (padding/2) + (i / invadersPerRow) * (invaderDim + invaderSpacing)
-                let x = padding + (i % invadersPerRow) * (invaderDim + invaderSpacing)
-                x, y)
+                let row = i / invadersPerRow
+                let col = i % invadersPerRow
+                let size = match row with 0 -> Small | 1 | 2 -> Medium | _ -> Large
+                let w, h = match size with Small -> smallSize | Medium -> mediumSize | Large -> largeSize
+                let lw, _ = largeSize
+                let offset = (lw - w) / 2
+                padding + col * (lw + padding) + offset, padding + row * (h + padding), w, h, size)
         invaderDirection = 1
         bunkers = []
         projectiles = []
@@ -55,23 +46,23 @@ type Message =
 let shuffleInvaders time model = 
     let (newInvaders, valid) = 
         (([], true), model.invaders)
-        ||> List.fold (fun (acc, valid) (x, y) ->
+        ||> List.fold (fun (acc, valid) (x, y, w, h, kind) ->
             if not valid then (acc, valid)
             else
                 let nx = x + invaderShuffleAmount * model.invaderDirection
-                if nx < padding || nx + invaderDim > (resWidth - padding) then acc, false
-                else (nx, y)::acc, true)
+                if nx < padding || nx + w > (resWidth - padding) then acc, false
+                else (nx, y, w, h, kind)::acc, true)
     if not valid then
         { model with 
-            invaders = model.invaders |> List.map (fun (x, y) -> x, y + invaderDim / 2)
+            invaders = model.invaders |> List.map (fun (x, y, w, h, kind) -> x, y + h/2, w, h, kind)
             invaderDirection = model.invaderDirection * -1
             lastShuffle = time
-            shuffleInterval = max 50L (model.shuffleInterval - 50L) }, 
+            shuffleInterval = max 50L (model.shuffleInterval - invaderShuffleIncrease) }, 
         Cmd.none
     else
         let command = 
             let playerRect = rect model.playerX playerY playerDim playerDim
-            if List.exists (fun (x, y) -> (rect x y invaderDim invaderDim).Intersects(playerRect)) model.invaders 
+            if List.exists (fun (x, y, w, h, _) -> (rect x y w h).Intersects(playerRect)) model.invaders 
             then Cmd.ofMsg PlayerHit else Cmd.none
         { model with invaders = newInvaders; lastShuffle = time }, command
 
@@ -83,8 +74,8 @@ let moveProjectiles model =
             let projectileRect = rect x y 1 projectileHeight
             let hitInvaders = 
                 model.invaders 
-                |> List.filter (fun (ix, iy) -> 
-                    projectileRect.Intersects(rect ix iy invaderDim invaderDim))
+                |> List.filter (fun (ix, iy, iw, ih, _) -> 
+                    projectileRect.Intersects(rect ix iy iw ih))
             if hitInvaders <> [] then
                 acc, playerHit, hitInvaders @ invadersHit
             else
@@ -128,8 +119,8 @@ let update message model =
 let view model dispatch =
     [
         yield! model.invaders 
-            |> List.map (fun invaderPos ->
-                colour Colour.Green (invaderDim, invaderDim) invaderPos)
+            |> List.map (fun (x, y, w, h, _) ->
+                colour Colour.Green (w, h) (x, y))
 
         yield colour Colour.Red (playerDim, playerDim) (model.playerX, playerY)
 

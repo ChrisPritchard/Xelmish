@@ -7,10 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="spritemap.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="sprites.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="readme.md" />
+    <Compile Include="Config.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -18,7 +22,6 @@
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
-  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
