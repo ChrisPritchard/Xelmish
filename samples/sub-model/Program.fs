@@ -130,7 +130,7 @@ let main _ =
         assetsToLoad = [
             Font ("connection", "./connection")
         ]
-        showFpsInConsole = true
+        showFpsInConsole = false
     }
 
     Program.mkSimple App.init App.update App.view

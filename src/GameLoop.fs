@@ -68,13 +68,7 @@ type GameLoop (config: GameConfig) as this =
                 mouseState = Mouse.GetState ()
                 gameTime = gameTime }
 
-        if config.showFpsInConsole then 
-            if gameTime.TotalGameTime.TotalMilliseconds - lastFpsUpdate > fpsUpdateInterval then
-                fps <- int (1. / gameTime.ElapsedGameTime.TotalSeconds)
-                lastFpsUpdate <- gameTime.TotalGameTime.TotalMilliseconds
-                printFps fps
-
-    override __.Draw _ =
+    override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear config.clearColour
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
@@ -85,3 +79,9 @@ type GameLoop (config: GameConfig) as this =
             | :? QuitGame -> __.Exit()
 
         spriteBatch.End ()
+        
+        if config.showFpsInConsole then 
+            if gameTime.TotalGameTime.TotalMilliseconds - lastFpsUpdate > fpsUpdateInterval then
+                fps <- int (1. / gameTime.ElapsedGameTime.TotalSeconds)
+                lastFpsUpdate <- gameTime.TotalGameTime.TotalMilliseconds
+                printFps fps
