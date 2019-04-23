@@ -74,27 +74,38 @@ let shuffleInvaders time model =
         { model with invaders = newInvaders; lastShuffle = time }, command
 
 let moveProjectiles model =
+    let invaderTop = model.invaders |> Seq.map (fun (_, y) -> y) |> Seq.min
+
+    let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =
+        let newY = y + v
+        if newY < invaderTop then acc, false, invadersHit
+        else
+            let projectileRect = rect x y 1 projectileHeight
+            let hitInvaders = 
+                model.invaders 
+                |> List.filter (fun (ix, iy) -> 
+                    projectileRect.Intersects(rect ix iy invaderDim invaderDim))
+            if hitInvaders <> [] then
+                acc, playerHit, hitInvaders @ invadersHit
+            else
+                (x, newY, v)::acc, playerHit, invadersHit
+
+    let invaderProjectile (acc, playerHit, invadersHit) (x, y, v) =
+        let newY = y + v
+        if newY > resHeight then acc, false, invadersHit
+        else
+            let overlapsPlayer = 
+                x >= model.playerX && x < model.playerX + playerDim
+                && newY >= playerY
+            if overlapsPlayer then acc, true, invadersHit
+            else (x, newY, v)::acc, playerHit, invadersHit
+
     let newProjectiles, playerHit, invadersHit =
         (([], false, []), model.projectiles)
         ||> List.fold (fun (acc, playerHit, invadersHit) (x, y, v) ->
-            let newY = y + v
-            if newY > resHeight || newY < -projectileHeight then acc, playerHit, invadersHit // out of bounds
-            elif v > 0 then // invader projectile
-                let overlapsPlayer = 
-                    x >= model.playerX && x < model.playerX + playerDim
-                    && newY >= playerY
-                if overlapsPlayer then acc, true, invadersHit
-                else (x, newY, v)::acc, playerHit, invadersHit
-            else // player projectile
-                let projectileRect = rect x y 1 projectileHeight
-                let hitInvaders = 
-                    model.invaders 
-                    |> List.filter (fun (ix, iy) -> 
-                        projectileRect.Intersects(rect ix iy invaderDim invaderDim))
-                if hitInvaders <> [] then
-                    acc, playerHit, hitInvaders @ invadersHit
-                else
-                    (x, newY, v)::acc, playerHit, invadersHit)
+            if v > 0 then invaderProjectile (acc, playerHit, invadersHit) (x, y, v)
+            else playerProjectile (acc, playerHit, invadersHit) (x, y, v))
+            
     let newInvaders = List.except invadersHit model.invaders
     let command = 
         if playerHit then Cmd.ofMsg PlayerHit 
