@@ -38,7 +38,7 @@ module Clock =
             if model.UseUtc then timeFormat model.Time.UtcDateTime 
             else timeFormat model.Time.LocalDateTime
         [
-            yield text 20. Colour.White (0., 0.) timeString (x, y)
+            yield text 20. Colour.Black (0., 0.) timeString (x, y)
             yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x + 550, y)
         ]
 
@@ -130,6 +130,7 @@ let main _ =
         assetsToLoad = [
             Font ("connection", "./connection")
         ]
+        showFpsInConsole = true
     }
 
     Program.mkSimple App.init App.update App.view

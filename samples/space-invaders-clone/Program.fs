@@ -152,6 +152,7 @@ let main _ =
         resolution = Windowed (resWidth, resHeight)
         assetsToLoad = []
         mouseVisible = false
+        showFpsInConsole = true
     }
 
     Program.mkProgram init update view

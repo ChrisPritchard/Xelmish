@@ -54,6 +54,7 @@ let main _ =
         assetsToLoad = [
             Font ("connection", "./connection")
         ]
+        showFpsInConsole = true
     }
 
     Program.mkProgram init update view

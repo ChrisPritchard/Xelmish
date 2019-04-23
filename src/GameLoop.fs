@@ -5,6 +5,7 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 open Model
+open Helpers
 
 type GameLoop (config: GameConfig) as this = 
     inherit Game ()
@@ -20,6 +21,10 @@ type GameLoop (config: GameConfig) as this =
         lastMouseState = Unchecked.defaultof<MouseState>
         gameTime = Unchecked.defaultof<GameTime>
     }
+    
+    let mutable fps = 0
+    let mutable lastFpsUpdate = 0.
+    let fpsUpdateInterval = 200.
 
     let mutable view: Viewable list = []
 
@@ -62,6 +67,12 @@ type GameLoop (config: GameConfig) as this =
                 lastMouseState = inputs.mouseState
                 mouseState = Mouse.GetState ()
                 gameTime = gameTime }
+
+        if config.showFpsInConsole then 
+            if gameTime.TotalGameTime.TotalMilliseconds - lastFpsUpdate > fpsUpdateInterval then
+                fps <- int (1. / gameTime.ElapsedGameTime.TotalSeconds)
+                lastFpsUpdate <- gameTime.TotalGameTime.TotalMilliseconds
+                printFps fps
 
     override __.Draw _ =
         Option.iter this.GraphicsDevice.Clear config.clearColour

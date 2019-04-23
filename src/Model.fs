@@ -22,6 +22,9 @@ type GameConfig = {
     mouseVisible: bool
     /// All assets (like images, fonts etc) that the game will use
     assetsToLoad: Loadable list
+    /// Displays an approximate FPS in the top left corner of the console.
+    /// Note this works best when Elmish console trace is off...otherwise it looks weird
+    showFpsInConsole: bool
 } 
 /// Specifies the resolution to run the game at. For now, this is set once at initiation.
 /// Also, presently fullscreen is not supported.
