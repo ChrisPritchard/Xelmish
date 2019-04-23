@@ -9,7 +9,9 @@ let playerDim = 40
 let playerY = resHeight - (playerDim + padding)
 let playerSpeed = 5
 let invaderDim = 40
-let invaderSpacing = 20
+let invaderSpacing = 10
+let invadersPerRow = 11
+let invaderRows = 5
 let invaderShuffleAmount = 20
 let projectileHeight = 10
 let projectileSpeed = 6
@@ -29,10 +31,10 @@ let init () =
     {
         playerX = resWidth / 2 - (playerDim / 2)
         invaders = 
-            [0..8*5-1] 
+            [0..invadersPerRow*invaderRows-1]
             |> List.map (fun i ->
-                let y = padding + (i / 8) * (invaderDim + invaderSpacing)
-                let x = padding + (i % 8) * (invaderDim + invaderSpacing)
+                let y = padding + (padding/2) + (i / invadersPerRow) * (invaderDim + invaderSpacing)
+                let x = padding + (i % invadersPerRow) * (invaderDim + invaderSpacing)
                 x, y)
         invaderDirection = 1
         bunkers = []
@@ -74,11 +76,9 @@ let shuffleInvaders time model =
         { model with invaders = newInvaders; lastShuffle = time }, command
 
 let moveProjectiles model =
-    let invaderTop = model.invaders |> Seq.map (fun (_, y) -> y) |> Seq.min
-
     let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =
         let newY = y + v
-        if newY < invaderTop then acc, false, invadersHit
+        if newY < 0 then acc, false, invadersHit
         else
             let projectileRect = rect x y 1 projectileHeight
             let hitInvaders = 
