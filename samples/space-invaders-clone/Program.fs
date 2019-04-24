@@ -27,7 +27,7 @@ let init () =
                 let w, h = match size with Small -> smallSize | Medium -> mediumSize | Large -> largeSize
                 let lw, _ = largeSize
                 let offset = (lw - w) / 2
-                padding + col * (lw + padding) + offset, padding + row * (h + padding), w, h, size)
+                padding + col * (lw + invaderSpacing) + offset, padding + row * (h + invaderSpacing), w, h, size)
         invaderDirection = 1
         bunkers = []
         projectiles = []
