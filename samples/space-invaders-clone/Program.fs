@@ -137,10 +137,10 @@ let view model dispatch =
         yield! model.invaders 
             |> List.map (fun (x, y, w, h, kind) ->
                 let key = sprintf "%s-%i" invaderSprites.[kind] model.shuffleMod
-                let colour = match kind with Small -> Colour.Blue | Medium -> Colour.Yellow | Large -> Colour.Red
+                let colour = match kind with Small -> Colour.Cyan | Medium -> Colour.Gold | Large -> Colour.OrangeRed
                 sprite key (w, h) (x, y) colour)
 
-        yield sprite "player" (playerWidth, playerHeight) (model.playerX, playerY) (rgba 0uy 255uy 0uy 255uy)
+        yield sprite "player" (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
 
         yield! model.projectiles
             |> List.map (fun (x, y, _) ->
