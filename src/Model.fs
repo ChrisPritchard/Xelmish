@@ -16,6 +16,8 @@ let rect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
 
 /// Aliased version of XNA spritebatch
 type SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch
+/// Aliased version of gameTime
+type GameTime = Microsoft.Xna.Framework.GameTime
 
 /// The broad config for the game loop, e.g. resolution and clear colour, plus assets to load at startup
 type GameConfig = {

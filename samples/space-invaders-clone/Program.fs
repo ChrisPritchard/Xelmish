@@ -11,6 +11,7 @@ type PlayingModel = {
     projectiles: (int * int * int) list
     lastShuffle: int64
     shuffleInterval: int64
+    shuffleMod: int
     freeze: bool
 } and InvaderKind = Small | Medium | Large
 
@@ -32,6 +33,7 @@ let init () =
         projectiles = []
         lastShuffle = 0L
         shuffleInterval = 500L
+        shuffleMod = 0
         freeze = false
     }, Cmd.none
 
@@ -44,6 +46,7 @@ type Message =
     | Victory
 
 let shuffleInvaders time model = 
+    let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
     let (newInvaders, valid) = 
         (([], true), model.invaders)
         ||> List.fold (fun (acc, valid) (x, y, w, h, kind) ->
@@ -118,9 +121,9 @@ let update message model =
 
 let invaderSprites = 
     [
-        Small, "invader-small-0"
-        Medium, "invader-medium-0"
-        Large, "invader-large-0"
+        Small, "invader-small"
+        Medium, "invader-medium"
+        Large, "invader-large"
     ] |> Map.ofList
 
 let sprite key (w, h) (x, y) colour =
@@ -133,7 +136,9 @@ let view model dispatch =
     [
         yield! model.invaders 
             |> List.map (fun (x, y, w, h, kind) ->
-                sprite (invaderSprites.[kind]) (w, h) (x, y) Colour.White)
+                let key = sprintf "%s-%i" invaderSprites.[kind] model.shuffleMod
+                let colour = match kind with Small -> Colour.Blue | Medium -> Colour.Yellow | Large -> Colour.Red
+                sprite key (w, h) (x, y) colour)
 
         yield sprite "player" (playerWidth, playerHeight) (model.playerX, playerY) (rgba 0uy 255uy 0uy 255uy)
 
