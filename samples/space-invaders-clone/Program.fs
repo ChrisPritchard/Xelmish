@@ -29,7 +29,7 @@ let init () =
                     |> Array.map (fun col -> 
                         padding + col * (largeSize.width + invaderSpacing) + kind.offset)
                 kind, y, xs)
-        invaderDirection = Across (0, 1)
+        invaderDirection = Across (invaderRows - 1, 1)
         bunkers = []
         projectiles = []
         lastShuffle = 0L
@@ -58,7 +58,10 @@ let shuffleInvaders time model =
                     if i <> row then (kind, y, xs) 
                     else
                         kind, y, xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)))
-            newInvaders, Across ((row + 1) % model.invaders.Length, dir)
+            let _, _, xs = model.invaders.[row]
+            if Array.exists (fun x -> x < padding || x + largeSize.width > (resWidth - padding)) xs 
+            then model.invaders, Down (newInvaders.Length - 1, dir * -1)
+            else newInvaders, Across ((if row = 0 then newInvaders.Length - 1 else row - 1), dir)
         | Down (row, nextDir) ->
             let newInvaders = 
                 model.invaders 
@@ -66,7 +69,9 @@ let shuffleInvaders time model =
                     if i <> row then (kind, y, xs) 
                     else
                         kind, y + invaderShuffleAmount, xs)
-            let nextDirection = if row = 0 then Across (0, nextDir) else Down (row - 1, nextDir)
+            let nextDirection = 
+                if row = 0 then Across (newInvaders.Length - 1, nextDir) 
+                else Down (row - 1, nextDir)
             newInvaders, nextDirection
     //    (([], true), model.invaders)
     //    ||> List.fold (fun (acc, valid) (x, y, w, h, kind) ->
@@ -87,7 +92,10 @@ let shuffleInvaders time model =
         //    let playerRect = rect model.playerX playerY playerWidth playerHeight
         //    if List.exists (fun (x, y, w, h, _) -> (rect x y w h).Intersects(playerRect)) model.invaders 
         //    then Cmd.ofMsg PlayerHit else Cmd.none
-    { model with invaders = newInvaders; invaderDirection = newDirection; lastShuffle = time }, Cmd.none
+    { model with 
+        invaders = newInvaders
+        invaderDirection = newDirection
+        lastShuffle = time }, Cmd.none
 
 //let moveProjectiles model =
 //    let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =
