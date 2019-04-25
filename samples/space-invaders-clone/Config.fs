@@ -11,7 +11,7 @@ let padding = 30
 let invaderSpacing = 12
 let invadersPerRow = 11
 let invaderRows = 5
-let invaderShuffleAmount = 10
+let invaderShuffleAmount = 20
 let invaderShuffleIncrease = 25L
 
 let projectileHeight = 10

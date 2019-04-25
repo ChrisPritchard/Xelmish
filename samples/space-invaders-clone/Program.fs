@@ -14,7 +14,7 @@ type PlayingModel = {
     shuffleMod: int
     freeze: bool
 } 
-and ShuffleState = Left of row:int | Right of row:int | Down of row:int
+and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 
 let init () = 
     {
@@ -29,7 +29,7 @@ let init () =
                     |> Array.map (fun col -> 
                         padding + col * (largeSize.width + invaderSpacing) + kind.offset)
                 kind, y, xs)
-        invaderDirection = Right 0
+        invaderDirection = Across (0, 1)
         bunkers = []
         projectiles = []
         lastShuffle = 0L
@@ -46,29 +46,48 @@ type Message =
     | PlayerHit
     | Victory
 
-//let shuffleInvaders time model = 
-//    let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
-//    let (newInvaders, valid) = 
-//        (([], true), model.invaders)
-//        ||> List.fold (fun (acc, valid) (x, y, w, h, kind) ->
-//            if not valid then (acc, valid)
-//            else
-//                let nx = x + invaderShuffleAmount * model.invaderDirection
-//                if nx < padding || nx + w > (resWidth - padding) then acc, false
-//                else (nx, y, w, h, kind)::acc, true)
-//    if not valid then
-//        { model with 
-//            invaders = model.invaders |> List.map (fun (x, y, w, h, kind) -> x, y + h/2, w, h, kind)
-//            invaderDirection = model.invaderDirection * -1
-//            lastShuffle = time
-//            shuffleInterval = max 50L (model.shuffleInterval - invaderShuffleIncrease) }, 
-//        Cmd.none
-//    else
-//        let command = 
-//            let playerRect = rect model.playerX playerY playerWidth playerHeight
-//            if List.exists (fun (x, y, w, h, _) -> (rect x y w h).Intersects(playerRect)) model.invaders 
-//            then Cmd.ofMsg PlayerHit else Cmd.none
-//        { model with invaders = newInvaders; lastShuffle = time }, command
+let shuffleInvaders time model = 
+    let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
+    
+    let (newInvaders, newDirection) = 
+        match model.invaderDirection with
+        | Across (row, dir) ->
+            let newInvaders = 
+                model.invaders 
+                |> Array.mapi (fun i (kind, y, xs) -> 
+                    if i <> row then (kind, y, xs) 
+                    else
+                        kind, y, xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)))
+            newInvaders, Across ((row + 1) % model.invaders.Length, dir)
+        | Down (row, nextDir) ->
+            let newInvaders = 
+                model.invaders 
+                |> Array.mapi (fun i (kind, y, xs) -> 
+                    if i <> row then (kind, y, xs) 
+                    else
+                        kind, y + invaderShuffleAmount, xs)
+            let nextDirection = if row = 0 then Across (0, nextDir) else Down (row - 1, nextDir)
+            newInvaders, nextDirection
+    //    (([], true), model.invaders)
+    //    ||> List.fold (fun (acc, valid) (x, y, w, h, kind) ->
+    //        if not valid then (acc, valid)
+    //        else
+    //            let nx = x + invaderShuffleAmount * model.invaderDirection
+    //            if nx < padding || nx + w > (resWidth - padding) then acc, false
+    //            else (nx, y, w, h, kind)::acc, true)
+    //if not valid then
+    //    { model with 
+    //        invaders = model.invaders |> List.map (fun (x, y, w, h, kind) -> x, y + h/2, w, h, kind)
+    //        invaderDirection = model.invaderDirection * -1
+    //        lastShuffle = time
+    //        shuffleInterval = max 50L (model.shuffleInterval - invaderShuffleIncrease) }, 
+    //    Cmd.none
+    //else
+        //let command = 
+        //    let playerRect = rect model.playerX playerY playerWidth playerHeight
+        //    if List.exists (fun (x, y, w, h, _) -> (rect x y w h).Intersects(playerRect)) model.invaders 
+        //    then Cmd.ofMsg PlayerHit else Cmd.none
+    { model with invaders = newInvaders; invaderDirection = newDirection; lastShuffle = time }, Cmd.none
 
 //let moveProjectiles model =
 //    let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =
@@ -115,7 +134,7 @@ let update message model =
         { model with playerX = newPos }, Cmd.none
     | FireProjectile (x, y, v) ->
         { model with projectiles = (x, y, v)::model.projectiles }, Cmd.none
-    //| ShuffleInvaders time -> shuffleInvaders time model        
+    | ShuffleInvaders time -> shuffleInvaders time model        
     //| MoveProjectiles -> moveProjectiles model
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
@@ -139,9 +158,9 @@ let view model dispatch =
                 colour Colour.White (1, projectileHeight) (x, y))
 
         if not model.freeze then
-            //yield fun _ inputs _ -> 
-            //    if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
-            //        dispatch (ShuffleInvaders inputs.totalGameTime)
+            yield fun _ inputs _ -> 
+                if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
+                    dispatch (ShuffleInvaders inputs.totalGameTime)
 
             //yield fun _ _ _ -> dispatch MoveProjectiles
 
