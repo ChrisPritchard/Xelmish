@@ -154,7 +154,9 @@ let view model dispatch =
             yield fun _ _ _ -> dispatch MoveProjectiles
 
             yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
+            yield whilekeydown Keys.A (fun () -> dispatch (MovePlayer -1))
             yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
+            yield whilekeydown Keys.D (fun () -> dispatch (MovePlayer 1))
 
         yield onkeydown Keys.Space (fun () -> 
             if not (List.exists (fun (_, _, v) -> v < 0) model.projectiles) then
