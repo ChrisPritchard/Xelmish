@@ -1,6 +1,8 @@
 ﻿/// Constants and loaded configuration (e.g. the spritemap) are specified in here
 module Config
 
+open Xelmish.Model
+
 let resWidth = 800
 let resHeight = 600
 
@@ -24,9 +26,52 @@ let spritemap =
 
 let sizeMulti = 2
 
-let smallSize = let (w, h, _, _) = spritemap.["invader-small-0"] in w * sizeMulti, h * sizeMulti
-let mediumSize = let (w, h, _, _) = spritemap.["invader-medium-0"] in w * sizeMulti, h * sizeMulti
-let largeSize = let (w, h, _, _) = spritemap.["invader-large-0"] in w * sizeMulti, h * sizeMulti
+type InvaderKind = {
+    width: int
+    height: int
+    offset: int
+    colour: Colour
+    animations: (int * int * int * int) []
+}
+
+let largeSize = 
+    let width, height = 
+        let w, h, _, _ = spritemap.["invader-large-0"]
+        w * sizeMulti, h * sizeMulti
+    {   width = width
+        height = height
+        offset = 0
+        colour = Colour.OrangeRed
+        animations = [|
+                spritemap.["invader-large-0"]
+                spritemap.["invader-large-1"]
+            |] }
+
+let mediumSize = 
+    let width, height = 
+        let w, h, _, _ = spritemap.["invader-medium-0"]
+        w * sizeMulti, h * sizeMulti
+    {   width = width
+        height = height
+        offset = (largeSize.width - width) / 2
+        colour = Colour.Gold
+        animations = [|
+                spritemap.["invader-medium-0"]
+                spritemap.["invader-medium-1"]
+            |] }
+
+let smallSize = 
+    let width, height = 
+        let w, h, _, _ = spritemap.["invader-small-0"]
+        w * sizeMulti, h * sizeMulti
+    {   width = width
+        height = height
+        offset = (largeSize.width - width) / 2
+        colour = Colour.Cyan
+        animations = [|
+                spritemap.["invader-small-0"]
+                spritemap.["invader-small-1"]
+            |] }
 
 let animationSpeed = 100L
 
