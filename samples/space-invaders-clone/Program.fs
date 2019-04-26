@@ -92,43 +92,46 @@ let rec shuffleInvaders time model =
             invaderDirection = newDirection
             lastShuffle = time }, command
 
-//let moveProjectiles model =
-//    let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =
-//        let newY = y + v
-//        if newY < 0 then acc, false, invadersHit
-//        else
-//            let projectileRect = rect x y 1 projectileHeight
-//            let hitInvaders = 
-//                model.invaders 
-//                |> List.filter (fun (ix, iy, iw, ih, _) -> 
-//                    projectileRect.Intersects(rect ix iy iw ih))
-//            if hitInvaders <> [] then
-//                acc, playerHit, hitInvaders @ invadersHit
-//            else
-//                (x, newY, v)::acc, playerHit, invadersHit
+let moveProjectiles model =
+    let playerProjectile (acc, playerHit, invadersHit) (projectile: Projectile) =
+        let next = { projectile with y = projectile.y + projectile.velocity }
+        if next.y < 0 then acc, false, invadersHit
+        else
+            //let projectileRect = rect next.x next.y 1 projectileHeight
+            //let hitInvaders = 
+            //    model.invaders 
+            //    |> List.filter (fun (ix, iy, iw, ih, _) -> 
+            //        projectileRect.Intersects(rect ix iy iw ih))
+            //if hitInvaders <> [] then
+            //    acc, playerHit, hitInvaders @ invadersHit
+            //else
+            next::acc, playerHit, invadersHit
 
-//    let invaderProjectile (acc, playerHit, invadersHit) (x, y, v) =
-//        let newY = y + v
-//        if newY > resHeight then acc, false, invadersHit
-//        else
-//            let overlapsPlayer = 
-//                x >= model.playerX && x < model.playerX + playerWidth
-//                && newY >= playerY
-//            if overlapsPlayer then acc, true, invadersHit
-//            else (x, newY, v)::acc, playerHit, invadersHit
+    let invaderProjectile (acc, playerHit, invadersHit) (projectile: Projectile) =
+        let next = { projectile with y = projectile.y + projectile.velocity }
+        if next.y > resHeight then acc, playerHit, invadersHit
+        else
+            let overlapsPlayer = 
+                projectile.x >= model.playerX && projectile.x < model.playerX + playerWidth
+                && next.y >= playerY
+            if overlapsPlayer then acc, true, invadersHit
+            else next::acc, playerHit, invadersHit
 
-//    let newProjectiles, playerHit, invadersHit =
-//        (([], false, []), model.projectiles)
-//        ||> List.fold (fun (acc, playerHit, invadersHit) (x, y, v) ->
-//            if v > 0 then invaderProjectile (acc, playerHit, invadersHit) (x, y, v)
-//            else playerProjectile (acc, playerHit, invadersHit) (x, y, v))
+    let newProjectiles, playerHit, invadersHit =
+        (([], false, []), model.projectiles)
+        ||> List.fold (fun (acc, playerHit, invadersHit) projectile ->
+            if projectile.velocity > 0 then 
+                invaderProjectile (acc, playerHit, invadersHit) projectile
+            else 
+                playerProjectile (acc, playerHit, invadersHit) projectile)
             
-//    let newInvaders = List.except invadersHit model.invaders
-//    let command = 
-//        if playerHit then Cmd.ofMsg PlayerHit 
-//        elif newInvaders = [] then Cmd.ofMsg Victory 
-//        else Cmd.none
-//    { model with projectiles = newProjectiles; invaders = newInvaders }, command
+    //let newInvaders = List.except invadersHit model.invaders
+    let command = 
+        if playerHit then Cmd.ofMsg PlayerHit 
+        //elif newInvaders = [] then Cmd.ofMsg Victory 
+        else Cmd.none
+    //{ model with projectiles = newProjectiles; invaders = newInvaders }, command
+    { model with projectiles = newProjectiles }, command
 
 let update message model =
     match message with
@@ -138,7 +141,7 @@ let update message model =
     | FireProjectile projectile ->
         { model with projectiles = projectile::model.projectiles }, Cmd.none
     | ShuffleInvaders time -> shuffleInvaders time model        
-    //| MoveProjectiles -> moveProjectiles model
+    | MoveProjectiles -> moveProjectiles model
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
     
@@ -165,7 +168,7 @@ let view model dispatch =
                 if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders inputs.totalGameTime)
 
-            //yield fun _ _ _ -> dispatch MoveProjectiles
+            yield fun _ _ _ -> dispatch MoveProjectiles
 
             yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
             yield whilekeydown Keys.A (fun () -> dispatch (MovePlayer -1))
