@@ -5,7 +5,7 @@ open Config
 
 type PlayingModel = {
     playerX: int
-    invaders: (InvaderKind * int * int []) []
+    invaders: Row []
     invaderDirection: ShuffleState
     bunkers: (int * int) list
     projectiles: (int * int * int) list
@@ -14,6 +14,7 @@ type PlayingModel = {
     shuffleMod: int
     freeze: bool
 } 
+and Row = { kind: InvaderKind; y: int; xs: int [] }
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 
 let init () = 
@@ -21,14 +22,16 @@ let init () =
         playerX = resWidth / 2 - (playerWidth / 2)
         invaders = 
             [|0..invaderRows-1|]
-            |> Array.map (fun row ->
+            |> Array.map (fun row -> 
                 let kind = match row with 0 -> smallSize | 1 | 2 -> mediumSize | _ -> largeSize
-                let y = padding + row * (kind.height + invaderSpacing)
-                let xs = 
-                    [|0..invadersPerRow-1|] 
-                    |> Array.map (fun col -> 
-                        padding + col * (largeSize.width + invaderSpacing) + kind.offset)
-                kind, y, xs)
+                {
+                    kind = kind
+                    y = padding + row * (kind.height + invaderSpacing)
+                    xs = 
+                        [|0..invadersPerRow-1|] 
+                        |> Array.map (fun col -> 
+                            padding + col * (largeSize.width + invaderSpacing) + kind.offset) 
+                })
         invaderDirection = Across (invaderRows - 1, 1)
         bunkers = []
         projectiles = []
@@ -51,27 +54,26 @@ let rec shuffleInvaders time model =
     
     let (newInvaders, newDirection) = 
         match model.invaderDirection with
-        | Across (row, dir) ->
+        | Across (targetRow, dir) ->
             let newInvaders = 
                 model.invaders 
-                |> Array.mapi (fun i (kind, y, xs) -> 
-                    if i <> row then (kind, y, xs) 
+                |> Array.mapi (fun i row -> 
+                    if i <> targetRow then row
                     else
-                        kind, y, xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)))
-            let _, _, xs = newInvaders.[row]
-            if Array.exists (fun x -> x < padding || x + largeSize.width > (resWidth - padding)) xs 
+                        { row with xs = row.xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)) })
+            if newInvaders.[targetRow].xs |> Array.exists (fun x -> x < padding || x + largeSize.width > (resWidth - padding))
             then model.invaders, Down (model.invaders.Length - 1, dir * -1)
-            else newInvaders, Across ((if row = 0 then newInvaders.Length - 1 else row - 1), dir)
-        | Down (row, nextDir) ->
+            else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
+        | Down (targetRow, nextDir) ->
             let newInvaders = 
                 model.invaders 
-                |> Array.mapi (fun i (kind, y, xs) -> 
-                    if i <> row then (kind, y, xs) 
+                |> Array.mapi (fun i row -> 
+                    if i <> targetRow then row
                     else
-                        kind, y + invaderShuffleAmount, xs)
+                        { row with y = row.y + invaderShuffleAmount })
             let nextDirection = 
-                if row = 0 then Across (newInvaders.Length - 1, nextDir) 
-                else Down (row - 1, nextDir)
+                if targetRow = 0 then Across (newInvaders.Length - 1, nextDir) 
+                else Down (targetRow - 1, nextDir)
             newInvaders, nextDirection
 
     match model.invaderDirection, newDirection with
@@ -81,8 +83,8 @@ let rec shuffleInvaders time model =
             let playerRect = rect model.playerX playerY playerWidth playerHeight
             let playerHit =
                 newInvaders 
-                |> Seq.collect (fun (kind, y, xs) -> 
-                    xs |> Seq.map (fun x -> rect x y kind.width kind.height))
+                |> Seq.collect (fun row -> 
+                    row.xs |> Seq.map (fun x -> rect x row.y row.kind.width row.kind.height))
                 |> Seq.exists (fun (rect: Rectangle) -> rect.Intersects playerRect)
             if playerHit then Cmd.ofMsg PlayerHit else Cmd.none
 
@@ -149,9 +151,9 @@ let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
 let view model dispatch =
     [
         yield! model.invaders 
-            |> Array.collect (fun (kind, y, xs) ->
-                let spriteRect = kind.animations.[model.shuffleMod]
-                xs |> Array.map (fun x -> sprite spriteRect (kind.width, kind.height) (x, y) kind.colour))
+            |> Array.collect (fun row ->
+                let spriteRect = row.kind.animations.[model.shuffleMod]
+                row.xs |> Array.map (fun x -> sprite spriteRect (row.kind.width, row.kind.height) (x, row.y) row.kind.colour))
 
         yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
 
