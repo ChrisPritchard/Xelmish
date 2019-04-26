@@ -58,7 +58,7 @@ let shuffleInvaders time model =
                     if i <> row then (kind, y, xs) 
                     else
                         kind, y, xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)))
-            let _, _, xs = model.invaders.[row]
+            let _, _, xs = newInvaders.[row]
             if Array.exists (fun x -> x < padding || x + largeSize.width > (resWidth - padding)) xs 
             then model.invaders, Down (model.invaders.Length - 1, dir * -1)
             else newInvaders, Across ((if row = 0 then newInvaders.Length - 1 else row - 1), dir)
