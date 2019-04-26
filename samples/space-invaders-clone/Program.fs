@@ -7,7 +7,6 @@ type PlayingModel = {
     playerX: int
     invaders: Row []
     invaderDirection: ShuffleState
-    bunkers: (int * int) list
     projectiles: (int * int * int) list
     lastShuffle: int64
     shuffleInterval: int64
@@ -33,7 +32,6 @@ let init () =
                             padding + col * (largeSize.width + invaderSpacing) + kind.offset) 
                 })
         invaderDirection = Across (invaderRows - 1, 1)
-        bunkers = []
         projectiles = []
         lastShuffle = 0L
         shuffleInterval = 500L
