@@ -7,7 +7,7 @@ type PlayingModel = {
     playerX: int
     invaders: Row []
     invaderDirection: ShuffleState
-    projectiles: (int * int * int) list
+    projectiles: Projectile list
     lastShuffle: int64
     shuffleInterval: int64
     shuffleMod: int
@@ -15,6 +15,7 @@ type PlayingModel = {
 } 
 and Row = { kind: InvaderKind; y: int; xs: int [] }
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
+and Projectile = { x: int; y: int; velocity: int }
 
 let init () = 
     {
@@ -41,7 +42,7 @@ let init () =
 
 type Message = 
     | MovePlayer of dir: int
-    | FireProjectile of x: int * y: int * velocity: int
+    | FireProjectile of Projectile
     | ShuffleInvaders of int64
     | MoveProjectiles
     | PlayerHit
@@ -134,8 +135,8 @@ let update message model =
     | MovePlayer dir ->
         let newPos = min (resWidth - padding - playerWidth) (max padding (model.playerX + dir * playerSpeed))
         { model with playerX = newPos }, Cmd.none
-    | FireProjectile (x, y, v) ->
-        { model with projectiles = (x, y, v)::model.projectiles }, Cmd.none
+    | FireProjectile projectile ->
+        { model with projectiles = projectile::model.projectiles }, Cmd.none
     | ShuffleInvaders time -> shuffleInvaders time model        
     //| MoveProjectiles -> moveProjectiles model
     | PlayerHit -> { model with freeze = true }, Cmd.none
@@ -156,8 +157,8 @@ let view model dispatch =
         yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
 
         yield! model.projectiles
-            |> List.map (fun (x, y, _) ->
-                colour Colour.White (1, projectileHeight) (x, y))
+            |> List.map (fun projectile ->
+                colour Colour.White (1, projectileHeight) (projectile.x, projectile.y))
 
         if not model.freeze then
             yield fun _ inputs _ -> 
@@ -172,10 +173,13 @@ let view model dispatch =
             yield whilekeydown Keys.D (fun () -> dispatch (MovePlayer 1))
 
         yield onkeydown Keys.Space (fun () -> 
-            if not (List.exists (fun (_, _, v) -> v < 0) model.projectiles) then
-                let x = model.playerX + playerWidth / 2
-                let y = resHeight - (playerHeight + padding) - projectileHeight - 1
-                dispatch (FireProjectile (x, y, -projectileSpeed)))
+            // check that the player hasn't already fired a projectile before adding a new one
+            if not (model.projectiles |> List.exists (fun projectile -> projectile.velocity < 0)) then
+                {
+                    x = model.playerX + playerWidth / 2
+                    y = resHeight - (playerHeight + padding) - projectileHeight - 1
+                    velocity = -projectileSpeed
+                } |> FireProjectile |> dispatch)
 
         yield onkeydown Keys.Escape exit
     ]
