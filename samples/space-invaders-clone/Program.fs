@@ -73,29 +73,20 @@ let shuffleInvaders time model =
                 if row = 0 then Across (newInvaders.Length - 1, nextDir) 
                 else Down (row - 1, nextDir)
             newInvaders, nextDirection
-    //    (([], true), model.invaders)
-    //    ||> List.fold (fun (acc, valid) (x, y, w, h, kind) ->
-    //        if not valid then (acc, valid)
-    //        else
-    //            let nx = x + invaderShuffleAmount * model.invaderDirection
-    //            if nx < padding || nx + w > (resWidth - padding) then acc, false
-    //            else (nx, y, w, h, kind)::acc, true)
-    //if not valid then
-    //    { model with 
-    //        invaders = model.invaders |> List.map (fun (x, y, w, h, kind) -> x, y + h/2, w, h, kind)
-    //        invaderDirection = model.invaderDirection * -1
-    //        lastShuffle = time
-    //        shuffleInterval = max 50L (model.shuffleInterval - invaderShuffleIncrease) }, 
-    //    Cmd.none
-    //else
-        //let command = 
-        //    let playerRect = rect model.playerX playerY playerWidth playerHeight
-        //    if List.exists (fun (x, y, w, h, _) -> (rect x y w h).Intersects(playerRect)) model.invaders 
-        //    then Cmd.ofMsg PlayerHit else Cmd.none
+
+    let command = 
+        let playerRect = rect model.playerX playerY playerWidth playerHeight
+        let playerHit =
+            newInvaders 
+            |> Seq.collect (fun (kind, y, xs) -> 
+                xs |> Seq.map (fun x -> rect x y kind.width kind.height))
+            |> Seq.exists (fun (rect: Rectangle) -> rect.Intersects playerRect)
+        if playerHit then Cmd.ofMsg PlayerHit else Cmd.none
+
     { model with 
         invaders = newInvaders
         invaderDirection = newDirection
-        lastShuffle = time }, Cmd.none
+        lastShuffle = time }, command
 
 //let moveProjectiles model =
 //    let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =

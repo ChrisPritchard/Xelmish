@@ -4,20 +4,18 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
 
-/// Possible keys on the keyboard - aliased here so games don't need to understand/reference XNA namespaces
+// Aliases here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
+
 type Keys = Microsoft.Xna.Framework.Input.Keys
-/// Colours - aliased here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
 type Colour = Microsoft.Xna.Framework.Color
+type Rectangle = Microsoft.Xna.Framework.Rectangle
+type SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch
+type GameTime = Microsoft.Xna.Framework.GameTime
 
 let rgba (r: byte) (g: byte) (b: byte) (a: byte) = Colour (r, g, b, a)
 
 /// Creates an xna rect from x, y, w, h values
-let rect x y w h = new Microsoft.Xna.Framework.Rectangle(x, y, w, h)
-
-/// Aliased version of XNA spritebatch
-type SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch
-/// Aliased version of gameTime
-type GameTime = Microsoft.Xna.Framework.GameTime
+let rect x y w h = new Rectangle(x, y, w, h)
 
 /// The broad config for the game loop, e.g. resolution and clear colour, plus assets to load at startup
 type GameConfig = {
