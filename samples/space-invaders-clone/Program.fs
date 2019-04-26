@@ -46,7 +46,7 @@ type Message =
     | PlayerHit
     | Victory
 
-let shuffleInvaders time model = 
+let rec shuffleInvaders time model = 
     let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
     
     let (newInvaders, newDirection) = 
@@ -74,19 +74,22 @@ let shuffleInvaders time model =
                 else Down (row - 1, nextDir)
             newInvaders, nextDirection
 
-    let command = 
-        let playerRect = rect model.playerX playerY playerWidth playerHeight
-        let playerHit =
-            newInvaders 
-            |> Seq.collect (fun (kind, y, xs) -> 
-                xs |> Seq.map (fun x -> rect x y kind.width kind.height))
-            |> Seq.exists (fun (rect: Rectangle) -> rect.Intersects playerRect)
-        if playerHit then Cmd.ofMsg PlayerHit else Cmd.none
+    match model.invaderDirection, newDirection with
+    | Across _, Down _ -> shuffleInvaders time { model with invaderDirection = newDirection }
+    | _ ->
+        let command = 
+            let playerRect = rect model.playerX playerY playerWidth playerHeight
+            let playerHit =
+                newInvaders 
+                |> Seq.collect (fun (kind, y, xs) -> 
+                    xs |> Seq.map (fun x -> rect x y kind.width kind.height))
+                |> Seq.exists (fun (rect: Rectangle) -> rect.Intersects playerRect)
+            if playerHit then Cmd.ofMsg PlayerHit else Cmd.none
 
-    { model with 
-        invaders = newInvaders
-        invaderDirection = newDirection
-        lastShuffle = time }, command
+        { model with 
+            invaders = newInvaders
+            invaderDirection = newDirection
+            lastShuffle = time }, command
 
 //let moveProjectiles model =
 //    let playerProjectile (acc, playerHit, invadersHit) (x, y, v) =
