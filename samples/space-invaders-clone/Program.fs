@@ -53,6 +53,7 @@ type Message =
     | Victory
 
 let rec shuffleInvaders time model = 
+    // the shuffle mod is used for animations
     let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
     
     let (newInvaders, newDirection) = 
@@ -64,6 +65,7 @@ let rec shuffleInvaders time model =
                     if i <> targetRow then row
                     else
                         { row with xs = row.xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)) })
+            // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
             if newInvaders.[targetRow].xs |> Array.exists (fun x -> x < padding || x + largeSize.width > (resWidth - padding))
             then model.invaders, Down (model.invaders.Length - 1, dir * -1)
             else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
@@ -80,8 +82,11 @@ let rec shuffleInvaders time model =
             newInvaders, nextDirection
 
     match model.invaderDirection, newDirection with
-    | Across _, Down _ -> shuffleInvaders time { model with invaderDirection = newDirection }
+    | Across _, Down _ -> 
+        // immediately do another shuffle, to eliminate the pause between going from across to down.
+        shuffleInvaders time { model with invaderDirection = newDirection }
     | _ ->
+        // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
             let playerRect = rect model.playerX playerY playerWidth playerHeight
             let playerHit =
