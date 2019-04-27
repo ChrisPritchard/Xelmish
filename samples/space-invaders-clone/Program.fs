@@ -18,6 +18,17 @@ and Row = { kind: InvaderKind; y: int; xs: int [] }
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 and Projectile = { x: int; y: int }
 
+let invaderImpact x y w h model =
+    let testRect = rect x y w h
+    model.invaders 
+    |> Seq.indexed 
+    |> Seq.collect (fun (r, row) -> 
+        row.xs 
+        |> Seq.indexed 
+        |> Seq.map (fun (c, x) -> (r, c), rect x row.y row.kind.width row.kind.height))
+    |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
+    |> Option.map fst
+
 let init () = 
     {
         playerX = resWidth / 2 - (playerWidth / 2)
@@ -88,60 +99,42 @@ let rec shuffleInvaders time model =
     | _ ->
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
-            let playerRect = rect model.playerX playerY playerWidth playerHeight
-            let playerHit =
-                newInvaders 
-                |> Seq.collect (fun row -> 
-                    row.xs |> Seq.map (fun x -> rect x row.y row.kind.width row.kind.height))
-                |> Seq.exists (fun (rect: Rectangle) -> rect.Intersects playerRect)
-            if playerHit then Cmd.ofMsg PlayerHit else Cmd.none
-
+            let playerHit = invaderImpact model.playerX playerY playerWidth playerHeight model
+            if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.none
         { model with 
             invaders = newInvaders
             invaderDirection = newDirection
             lastShuffle = time }, command
 
 let moveProjectiles model =
-    model, Cmd.none
-//    let playerProjectile (acc, playerHit, invadersHit) (projectile: Projectile) =
-//        let next = { projectile with y = projectile.y + projectile.velocity }
-//        if next.y < 0 then acc, false, invadersHit
-//        else
-//            //let projectileRect = rect next.x next.y 1 projectileHeight
-//            //let hitInvaders = 
-//            //    model.invaders 
-//            //    |> List.filter (fun (ix, iy, iw, ih, _) -> 
-//            //        projectileRect.Intersects(rect ix iy iw ih))
-//            //if hitInvaders <> [] then
-//            //    acc, playerHit, hitInvaders @ invadersHit
-//            //else
-//            next::acc, playerHit, invadersHit
 
-//    let invaderProjectile (acc, playerHit, invadersHit) (projectile: Projectile) =
-//        let next = { projectile with y = projectile.y + projectile.velocity }
-//        if next.y > resHeight then acc, playerHit, invadersHit
-//        else
-//            let overlapsPlayer = 
-//                projectile.x >= model.playerX && projectile.x < model.playerX + playerWidth
-//                && next.y >= playerY
-//            if overlapsPlayer then acc, true, invadersHit
-//            else next::acc, playerHit, invadersHit
+    let nextPlayerProjectile, cmdResult =
+        match model.playerProjectile with
+        | None -> None, Cmd.none
+        | Some p ->
+            let next = { p with y = p.y - projectileSpeed }
+            if next.y < 0 then None, Cmd.none
+            else
+                match invaderImpact p.x p.y 1 projectileHeight model with
+                | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex)
+                | None -> Some next, Cmd.none
 
-//    let newProjectiles, playerHit, invadersHit =
-//        (([], false, []), model.projectiles)
-//        ||> List.fold (fun (acc, playerHit, invadersHit) projectile ->
-//            if projectile.velocity > 0 then 
-//                invaderProjectile (acc, playerHit, invadersHit) projectile
-//            else 
-//                playerProjectile (acc, playerHit, invadersHit) projectile)
-            
-//    //let newInvaders = List.except invadersHit model.invaders
-//    let command = 
-//        if playerHit then Cmd.ofMsg PlayerHit 
-//        //elif newInvaders = [] then Cmd.ofMsg Victory 
-//        else Cmd.none
-//    //{ model with projectiles = newProjectiles; invaders = newInvaders }, command
-//    { model with projectiles = newProjectiles }, command
+    let nextInvaderProjectiles, cmdResult =
+        (([], cmdResult), model.invaderProjectiles)
+        ||> List.fold (fun (acc, cmdResult) p ->
+            let next = { p with y = p.y + projectileSpeed }
+            if next.y > resHeight then acc, cmdResult
+            else
+                if 
+                    p.x >= model.playerX && p.x < model.playerX + playerWidth
+                    && p.y >= playerY && p.y < playerY + playerHeight then
+                        acc, Cmd.batch [cmdResult; Cmd.ofMsg PlayerHit]
+                else
+                    next::acc, cmdResult)
+
+    { model with 
+        playerProjectile = nextPlayerProjectile 
+        invaderProjectiles = nextInvaderProjectiles }, cmdResult
 
 let update message model =
     match message with
