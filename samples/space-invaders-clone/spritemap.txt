@@ -4,5 +4,7 @@ invader-medium-0	22,16		74,225
 invader-medium-1	22,16		107,225
 invader-large-0		24,16		147,226
 invader-large-1		24,16		179,226
+invader-death		26,16		437,276
 mothership			48,21		215,224
 player				26,16		277,228
+player-death		30,16		367,275
