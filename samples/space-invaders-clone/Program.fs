@@ -12,11 +12,13 @@ type PlayingModel = {
     lastShuffle: int64
     shuffleInterval: int64
     shuffleMod: int
+    explosions: Explosion list
     freeze: bool
 } 
 and Row = { kind: InvaderKind; y: int; xs: int [] }
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 and Projectile = { x: int; y: int }
+and Explosion = { x: int; y: int; life: int }
 
 let invaderImpact x y w h model =
     let testRect = rect x y w h
@@ -50,6 +52,7 @@ let init () =
         lastShuffle = 0L
         shuffleInterval = 500L
         shuffleMod = 0
+        explosions = []
         freeze = false
     }, Cmd.none
 
@@ -97,17 +100,25 @@ let rec shuffleInvaders time model =
         // immediately do another shuffle, to eliminate the pause between going from across to down.
         shuffleInvaders time { model with invaderDirection = newDirection }
     | _ ->
+        // update explosions
+        let newExplosions = 
+            model.explosions 
+            |> List.map (fun explosion -> 
+                { explosion with life = explosion.life - 1 })
+            |> List.filter (fun explosion -> explosion.life > 0)
+
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
             let playerHit = invaderImpact model.playerX playerY playerWidth playerHeight model
             if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.none
+
         { model with 
             invaders = newInvaders
             invaderDirection = newDirection
+            explosions = newExplosions
             lastShuffle = time }, command
 
 let moveProjectiles model =
-
     let nextPlayerProjectile, cmdResult =
         match model.playerProjectile with
         | None -> None, Cmd.none
@@ -136,6 +147,28 @@ let moveProjectiles model =
         playerProjectile = nextPlayerProjectile 
         invaderProjectiles = nextInvaderProjectiles }, cmdResult
 
+let destroyInvader targetRow index model =
+    let xOffset = model.invaders.[targetRow].kind.width / 2 - explosionWidth / 2
+    let newExplosion = 
+        { x = model.invaders.[targetRow].xs.[index] + xOffset
+          y = model.invaders.[targetRow].y
+          life = explosionDuration }
+
+    let newInvaders =
+        if model.invaders.[targetRow].xs.Length = 1 then 
+            Array.append model.invaders.[0..targetRow - 1] model.invaders.[targetRow + 1..]
+        else
+            model.invaders 
+            |> Array.mapi (fun i row ->
+                if i <> targetRow then row
+                else
+                    let newXs = Array.append row.xs.[0..index - 1] row.xs.[index + 1..]
+                    { row with xs = newXs })
+
+    { model with
+        invaders = newInvaders
+        explosions = newExplosion::model.explosions }, Cmd.none
+        
 let update message model =
     match message with
     | MovePlayer dir ->
@@ -151,7 +184,7 @@ let update message model =
         { model with invaderProjectiles = newProjectiles }, Cmd.none
     | ShuffleInvaders time -> shuffleInvaders time model        
     | MoveProjectiles -> moveProjectiles model
-    | InvaderHit (row, index) -> model, Cmd.none // TODO
+    | InvaderHit (row, index) -> destroyInvader row index model
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
     
@@ -165,7 +198,17 @@ let view model dispatch =
         yield! model.invaders 
             |> Array.collect (fun row ->
                 let spriteRect = row.kind.animations.[model.shuffleMod]
-                row.xs |> Array.map (fun x -> sprite spriteRect (row.kind.width, row.kind.height) (x, row.y) row.kind.colour))
+                row.xs 
+                |> Array.map (fun x -> 
+                    sprite spriteRect 
+                        (row.kind.width, row.kind.height) 
+                        (x, row.y) row.kind.colour))
+
+        yield! model.explosions
+            |> List.map (fun explosion ->
+                sprite spritemap.["invader-death"] 
+                    (explosionWidth, explosionHeight) 
+                    (explosion.x, explosion.y) Colour.White)
 
         yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
 

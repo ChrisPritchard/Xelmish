@@ -75,6 +75,14 @@ let smallSize =
 
 let animationSpeed = 100L
 
-let playerWidth, playerHeight = let (w, h, _, _) = spritemap.["player"] in w * sizeMulti, h * sizeMulti
+let playerWidth, playerHeight = 
+    let (w, h, _, _) = spritemap.["player"]
+    w * sizeMulti, h * sizeMulti
+
 let playerY = resHeight - (playerHeight + padding)
 let playerSpeed = 5
+
+let explosionWidth, explosionHeight = 
+    let (w, h, _, _) = spritemap.["invader-death"]
+    w * sizeMulti, h * sizeMulti
+let explosionDuration = 1
