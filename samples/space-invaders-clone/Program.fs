@@ -165,8 +165,17 @@ let destroyInvader targetRow index model =
                     let newXs = Array.append row.xs.[0..index - 1] row.xs.[index + 1..]
                     { row with xs = newXs })
 
+    // if an invader was the last of the last row, and the current shuffle index is that row,
+    // then update the shuffle index to avoid a out of range exception
+    let newInvaderDirection =
+        match model.invaderDirection with
+        | Across (n, dir) when n = newInvaders.Length -> Across (n - 1, dir)
+        | Down (n, nextDir) when n = newInvaders.Length -> Down (n - 1, nextDir)
+        | other -> other
+
     { model with
         invaders = newInvaders
+        invaderDirection = newInvaderDirection
         explosions = newExplosion::model.explosions }, Cmd.none
         
 let update message model =
