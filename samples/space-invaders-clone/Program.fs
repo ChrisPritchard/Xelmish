@@ -176,7 +176,8 @@ let destroyInvader targetRow index model =
     { model with
         invaders = newInvaders
         invaderDirection = newInvaderDirection
-        explosions = newExplosion::model.explosions }, Cmd.none
+        explosions = newExplosion::model.explosions
+        shuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease) }, Cmd.none
         
 let update message model =
     match message with
@@ -233,7 +234,7 @@ let view model dispatch =
 
         if not model.freeze then
             yield fun _ inputs _ -> 
-                if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
+                if not (Array.isEmpty model.invaders) && inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders inputs.totalGameTime)
 
             yield fun _ _ _ -> dispatch MoveProjectiles

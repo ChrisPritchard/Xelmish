@@ -14,6 +14,9 @@ let invaderRows = 5
 let invaderShuffleAmount = 20
 let invaderShuffleIncrease = 25L
 
+let shuffleDecrease = 20L
+let minShuffle = 50L
+
 let projectileHeight = 10
 let projectileSpeed = 6
 
