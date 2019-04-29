@@ -61,7 +61,7 @@ let init () =
 type Message = 
     | MovePlayer of dir: int
     | PlayerShoot
-    | InvaderShoot of x: int * y: int
+    | InvaderShoot
     | ShuffleInvaders of int64
     | MoveProjectiles
     | InvaderHit of row: int * index: int
@@ -119,6 +119,11 @@ let rec shuffleInvaders time model =
             invaderDirection = newDirection
             explosions = newExplosions
             lastShuffle = time }, command
+
+let shootFromInvader model = 
+    //let newProjectiles = { x = x; y = y }::model.invaderProjectiles
+    //{ model with invaderProjectiles = newProjectiles }, Cmd.none
+    model, Cmd.none
 
 let moveProjectiles model =
     let nextPlayerProjectile, cmdResult =
@@ -194,9 +199,7 @@ let update message model =
             {   x = model.playerX + playerWidth / 2
                 y = resHeight - (playerHeight + padding) - projectileHeight - 1 }
         { model with playerProjectile = Some newProjectile }, Cmd.none
-    | InvaderShoot (x, y) ->
-        let newProjectiles = { x = x; y = y }::model.invaderProjectiles
-        { model with invaderProjectiles = newProjectiles }, Cmd.none
+    | InvaderShoot -> shootFromInvader model
     | ShuffleInvaders time -> shuffleInvaders time model        
     | MoveProjectiles -> moveProjectiles model
     | InvaderHit (row, index) -> destroyInvader row index model
@@ -209,6 +212,10 @@ let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
         spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour)
 
 let text = text "connection" 24. Colour.White (0., 0.)
+
+let random = System.Random()
+let random chance =
+    random.NextDouble () <= chance
 
 let view model dispatch =
     [
@@ -236,16 +243,22 @@ let view model dispatch =
             |> List.map (fun projectile ->
                 colour Colour.White (1, projectileHeight) (projectile.x, projectile.y))
 
-        match model.playerProjectile with
-            | Some p -> 
-                yield colour Colour.White (1, projectileHeight) (p.x, p.y)
-            | _ -> 
-                yield onkeydown Keys.Space (fun () -> dispatch PlayerShoot)
-
         if not model.freeze then
             yield fun _ inputs _ -> 
                 if not (Array.isEmpty model.invaders) && inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders inputs.totalGameTime)
+            
+            match model.playerProjectile with
+                | Some p -> 
+                    yield colour Colour.White (1, projectileHeight) (p.x, p.y)
+                | _ -> 
+                    yield onkeydown Keys.Space (fun () -> dispatch PlayerShoot)
+
+            yield fun _ _ _ -> 
+                if not (Array.isEmpty model.invaders)
+                    && List.length model.invaderProjectiles < maxInvaderProjectiles
+                    && random invaderShootChance then
+                        dispatch InvaderShoot
 
             yield fun _ _ _ -> dispatch MoveProjectiles
 

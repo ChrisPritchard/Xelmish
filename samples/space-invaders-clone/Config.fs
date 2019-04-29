@@ -21,6 +21,9 @@ let minShuffle = 50L
 let projectileHeight = 10
 let projectileSpeed = 6
 
+let maxInvaderProjectiles = 3
+let invaderShootChance = 0.3
+
 let spritemap = 
     System.IO.File.ReadAllLines "./spritemap.txt"
     |> Array.map (fun line -> 
