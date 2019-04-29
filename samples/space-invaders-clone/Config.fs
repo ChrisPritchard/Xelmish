@@ -7,6 +7,7 @@ let resWidth = 800
 let resHeight = 600
 
 let padding = 30
+let invaderTop = padding * 3
 
 let invaderSpacing = 12
 let invadersPerRow = 11

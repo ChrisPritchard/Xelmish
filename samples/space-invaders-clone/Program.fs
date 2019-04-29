@@ -42,7 +42,7 @@ let init () =
                 let kind = match row with 0 -> smallSize | 1 | 2 -> mediumSize | _ -> largeSize
                 {
                     kind = kind
-                    y = padding + row * (kind.height + invaderSpacing)
+                    y = invaderTop + row * (kind.height + invaderSpacing)
                     xs = 
                         [|0..invadersPerRow-1|] 
                         |> Array.map (fun col -> 
