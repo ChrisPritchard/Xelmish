@@ -14,6 +14,7 @@ type PlayingModel = {
     shuffleMod: int
     explosions: Explosion list
     freeze: bool
+    score: int
 } 
 and Row = { kind: InvaderKind; y: int; xs: int [] }
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
@@ -54,6 +55,7 @@ let init () =
         shuffleMod = 0
         explosions = []
         freeze = false
+        score = 0
     }, Cmd.none
 
 type Message = 
@@ -203,8 +205,13 @@ let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
         let texture = loadedAssets.textures.["sprites"]
         spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour)
 
+let text = text "connection" 24. Colour.White (0., 0.)
+
 let view model dispatch =
     [
+        yield text "SCORE" (10, 10)
+        yield text (sprintf "%04i" model.score) (10, 44)
+
         yield! model.invaders 
             |> Array.collect (fun row ->
                 let spriteRect = row.kind.animations.[model.shuffleMod]
@@ -252,7 +259,9 @@ let main _ =
     let config: GameConfig = {
         clearColour = Some Colour.Black
         resolution = Windowed (resWidth, resHeight)
-        assetsToLoad = [ Texture ("sprites", "./sprites.png") ]
+        assetsToLoad = [ 
+            Texture ("sprites", "./sprites.png")
+            Font ("connection", "./connection") ]
         mouseVisible = false
         showFpsInConsole = true
     }
