@@ -60,6 +60,7 @@ type Message =
     | InvaderHit of row: int * index: int
     | PlayerHit
     | Victory
+    | Restart
 
 let invaderImpact x y w h model =
     let testRect = rect x y w h
@@ -203,6 +204,7 @@ let update message model =
     | InvaderHit (row, index) -> destroyInvader row index model
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
+    | Restart -> init ()
     
 let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
     fun loadedAssets _ (spriteBatch: SpriteBatch) ->
@@ -263,6 +265,7 @@ let view model dispatch =
             yield whilekeydown Keys.D (fun () -> dispatch (MovePlayer 1))
 
         yield onkeydown Keys.Escape exit
+        yield onkeydown Keys.R (fun () -> dispatch Restart)
     ]
 
 [<EntryPoint>]
