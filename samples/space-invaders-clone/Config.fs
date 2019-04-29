@@ -22,7 +22,7 @@ let projectileHeight = 10
 let projectileSpeed = 6
 
 let maxInvaderProjectiles = 3
-let invaderShootChance = 0.3
+let invaderShootChance = 0.1
 
 let spritemap = 
     System.IO.File.ReadAllLines "./spritemap.txt"

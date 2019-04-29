@@ -3,6 +3,12 @@ open Xelmish.Model
 open Xelmish.Viewables
 open Config
 
+let random = System.Random()
+let check chance =
+    random.NextDouble () <= chance
+let pick from =
+    random.Next (0, from)
+
 type PlayingModel = {
     playerX: int
     playerProjectile: Projectile option
@@ -121,9 +127,12 @@ let rec shuffleInvaders time model =
             lastShuffle = time }, command
 
 let shootFromInvader model = 
-    //let newProjectiles = { x = x; y = y }::model.invaderProjectiles
-    //{ model with invaderProjectiles = newProjectiles }, Cmd.none
-    model, Cmd.none
+    let x, y = 
+        let row = model.invaders.[pick model.invaders.Length]
+        let x = row.xs.[pick row.xs.Length] + row.kind.width / 2
+        x, row.y + row.kind.height
+    let newProjectiles = { x = x; y = y }::model.invaderProjectiles
+    { model with invaderProjectiles = newProjectiles }, Cmd.none
 
 let moveProjectiles model =
     let nextPlayerProjectile, cmdResult =
@@ -212,10 +221,6 @@ let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
         spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour)
 
 let text = text "connection" 24. Colour.White (0., 0.)
-
-let random = System.Random()
-let check chance =
-    random.NextDouble () <= chance
 
 let view model dispatch =
     [
