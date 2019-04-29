@@ -18,25 +18,13 @@ type PlayingModel = {
     lastShuffle: int64
     shuffleInterval: int64
     shuffleMod: int
-    explosions: Explosion list
     freeze: bool
     score: int
 } 
-and Row = { kind: InvaderKind; y: int; xs: int [] }
+and Row = { kind: InvaderKind; y: int; xs: (int * InvaderState) [] }
+and InvaderState = Alive | Dying | Dead
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 and Projectile = { x: int; y: int }
-and Explosion = { x: int; y: int; life: int }
-
-let invaderImpact x y w h model =
-    let testRect = rect x y w h
-    model.invaders 
-    |> Seq.indexed 
-    |> Seq.collect (fun (r, row) -> 
-        row.xs 
-        |> Seq.indexed 
-        |> Seq.map (fun (c, x) -> (r, c), rect x row.y row.kind.width row.kind.height))
-    |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
-    |> Option.map fst
 
 let init () = 
     {
@@ -52,14 +40,13 @@ let init () =
                     xs = 
                         [|0..invadersPerRow-1|] 
                         |> Array.map (fun col -> 
-                            padding + col * (largeSize.width + invaderSpacing) + kind.offset) 
+                            padding + col * (largeSize.width + invaderSpacing) + kind.offset, Alive) 
                 })
         invaderDirection = Across (invaderRows - 1, 1)
         invaderProjectiles = []
         lastShuffle = 0L
         shuffleInterval = 500L
         shuffleMod = 0
-        explosions = []
         freeze = false
         score = 0
     }, Cmd.none
@@ -74,6 +61,18 @@ type Message =
     | PlayerHit
     | Victory
 
+let invaderImpact x y w h model =
+    let testRect = rect x y w h
+    model.invaders 
+    |> Seq.indexed 
+    |> Seq.collect (fun (r, row) -> 
+        row.xs 
+        |> Seq.indexed 
+        |> Seq.filter (fun (_, (_, state)) -> state = Alive)
+        |> Seq.map (fun (c, (x, _)) -> (r, c), rect x row.y row.kind.width row.kind.height))
+    |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
+    |> Option.map fst
+
 let rec shuffleInvaders time model = 
     // the shuffle mod is used for animations
     let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
@@ -86,11 +85,19 @@ let rec shuffleInvaders time model =
                 |> Array.mapi (fun i row -> 
                     if i <> targetRow then row
                     else
-                        { row with xs = row.xs |> Array.map (fun x -> x + (invaderShuffleAmount * dir)) })
+                        { row with 
+                            xs = 
+                                row.xs 
+                                |> Array.map (fun (x, state) -> 
+                                    match state with
+                                    | Alive -> x + (invaderShuffleAmount * dir), Alive
+                                    | _ -> (x, state)) })
+
             // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
-            if newInvaders.[targetRow].xs |> Array.exists (fun x -> x < padding || x + largeSize.width > (resWidth - padding))
+            if newInvaders.[targetRow].xs |> Array.exists (fun (x, state) -> state = Alive && x < padding || x + largeSize.width > (resWidth - padding))
             then model.invaders, Down (model.invaders.Length - 1, dir * -1)
             else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
+
         | Down (targetRow, nextDir) ->
             let newInvaders = 
                 model.invaders 
@@ -108,12 +115,11 @@ let rec shuffleInvaders time model =
         // immediately do another shuffle, to eliminate the pause between going from across to down.
         shuffleInvaders time { model with invaderDirection = newDirection }
     | _ ->
-        // update explosions
-        let newExplosions = 
-            model.explosions 
-            |> List.map (fun explosion -> 
-                { explosion with life = explosion.life - 1 })
-            |> List.filter (fun explosion -> explosion.life > 0)
+        // update dying
+        let newInvaders = 
+            newInvaders 
+            |> Array.map (fun row ->
+                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Dying then x, Dead else x, state) })
 
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
@@ -123,13 +129,12 @@ let rec shuffleInvaders time model =
         { model with 
             invaders = newInvaders
             invaderDirection = newDirection
-            explosions = newExplosions
             lastShuffle = time }, command
 
 let shootFromInvader model = 
     let x, y = 
         let row = model.invaders.[pick model.invaders.Length]
-        let x = row.xs.[pick row.xs.Length] + row.kind.width / 2
+        let x = fst row.xs.[pick row.xs.Length] + row.kind.width / 2
         x, row.y + row.kind.height
     let newProjectiles = { x = x; y = y }::model.invaderProjectiles
     { model with invaderProjectiles = newProjectiles }, Cmd.none
@@ -164,37 +169,21 @@ let moveProjectiles model =
         invaderProjectiles = nextInvaderProjectiles }, cmdResult
 
 let destroyInvader targetRow index model =
-    let xOffset = model.invaders.[targetRow].kind.width / 2 - explosionWidth / 2
-    let newExplosion = 
-        { x = model.invaders.[targetRow].xs.[index] + xOffset
-          y = model.invaders.[targetRow].y
-          life = explosionDuration }
-
     let newInvaders =
-        if model.invaders.[targetRow].xs.Length = 1 then 
-            Array.append model.invaders.[0..targetRow - 1] model.invaders.[targetRow + 1..]
-        else
-            model.invaders 
+        model.invaders 
             |> Array.mapi (fun i row ->
                 if i <> targetRow then row
                 else
-                    let newXs = Array.append row.xs.[0..index - 1] row.xs.[index + 1..]
+                    let newXs = 
+                        row.xs 
+                        |> Array.mapi (fun i (x, state) -> 
+                            if i <> index then (x, state) else (x, Dying))
                     { row with xs = newXs })
-
-    // if an invader was the last of the last row, and the current shuffle index is that row,
-    // then update the shuffle index to avoid a out of range exception
-    let newInvaderDirection =
-        match model.invaderDirection with
-        | Across (n, dir) when n = newInvaders.Length -> Across (n - 1, dir)
-        | Down (n, nextDir) when n = newInvaders.Length -> Down (n - 1, nextDir)
-        | other -> other
 
     let scoreIncrease = model.invaders.[targetRow].kind.score
 
     { model with
         invaders = newInvaders
-        invaderDirection = newInvaderDirection
-        explosions = newExplosion::model.explosions
         shuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease)
         score = model.score + scoreIncrease }, Cmd.none
         
@@ -231,16 +220,17 @@ let view model dispatch =
             |> Array.collect (fun row ->
                 let spriteRect = row.kind.animations.[model.shuffleMod]
                 row.xs 
-                |> Array.map (fun x -> 
-                    sprite spriteRect 
-                        (row.kind.width, row.kind.height) 
-                        (x, row.y) row.kind.colour))
-
-        yield! model.explosions
-            |> List.map (fun explosion ->
-                sprite spritemap.["invader-death"] 
-                    (explosionWidth, explosionHeight) 
-                    (explosion.x, explosion.y) Colour.White)
+                |> Array.filter (fun (_, state) -> state <> Dead)
+                |> Array.map (fun (x, state) -> 
+                    match state with
+                    | Alive ->
+                        sprite spriteRect 
+                            (row.kind.width, row.kind.height) 
+                            (x, row.y) row.kind.colour
+                    | _ -> 
+                        sprite spritemap.["invader-death"] 
+                            (explosionWidth, explosionHeight) 
+                            (x, row.y) Colour.White))
 
         yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
 
