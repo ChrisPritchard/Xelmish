@@ -214,7 +214,7 @@ let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
 let text = text "connection" 24. Colour.White (0., 0.)
 
 let random = System.Random()
-let random chance =
+let check chance =
     random.NextDouble () <= chance
 
 let view model dispatch =
@@ -257,7 +257,7 @@ let view model dispatch =
             yield fun _ _ _ -> 
                 if not (Array.isEmpty model.invaders)
                     && List.length model.invaderProjectiles < maxInvaderProjectiles
-                    && random invaderShootChance then
+                    && check invaderShootChance then
                         dispatch InvaderShoot
 
             yield fun _ _ _ -> dispatch MoveProjectiles
