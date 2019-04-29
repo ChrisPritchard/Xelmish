@@ -35,6 +35,7 @@ type InvaderKind = {
     offset: int
     colour: Colour
     animations: (int * int * int * int) []
+    score: int
 }
 
 let largeSize = 
@@ -48,7 +49,8 @@ let largeSize =
         animations = [|
                 spritemap.["invader-large-0"]
                 spritemap.["invader-large-1"]
-            |] }
+            |]
+        score = 10 }
 
 let mediumSize = 
     let width, height = 
@@ -61,7 +63,8 @@ let mediumSize =
         animations = [|
                 spritemap.["invader-medium-0"]
                 spritemap.["invader-medium-1"]
-            |] }
+            |]
+        score = 20 }
 
 let smallSize = 
     let width, height = 
@@ -74,7 +77,8 @@ let smallSize =
         animations = [|
                 spritemap.["invader-small-0"]
                 spritemap.["invader-small-1"]
-            |] }
+            |]
+        score = 30 }
 
 let animationSpeed = 100L
 

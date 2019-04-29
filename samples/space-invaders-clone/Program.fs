@@ -175,11 +175,14 @@ let destroyInvader targetRow index model =
         | Down (n, nextDir) when n = newInvaders.Length -> Down (n - 1, nextDir)
         | other -> other
 
+    let scoreIncrease = model.invaders.[targetRow].kind.score
+
     { model with
         invaders = newInvaders
         invaderDirection = newInvaderDirection
         explosions = newExplosion::model.explosions
-        shuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease) }, Cmd.none
+        shuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease)
+        score = model.score + scoreIncrease }, Cmd.none
         
 let update message model =
     match message with
