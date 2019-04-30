@@ -207,9 +207,9 @@ let update message model =
     | Restart -> init ()
     
 let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
-    fun loadedAssets _ (spriteBatch: SpriteBatch) ->
+    OnDraw (fun loadedAssets (spriteBatch: SpriteBatch) ->
         let texture = loadedAssets.textures.["sprites"]
-        spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour)
+        spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour))
 
 let text = text "connection" 24. Colour.White (0., 0.)
 
@@ -241,9 +241,9 @@ let view model dispatch =
                 colour Colour.White (1, projectileHeight) (projectile.x, projectile.y))
 
         if not model.freeze then
-            yield fun _ inputs _ -> 
+            yield OnUpdate (fun inputs -> 
                 if not (Array.isEmpty model.invaders) && inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
-                    dispatch (ShuffleInvaders inputs.totalGameTime)
+                    dispatch (ShuffleInvaders inputs.totalGameTime))
             
             match model.playerProjectile with
                 | Some p -> 
@@ -251,13 +251,13 @@ let view model dispatch =
                 | _ -> 
                     yield onkeydown Keys.Space (fun () -> dispatch PlayerShoot)
 
-            yield fun _ _ _ -> 
+            yield OnUpdate (fun _ -> 
                 if not (Array.isEmpty model.invaders)
                     && List.length model.invaderProjectiles < maxInvaderProjectiles
                     && check invaderShootChance then
-                        dispatch InvaderShoot
+                        dispatch InvaderShoot)
 
-            yield fun _ _ _ -> dispatch MoveProjectiles
+            yield OnUpdate (fun _ -> dispatch MoveProjectiles)
 
             yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
             yield whilekeydown Keys.A (fun () -> dispatch (MovePlayer -1))

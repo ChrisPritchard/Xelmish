@@ -62,10 +62,14 @@ type LoadedAssets = {
     fonts: Map<string, SpriteFont>
 }
 
-/// On each draw, a list of viewables provided by the main Xelmish component will be run in the order provided.
-/// Each is given the set of loaded asseets (e.g. textures), the current input state, and the spriteBatch object to draw with.
+/// On each draw and update of the core loop, a list of viewables provided by the main Xelmish component will be run 
+/// if appropriate, in the order provided.
+/// Each is given the set of loaded assets (e.g. textures) and the spriteBatch object if drawable to draw with, or
+/// the current input state if on update.
 /// In the Viewables module, there are functions that create viewables for common tasks, like drawing colours or images.
-type Viewable = LoadedAssets -> Inputs -> SpriteBatch -> unit
+type Viewable = 
+    | OnDraw of (LoadedAssets -> SpriteBatch -> unit)
+    | OnUpdate of (Inputs -> unit)
 
 /// If a game throws this exception, the gameloop will catch it and quit.
 type QuitGame() =
