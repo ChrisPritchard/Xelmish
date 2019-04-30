@@ -68,20 +68,22 @@ type GameLoop (config: GameConfig) as this =
                 mouseState = Mouse.GetState ()
                 gameTime = gameTime }
 
-        let onUpdate = view |> List.choose (function OnUpdate f -> Some f | _ -> None)
-        for updateFunc in onUpdate do
-            updateFunc inputs
+        try
+            for viewable in view do
+                match viewable with
+                | OnUpdate updateFunc -> updateFunc inputs
+                | _ -> ()
+        with
+            | :? QuitGame -> __.Exit()
 
     override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear config.clearColour
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
-        try
-            let onDraw = view |> List.choose (function OnDraw f -> Some f | _ -> None)
-            for drawFunc in onDraw do
-                drawFunc assets spriteBatch
-        with
-            | :? QuitGame -> __.Exit()
+        for viewable in view do
+            match viewable with
+            | OnDraw drawFunc -> drawFunc assets spriteBatch
+            | _ -> ()
 
         spriteBatch.End ()
         
