@@ -145,7 +145,7 @@ let moveProjectiles model =
         match model.playerProjectile with
         | None -> None, Cmd.none
         | Some p ->
-            let next = { p with y = p.y - projectileSpeed }
+            let next = { p with y = p.y - playerProjectileSpeed }
             if next.y < 0 then None, Cmd.none
             else
                 match invaderImpact p.x p.y 1 projectileHeight model with
@@ -155,7 +155,7 @@ let moveProjectiles model =
     let nextInvaderProjectiles, cmdResult =
         (([], cmdResult), model.invaderProjectiles)
         ||> List.fold (fun (acc, cmdResult) p ->
-            let next = { p with y = p.y + projectileSpeed }
+            let next = { p with y = p.y + invaderProjectileSpeed }
             if next.y > resHeight then acc, cmdResult
             else
                 if 
