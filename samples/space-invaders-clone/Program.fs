@@ -12,6 +12,7 @@ let pick from =
 type PlayingModel = {
     playerX: int
     playerProjectile: Projectile option
+    bunkers: Rectangle list
     invaders: Row []
     invaderDirection: ShuffleState
     invaderProjectiles: Projectile list
@@ -26,10 +27,24 @@ and InvaderState = Alive | Dying | Dead
 and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 and Projectile = { x: int; y: int }
 
+let defaultBunkers =
+    let bunkerAt x y =
+        []
+
+    let bunkerY = playerY - bunkerSpace - bunkerHeight
+    let spacing = resWidth / 6
+    List.concat [
+        bunkerAt spacing bunkerY
+        bunkerAt (spacing * 2) bunkerY
+        bunkerAt (spacing * 3) bunkerY
+        bunkerAt (spacing * 4) bunkerY
+    ]
+
 let init () = 
     {
         playerX = resWidth / 2 - (playerWidth / 2)
         playerProjectile = None
+        bunkers = defaultBunkers
         invaders = 
             [|0..invaderRows-1|]
             |> Array.map (fun row -> 

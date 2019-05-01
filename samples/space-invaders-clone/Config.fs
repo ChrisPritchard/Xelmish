@@ -94,6 +94,19 @@ let playerWidth, playerHeight =
 let playerY = resHeight - (playerHeight + padding)
 let playerSpeed = 5
 
+let bunkerSpace = 10
+let bunkerBitDim = 5
+let bunkerPattern = 
+    [|
+        "  XX  "
+        " XXXX "
+        "XXXXXX"
+        "XXXXXX"
+        "XX  XX"
+        "XX  XX"
+    |] |> Array.map (Seq.map (fun c -> if c = 'X' then true else false) >> Seq.toArray)
+let bunkerHeight = bunkerBitDim * bunkerPattern.Length
+
 let explosionWidth, explosionHeight = 
     let (w, h, _, _) = spritemap.["invader-death"]
     w * sizeMulti, h * sizeMulti
