@@ -42,8 +42,8 @@ type GameLoop (config: GameConfig) as this =
     member __.View
         with set value = 
             let newUpdatables, newDrawables =
-                (([], []), value)
-                ||> List.fold (fun (updatable, drawable) -> 
+                (([], []), Seq.rev value)
+                ||> Seq.fold (fun (updatable, drawable) -> 
                     function
                     | OnUpdate f -> 
                         f::updatable, drawable
