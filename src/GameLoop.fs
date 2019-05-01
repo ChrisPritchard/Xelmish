@@ -11,15 +11,15 @@ type GameLoop (config: GameConfig) as this =
     inherit Game ()
 
     let graphics = new GraphicsDeviceManager (this)
-    let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
+    let mutable spriteBatch = Unchecked.defaultof<_>
 
-    let mutable assets = Unchecked.defaultof<LoadedAssets>
+    let mutable assets = Unchecked.defaultof<_>
     let mutable inputs = {
-        keyboardState = Unchecked.defaultof<KeyboardState>
-        lastKeyboardState = Unchecked.defaultof<KeyboardState>
-        mouseState = Unchecked.defaultof<MouseState>
-        lastMouseState = Unchecked.defaultof<MouseState>
-        gameTime = Unchecked.defaultof<GameTime>
+        keyboardState = Unchecked.defaultof<_>
+        lastKeyboardState = Unchecked.defaultof<_>
+        mouseState = Unchecked.defaultof<_>
+        lastMouseState = Unchecked.defaultof<_>
+        gameTime = Unchecked.defaultof<_>
     }
     
     let mutable fps = 0
@@ -31,7 +31,7 @@ type GameLoop (config: GameConfig) as this =
 
     do 
         match config.resolution with
-        | Windowed (w,h) -> 
+        | Windowed (w, h) -> 
             graphics.PreferredBackBufferWidth <- w
             graphics.PreferredBackBufferHeight <- h
 
@@ -53,9 +53,9 @@ type GameLoop (config: GameConfig) as this =
             drawable <- newDrawables
 
     override __.LoadContent () = 
-        spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
-        let whiteTexture = new Texture2D(this.GraphicsDevice, 1, 1)
-        whiteTexture.SetData<Color> [|Color.White|]
+        spriteBatch <- new SpriteBatch (graphics.GraphicsDevice)
+        let whiteTexture = new Texture2D (this.GraphicsDevice, 1, 1)
+        whiteTexture.SetData<Color> [| Color.White |]
 
         let (textures, fonts) =
             ((Map.empty, Map.empty), config.assetsToLoad)
@@ -85,10 +85,9 @@ type GameLoop (config: GameConfig) as this =
 
     override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear config.clearColour
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
+        spriteBatch.Begin (SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
         for drawFunc in drawable do drawFunc assets spriteBatch
-
         spriteBatch.End ()
         
         if config.showFpsInConsole then 
