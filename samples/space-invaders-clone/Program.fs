@@ -28,11 +28,19 @@ and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 and Projectile = { x: int; y: int }
 
 let defaultBunkers =
+    let dim = bunkerBitDim
     let bunkerAt x y =
-        []
+        bunkerPattern 
+        |> Seq.indexed 
+        |> Seq.collect (fun (row, elems) ->
+            elems 
+            |> Seq.indexed 
+            |> Seq.filter snd
+            |> Seq.map (fun (col, _) -> rect (x + col * dim) (y + row * dim) dim dim))
+        |> Seq.toList
 
     let bunkerY = playerY - bunkerSpace - bunkerHeight
-    let spacing = resWidth / 6
+    let spacing = resWidth / 5
     List.concat [
         bunkerAt spacing bunkerY
         bunkerAt (spacing * 2) bunkerY
@@ -248,6 +256,10 @@ let view model dispatch =
                         sprite spritemap.["invader-death"] 
                             (explosionWidth, explosionHeight) 
                             (x, row.y) Colour.White))
+
+        yield! model.bunkers
+            |> List.map (fun r -> 
+                colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
 
         yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
 

@@ -106,6 +106,7 @@ let bunkerPattern =
         "XX  XX"
     |] |> Array.map (Seq.map (fun c -> if c = 'X' then true else false) >> Seq.toArray)
 let bunkerHeight = bunkerBitDim * bunkerPattern.Length
+let bunkerColour = rgba 0uy 255uy 0uy 255uy
 
 let explosionWidth, explosionHeight = 
     let (w, h, _, _) = spritemap.["invader-death"]
