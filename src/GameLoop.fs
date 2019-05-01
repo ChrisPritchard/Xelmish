@@ -26,7 +26,8 @@ type GameLoop (config: GameConfig) as this =
     let mutable lastFpsUpdate = 0.
     let fpsUpdateInterval = 200.
 
-    let mutable view: Viewable list = []
+    let mutable updatable: (Inputs -> Unit) list = []
+    let mutable drawable: (LoadedAssets -> SpriteBatch -> Unit) list = []
 
     do 
         match config.resolution with
@@ -40,7 +41,16 @@ type GameLoop (config: GameConfig) as this =
         
     member __.View
         with set value = 
-            view <- value
+            let newUpdatables, newDrawables =
+                (([], []), value)
+                ||> List.fold (fun (updatable, drawable) -> 
+                    function
+                    | OnUpdate f -> 
+                        f::updatable, drawable
+                    | OnDraw f ->
+                        updatable, f::drawable)
+            updatable <- newUpdatables
+            drawable <- newDrawables
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch(graphics.GraphicsDevice)
@@ -69,10 +79,7 @@ type GameLoop (config: GameConfig) as this =
                 gameTime = gameTime }
 
         try
-            for viewable in view do
-                match viewable with
-                | OnUpdate updateFunc -> updateFunc inputs
-                | _ -> ()
+            for updateFunc in updatable do updateFunc inputs
         with
             | :? QuitGame -> __.Exit()
 
@@ -80,10 +87,7 @@ type GameLoop (config: GameConfig) as this =
         Option.iter this.GraphicsDevice.Clear config.clearColour
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
 
-        for viewable in view do
-            match viewable with
-            | OnDraw drawFunc -> drawFunc assets spriteBatch
-            | _ -> ()
+        for drawFunc in drawable do drawFunc assets spriteBatch
 
         spriteBatch.End ()
         
