@@ -133,10 +133,15 @@ let rec shuffleInvaders time model =
             lastShuffle = time }, command
 
 let shootFromInvader model = 
-    let x, y = 
-        let row = model.invaders.[pick model.invaders.Length]
-        let x = fst row.xs.[pick row.xs.Length] + row.kind.width / 2
-        x, row.y + row.kind.height
+    let possibleShooters = 
+        [|0..invadersPerRow-1|]
+        |> Array.choose (fun col ->
+            [invaderRows-1..-1..0]
+            |> List.tryFind (fun row -> snd model.invaders.[row].xs.[col] = Alive)
+            |> Option.map (fun row -> 
+                let row = model.invaders.[row]
+                fst row.xs.[col] + row.kind.width / 2, row.y + row.kind.height))
+    let x, y = possibleShooters.[pick possibleShooters.Length]
     let newProjectiles = { x = x; y = y }::model.invaderProjectiles
     { model with invaderProjectiles = newProjectiles }, Cmd.none
 
