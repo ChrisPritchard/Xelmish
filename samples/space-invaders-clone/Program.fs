@@ -241,7 +241,7 @@ let view model dispatch =
                 colour Colour.White (1, projectileHeight) (projectile.x, projectile.y))
 
         if not model.freeze then
-            yield OnUpdate (fun inputs -> 
+            yield onupdate (fun inputs -> 
                 if not (Array.isEmpty model.invaders) && inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders inputs.totalGameTime))
             
@@ -251,13 +251,13 @@ let view model dispatch =
                 | _ -> 
                     yield onkeydown Keys.Space (fun () -> dispatch PlayerShoot)
 
-            yield OnUpdate (fun _ -> 
+            yield onupdate (fun _ -> 
                 if not (Array.isEmpty model.invaders)
                     && List.length model.invaderProjectiles < maxInvaderProjectiles
                     && check invaderShootChance then
                         dispatch InvaderShoot)
 
-            yield OnUpdate (fun _ -> dispatch MoveProjectiles)
+            yield onupdate (fun _ -> dispatch MoveProjectiles)
 
             yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
             yield whilekeydown Keys.A (fun () -> dispatch (MovePlayer -1))

@@ -206,7 +206,7 @@ let view model dispatch =
 
         // by placing the below code in a viewable function, it will get evaluated on every game draw
         // This can be more effective than using an Elmish subscription, especially if smoothness is needed
-        yield OnUpdate(fun inputs ->
+        yield onupdate (fun inputs ->
             // check to see if a drop tick is due
             let interval = if model.dropPressed then 100L else model.dropInterval
             if inputs.totalGameTime - model.lastDrop > interval then
