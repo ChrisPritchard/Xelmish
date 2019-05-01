@@ -37,10 +37,8 @@ let init () =
                 {
                     kind = kind
                     y = invaderTop + row * (kind.height + invaderSpacing)
-                    xs = 
-                        [|0..invadersPerRow-1|] 
-                        |> Array.map (fun col -> 
-                            padding + col * (largeSize.width + invaderSpacing) + kind.offset, Alive) 
+                    xs = [|0..invadersPerRow-1|] |> Array.map (fun col -> 
+                        padding + col * (largeSize.width + invaderSpacing) + kind.offset, Alive) 
                 })
         invaderDirection = Across (invaderRows - 1, 1)
         invaderProjectiles = []
@@ -81,18 +79,14 @@ let rec shuffleInvaders time model =
     let (newInvaders, newDirection) = 
         match model.invaderDirection with
         | Across (targetRow, dir) ->
-            let newInvaders = 
-                model.invaders 
-                |> Array.mapi (fun i row -> 
-                    if i <> targetRow then row
-                    else
-                        { row with 
-                            xs = 
-                                row.xs 
-                                |> Array.map (fun (x, state) -> 
-                                    match state with
-                                    | Alive -> x + (invaderShuffleAmount * dir), Alive
-                                    | _ -> (x, state)) })
+            let newInvaders = model.invaders |> Array.mapi (fun i row -> 
+                if i <> targetRow then row
+                else
+                    let shuffled = row.xs |> Array.map (fun (x, state) -> 
+                        match state with
+                            | Alive -> x + (invaderShuffleAmount * dir), Alive
+                            | _ -> (x, state)) // the dying and dead don't shuffle
+                    { row with xs = shuffled })
 
             // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
             if newInvaders.[targetRow].xs |> Array.exists (fun (x, state) -> state = Alive && x < padding || x + largeSize.width > (resWidth - padding))
@@ -121,18 +115,18 @@ let rec shuffleInvaders time model =
             newInvaders 
             |> Array.map (fun row ->
                 { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Dying then x, Dead else x, state) })
-
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
             let playerHit = invaderImpact model.playerX playerY playerWidth playerHeight model
             if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.none
-
         { model with 
             invaders = newInvaders
             invaderDirection = newDirection
             lastShuffle = time }, command
 
 let shootFromInvader model = 
+    // only the invaders with a clear shot can shoot
+    // start at the bottom of each column and look up until a live one is found
     let possibleShooters = 
         [|0..invadersPerRow-1|]
         |> Array.choose (fun col ->
@@ -141,6 +135,7 @@ let shootFromInvader model =
             |> Option.map (fun row -> 
                 let row = model.invaders.[row]
                 fst row.xs.[col] + row.kind.width / 2, row.y + row.kind.height))
+    // pick a random shooter
     let x, y = possibleShooters.[pick possibleShooters.Length]
     let newProjectiles = { x = x; y = y }::model.invaderProjectiles
     { model with invaderProjectiles = newProjectiles }, Cmd.none
