@@ -176,21 +176,27 @@ let shootFromInvader model =
     { model with invaderProjectiles = newProjectiles }, Cmd.none
 
 let moveProjectiles model =
-    let nextPlayerProjectile, cmdResult =
+    let nextPlayerProjectile, cmdResult, newBunkers =
         match model.playerProjectile with
-        | None -> None, Cmd.none
+        | None -> None, Cmd.none, model.bunkers
         | Some p ->
             let next = { p with y = p.y - playerProjectileSpeed }
-            if next.y < 0 then None, Cmd.none
+            if next.y < 0 then None, Cmd.none, model.bunkers
             else
-                match invaderImpact p.x p.y 1 projectileHeight model with
-                | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex)
-                | None -> Some next, Cmd.none
+                match invaderImpact p.x p.y projectileWidth projectileHeight model with
+                | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
+                | None -> 
+                    let shotRect = rect p.x p.y projectileWidth projectileHeight
+                    let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
+                    if List.isEmpty destroyed then
+                        Some next, Cmd.none, model.bunkers
+                    else
+                        None, Cmd.none, newBunkers
 
     let playerRect = playerRect model
 
     let nextInvaderProjectiles, cmdResult, newBunkers =
-        (([], cmdResult, model.bunkers), model.invaderProjectiles)
+        (([], cmdResult, newBunkers), model.invaderProjectiles)
         ||> List.fold (fun (acc, cmdResult, bunkers) p ->
             let next = { p with y = p.y + invaderProjectileSpeed }
             if next.y > resHeight then acc, cmdResult, bunkers
