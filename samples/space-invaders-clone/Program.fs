@@ -57,22 +57,22 @@ let playerRect model = rect model.player.x playerY playerWidth playerHeight
 
 let invaderImpact x y w h model =
     let testRect = rect x y w h
-    model.invaders 
+    model.invaders.rows
     |> Seq.indexed 
     |> Seq.collect (fun (r, row) -> 
         row.xs 
         |> Seq.indexed 
-        |> Seq.filter (fun (_, (_, state)) -> state = Alive)
+        |> Seq.filter (fun (_, (_, state)) -> state = Invaders.Alive)
         |> Seq.map (fun (c, (x, _)) -> (r, c), rect x row.y row.kind.width row.kind.height))
     |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
     |> Option.map fst
 
-let eraseBunkers invaders model =
+let eraseBunkers (invaderRows: Invaders.Row []) model =
     let invaderRects = 
-        invaders 
+        invaderRows 
         |> Seq.collect (fun row -> 
             row.xs 
-            |> Seq.filter (fun (_, state) -> state = Alive) 
+            |> Seq.filter (fun (_, state) -> state = Invaders.Alive) 
             |> Seq.map (fun (x, _) -> rect x row.y row.kind.width row.kind.height))
         |> Seq.toList
     model.bunkers 
@@ -102,17 +102,17 @@ let movePlayerProjectile model =
 let moveInvaderProjectiles model =
     let playerRect = playerRect model
     (([], Cmd.none, model.bunkers), model.invaders.lasers)
-    ||> List.fold (fun (acc, cmdResult, bunkers) p ->
-        let next = { p with y = p.y + invaderProjectileSpeed }
-        if next.y > resHeight then acc, cmdResult, bunkers
+    ||> List.fold (fun (acc, cmdResult, bunkers) (x, y) ->
+        let nx, ny = x, y + invaderProjectileSpeed
+        if ny > resHeight then acc, cmdResult, bunkers
         else
-            let shotRect = rect p.x p.y projectileWidth projectileHeight
+            let shotRect = rect nx ny projectileWidth projectileHeight
             if shotRect.Intersects playerRect then
                 acc, Cmd.ofMsg PlayerHit, bunkers
             else
                 let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
                 if List.isEmpty destroyed then
-                    next::acc, cmdResult, bunkers
+                    (nx, ny)::acc, cmdResult, bunkers
                 else
                     acc, cmdResult, newBunkers)
 
@@ -125,37 +125,37 @@ let moveProjectiles model =
     { model with 
         player = { model.player with laser = nextPlayerProjectile }
         bunkers = newBunkers
-        invaderProjectiles = nextInvaderProjectiles }, Cmd.batch [firstCommand;secondCommand]
+        invaders = { model.invaders with lasers = nextInvaderProjectiles } }, Cmd.batch [firstCommand;secondCommand]
 
 let destroyInvader targetRow index model =
     let newInvaders =
-        model.invaders 
+        model.invaders.rows
             |> Array.mapi (fun i row ->
                 if i <> targetRow then row
                 else
                     let newXs = 
                         row.xs 
                         |> Array.mapi (fun i (x, state) -> 
-                            if i <> index then (x, state) else (x, Dying))
+                            if i <> index then (x, state) else (x, Invaders.Dying))
                     { row with xs = newXs })
-    let scoreIncrease = model.invaders.[targetRow].kind.score
+    let scoreIncrease = model.invaders.rows.[targetRow].kind.score
+    let newShuffleInterval = max minShuffle (model.invaders.shuffleInterval - shuffleDecrease)
     { model with
-        invaders = newInvaders
-        shuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease)
+        invaders = { model.invaders with rows = newInvaders; shuffleInterval = newShuffleInterval }
         score = model.score + scoreIncrease }, Cmd.none
         
 let update message model =
     match message with
     | PlayerMessage message -> 
         { model with player = Player.update message model.player }, Cmd.none
-    | InvaderShoot -> shootFromInvader model
-    | ShuffleInvaders time -> shuffleInvaders time model   
+    | InvadersMessage message -> 
+        { model with invaders = Invaders.update message model.invaders }, Cmd.none
     | UpdateDying -> 
         let newInvaders = 
-            model.invaders 
+            model.invaders.rows
             |> Array.map (fun row ->
-                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Dying then x, Dead else x, state) })
-        { model with invaders = newInvaders }, Cmd.none
+                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Invaders.Dying then x, Invaders.Dead else x, state) })
+        { model with invaders = { model.invaders with rows = newInvaders } }, Cmd.none
     | MoveProjectiles -> moveProjectiles model
     | InvaderHit (row, index) -> destroyInvader row index model
     | PlayerHit -> { model with freeze = true }, Cmd.none
@@ -174,11 +174,13 @@ let view model dispatch =
         yield text "SCORE" (10, 10)
         yield text (sprintf "%04i" model.score) (10, 44)
 
+        yield! Player.view model.player (PlayerMessage >> dispatch)
+
         yield! model.bunkers
             |> List.map (fun r -> 
                 colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
 
-        yield! Player.view model.player (PlayerMessage >> dispatch)
+        yield! Invaders.view model.invaders (InvadersMessage >> dispatch) model.freeze
 
         if not model.freeze then
             yield onupdate (fun _ -> dispatch MoveProjectiles)

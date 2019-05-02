@@ -120,10 +120,11 @@ let view model dispatch freeze =
                         sprite spriteRect 
                             (row.kind.width, row.kind.height) 
                             (x, row.y) row.kind.colour
-                    | _ -> 
-                        sprite spritemap.["invader-death"] 
-                            (explosionWidth, explosionHeight) 
-                            (x, row.y) Colour.White))
+                    | _ -> OnDraw (fun _ _ -> ())))
+                        //sprite spritemap.["invader-death"] 
+                        //    (explosionWidth, explosionHeight) 
+                        //    (x, row.y) Colour.White))
+                        // TODO show when dying updated
         
         yield! 
             model.lasers
