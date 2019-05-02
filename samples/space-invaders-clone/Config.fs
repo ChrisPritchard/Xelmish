@@ -19,8 +19,8 @@ let shuffleDecrease = 20L
 let minShuffle = 50L
 
 let projectileHeight = 10
-let invaderProjectileSpeed = 1
-let playerProjectileSpeed = 3
+let invaderProjectileSpeed = 2
+let playerProjectileSpeed = 4
 
 let maxInvaderProjectiles = 3
 let invaderShootChance = 0.1
@@ -94,18 +94,21 @@ let playerWidth, playerHeight =
 let playerY = resHeight - (playerHeight + padding)
 let playerSpeed = 5
 
-let bunkerSpace = 10
-let bunkerBitDim = 5
+let bunkerSpace = 20
+let bunkerBitDim = 6
 let bunkerPattern = 
     [|
-        "  XX  "
-        " XXXX "
-        "XXXXXX"
-        "XXXXXX"
-        "XX  XX"
-        "XX  XX"
+        "   XXXXXXXXX   "
+        "  XXXXXXXXXXX  "
+        " XXXXXXXXXXXXX "
+        "XXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXX"
+        "XXXXXXXXXXXXXXX"
+        "XXX         XXX"
+        "XXX         XXX"
     |] |> Array.map (Seq.map (fun c -> if c = 'X' then true else false) >> Seq.toArray)
 let bunkerHeight = bunkerBitDim * bunkerPattern.Length
+let bunkerOffset = (bunkerBitDim * bunkerPattern.[0].Length) / 2
 let bunkerColour = rgba 0uy 255uy 0uy 255uy
 
 let explosionWidth, explosionHeight = 

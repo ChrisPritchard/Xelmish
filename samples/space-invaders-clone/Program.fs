@@ -42,10 +42,10 @@ let defaultBunkers =
     let bunkerY = playerY - bunkerSpace - bunkerHeight
     let spacing = resWidth / 5
     List.concat [
-        bunkerAt spacing bunkerY
-        bunkerAt (spacing * 2) bunkerY
-        bunkerAt (spacing * 3) bunkerY
-        bunkerAt (spacing * 4) bunkerY
+        bunkerAt (spacing - bunkerOffset) bunkerY
+        bunkerAt (spacing * 2 - bunkerOffset) bunkerY
+        bunkerAt (spacing * 3 - bunkerOffset) bunkerY
+        bunkerAt (spacing * 4 - bunkerOffset) bunkerY
     ]
 
 let init () = 
