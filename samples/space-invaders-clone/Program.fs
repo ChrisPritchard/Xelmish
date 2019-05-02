@@ -242,7 +242,7 @@ let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
         let texture = loadedAssets.textures.["sprites"]
         spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour))
 
-let text = text "connection" 24. Colour.White (0., 0.)
+let text = text "PressStart2P" 24. Colour.White (0., 0.)
 
 let view model dispatch =
     [
@@ -310,7 +310,7 @@ let main _ =
         resolution = Windowed (resWidth, resHeight)
         assetsToLoad = [ 
             Texture ("sprites", "./sprites.png")
-            Font ("connection", "./connection") ]
+            Font ("PressStart2P", "./PressStart2P") ]
         mouseVisible = false
         showFpsInConsole = true
     }

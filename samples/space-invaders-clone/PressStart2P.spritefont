@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
   <Asset Type="Graphics:FontDescription">
-    <FontName>Connection.otf</FontName>
-    <Size>50</Size>
-    <Spacing>0</Spacing>
-    <UseKerning>true</UseKerning>
+    <FontName>PressStart2P.ttf</FontName>
+    <Size>12</Size>
+    <Spacing>2</Spacing>
+    <UseKerning>false</UseKerning>
     <Style>Regular</Style>
     <CharacterRegions>
       <CharacterRegion>
