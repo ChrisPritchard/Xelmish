@@ -113,35 +113,39 @@ let eraseBunkers invaders model =
             invaderRect.Intersects bunker) 
         |> not)
 
+let shuffleAcross targetRow dir model =
+    let newInvaders = model.invaders |> Array.mapi (fun i row -> 
+        if i <> targetRow then row
+        else
+            let shuffled = row.xs |> Array.map (fun (x, state) -> 
+                match state with
+                    | Alive -> x + (invaderShuffleAmount * dir), Alive
+                    | _ -> (x, state)) // the dying and dead don't shuffle
+            { row with xs = shuffled })
+    // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
+    if newInvaders.[targetRow].xs |> Array.exists (fun (x, state) -> state = Alive && x < padding || x + largeSize.width > (resWidth - padding))
+    then model.invaders, Down (model.invaders.Length - 1, dir * -1)
+    else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
+
+let shuffleDown targetRow nextDir model =
+    let newInvaders = 
+        model.invaders 
+        |> Array.mapi (fun i row -> 
+            if i <> targetRow then row
+            else
+                { row with y = row.y + invaderShuffleAmount })
+    let nextDirection = 
+        if targetRow = 0 then Across (newInvaders.Length - 1, nextDir) 
+        else Down (targetRow - 1, nextDir)
+    newInvaders, nextDirection
+
 let rec shuffleInvaders time model = 
     // the shuffle mod is used for animations
     let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
     let (newInvaders, newDirection) = 
         match model.invaderDirection with
-        | Across (targetRow, dir) ->
-            let newInvaders = model.invaders |> Array.mapi (fun i row -> 
-                if i <> targetRow then row
-                else
-                    let shuffled = row.xs |> Array.map (fun (x, state) -> 
-                        match state with
-                            | Alive -> x + (invaderShuffleAmount * dir), Alive
-                            | _ -> (x, state)) // the dying and dead don't shuffle
-                    { row with xs = shuffled })
-            // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
-            if newInvaders.[targetRow].xs |> Array.exists (fun (x, state) -> state = Alive && x < padding || x + largeSize.width > (resWidth - padding))
-            then model.invaders, Down (model.invaders.Length - 1, dir * -1)
-            else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
-        | Down (targetRow, nextDir) ->
-            let newInvaders = 
-                model.invaders 
-                |> Array.mapi (fun i row -> 
-                    if i <> targetRow then row
-                    else
-                        { row with y = row.y + invaderShuffleAmount })
-            let nextDirection = 
-                if targetRow = 0 then Across (newInvaders.Length - 1, nextDir) 
-                else Down (targetRow - 1, nextDir)
-            newInvaders, nextDirection
+        | Across (targetRow, dir) -> shuffleAcross targetRow dir model
+        | Down (targetRow, nextDir) -> shuffleDown targetRow nextDir model
     match model.invaderDirection, newDirection with
     | Across _, Down _ -> 
         // immediately do another shuffle, to eliminate the pause between going from across to down.
@@ -175,46 +179,50 @@ let shootFromInvader model =
     let newProjectiles = { x = x; y = y }::model.invaderProjectiles
     { model with invaderProjectiles = newProjectiles }, Cmd.none
 
-let moveProjectiles model =
-    let nextPlayerProjectile, cmdResult, newBunkers =
-        match model.playerProjectile with
-        | None -> None, Cmd.none, model.bunkers
-        | Some p ->
-            let next = { p with y = p.y - playerProjectileSpeed }
-            if next.y < 0 then None, Cmd.none, model.bunkers
-            else
-                match invaderImpact p.x p.y projectileWidth projectileHeight model with
-                | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
-                | None -> 
-                    let shotRect = rect p.x p.y projectileWidth projectileHeight
-                    let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
-                    if List.isEmpty destroyed then
-                        Some next, Cmd.none, model.bunkers
-                    else
-                        None, Cmd.none, newBunkers
-
-    let playerRect = playerRect model
-
-    let nextInvaderProjectiles, cmdResult, newBunkers =
-        (([], cmdResult, newBunkers), model.invaderProjectiles)
-        ||> List.fold (fun (acc, cmdResult, bunkers) p ->
-            let next = { p with y = p.y + invaderProjectileSpeed }
-            if next.y > resHeight then acc, cmdResult, bunkers
-            else
+let movePlayerProjectile model =
+    match model.playerProjectile with
+    | None -> None, Cmd.none, model.bunkers
+    | Some p ->
+        let next = { p with y = p.y - playerProjectileSpeed }
+        if next.y < 0 then None, Cmd.none, model.bunkers
+        else
+            match invaderImpact p.x p.y projectileWidth projectileHeight model with
+            | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
+            | None -> 
                 let shotRect = rect p.x p.y projectileWidth projectileHeight
-                if shotRect.Intersects playerRect then
-                    acc, Cmd.batch [cmdResult; Cmd.ofMsg PlayerHit], bunkers
+                let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
+                if List.isEmpty destroyed then
+                    Some next, Cmd.none, model.bunkers
                 else
-                    let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
-                    if List.isEmpty destroyed then
-                        next::acc, cmdResult, bunkers
-                    else
-                        acc, cmdResult, newBunkers)
+                    None, Cmd.none, newBunkers
 
+let moveInvaderProjectiles model =
+    let playerRect = playerRect model
+    (([], Cmd.none, model.bunkers), model.invaderProjectiles)
+    ||> List.fold (fun (acc, cmdResult, bunkers) p ->
+        let next = { p with y = p.y + invaderProjectileSpeed }
+        if next.y > resHeight then acc, cmdResult, bunkers
+        else
+            let shotRect = rect p.x p.y projectileWidth projectileHeight
+            if shotRect.Intersects playerRect then
+                acc, Cmd.ofMsg PlayerHit, bunkers
+            else
+                let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
+                if List.isEmpty destroyed then
+                    next::acc, cmdResult, bunkers
+                else
+                    acc, cmdResult, newBunkers)
+
+let moveProjectiles model =
+    let nextPlayerProjectile, firstCommand, newBunkers = 
+        movePlayerProjectile model
+    let nextInvaderProjectiles, secondCommand, newBunkers = 
+        moveInvaderProjectiles { model with bunkers = newBunkers }
+        
     { model with 
         playerProjectile = nextPlayerProjectile 
         bunkers = newBunkers
-        invaderProjectiles = nextInvaderProjectiles }, cmdResult
+        invaderProjectiles = nextInvaderProjectiles }, Cmd.batch [firstCommand;secondCommand]
 
 let destroyInvader targetRow index model =
     let newInvaders =
@@ -227,9 +235,7 @@ let destroyInvader targetRow index model =
                         |> Array.mapi (fun i (x, state) -> 
                             if i <> index then (x, state) else (x, Dying))
                     { row with xs = newXs })
-
     let scoreIncrease = model.invaders.[targetRow].kind.score
-
     { model with
         invaders = newInvaders
         shuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease)
