@@ -3,7 +3,11 @@ open Elmish
 open Xelmish.Model
 open Xelmish.Viewables
 
+// because all text uses the same font, it is shadowed here with this param already applied
 let text = text "connection"
+// a button is defined here as a background colour which some text and a click event.
+// Xelmish doesn't provide a button viewable by default - too many possible variables. 
+// it just provides the core building blocks
 let button s event (x, y) = 
     let width, height = 100, 30 
     [
@@ -11,6 +15,9 @@ let button s event (x, y) =
         text 20. Colour.White (-0.5, -0.5) s (x + width/2, y+height/2)
         onclick event (width, height) (x, y)
     ]
+
+// Each of the following three modules are lifted *almost* directly from the Elmish.WPF sample.
+// They are different only in that their bindings methods have been replaced with Xelmish view methods
 
 module Clock =
 
@@ -30,6 +37,10 @@ module Clock =
         match msg with
         | Tick t -> { m with Time = t }
         | ToggleUtc -> { m with UseUtc = not m.UseUtc }
+
+    // note that these sub module's view methods take an additional (x, y) param.
+    // they place their elements relative to this, which allows easy nesting/duplication
+    // this is necessary as Xelmish is not a UI framework: it doesnt have a table layout or stack panel for example
 
     let view model dispatch (x, y) =
         let timeFormat = fun (date: DateTime) -> 
@@ -68,6 +79,8 @@ module CounterWithClock =
         | SetStepSize x -> { m with StepSize = x }
         | Reset -> { m with Count = 0; StepSize = 1 }
         | ClockMsg msg -> { m with Clock = Clock.update msg m.Clock }
+
+    // see the comment in the module above about the use of a 'relative to' x, y param
 
     let view model dispatch (x, y) =
         [
@@ -110,6 +123,10 @@ module App =
             yield onkeydown Keys.Escape exit
         ]
 
+// The timer here operates identically to the original sample. in Xelmish however it is usually more 
+// efficient to use an OnUpdate viewable that ties directly into the core loop. See the more advanced samples
+// for examples of that methodology.
+
 let timerTick dispatch =
     let timer = new System.Timers.Timer(1000.)
     timer.Elapsed.Add (fun _ -> 
@@ -133,8 +150,8 @@ let main _ =
         showFpsInConsole = false
     }
 
-    Program.mkSimple App.init App.update App.view
-    |> Program.withSubscription (fun m -> Cmd.ofSub timerTick)
-    |> Program.withConsoleTrace
-    |> Xelmish.Program.runGameLoop config
+    Program.mkSimple App.init App.update App.view // standard, out of the box Elmish mkSimple
+    |> Program.withSubscription (fun m -> Cmd.ofSub timerTick) // standard, out of the box Elmish subscription setup
+    |> Program.withConsoleTrace // standard, out of the box Elmish console trace
+    |> Xelmish.Program.runGameLoop config // custom Xelmish initialiser
     0
