@@ -39,11 +39,6 @@ let update message model =
             let pos = model.x + playerWidth / 2, resHeight - (playerHeight + padding) - projectileHeight - 1
             { model with laser = Some pos }
 
-let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
-    OnDraw (fun loadedAssets (spriteBatch: SpriteBatch) ->
-        let texture = loadedAssets.textures.["sprites"]
-        spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour))
-
 let view model dispatch =
     match model.state with
     | Alive ->

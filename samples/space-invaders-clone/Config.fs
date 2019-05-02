@@ -3,6 +3,12 @@ module Config
 
 open Xelmish.Model
 
+let random = System.Random()
+let check chance =
+    random.NextDouble () <= chance
+let pick from =
+    random.Next (0, from)
+
 let resWidth = 800
 let resHeight = 600
 
@@ -116,3 +122,8 @@ let explosionWidth, explosionHeight =
     let (w, h, _, _) = spritemap.["invader-death"]
     w * sizeMulti, h * sizeMulti
 let explosionDuration = 1
+
+let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
+    OnDraw (fun loadedAssets (spriteBatch: SpriteBatch) ->
+        let texture = loadedAssets.textures.["sprites"]
+        spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour))

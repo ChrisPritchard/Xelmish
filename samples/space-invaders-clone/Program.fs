@@ -3,27 +3,14 @@ open Xelmish.Model
 open Xelmish.Viewables
 open Config
 
-let random = System.Random()
-let check chance =
-    random.NextDouble () <= chance
-let pick from =
-    random.Next (0, from)
-
 type PlayingModel = {
     player: Player.Model
     bunkers: Rectangle list
-    invaders: Row []
-    invaderDirection: ShuffleState
-    invaderProjectiles: Projectile list
-    lastShuffle: int64
-    shuffleInterval: int64
-    shuffleMod: int
+    invaders: Invaders.Model
     freeze: bool
     score: int
 } 
-and Row = { kind: InvaderKind; y: int; xs: (int * InvaderState) [] }
-and InvaderState = Alive | Dying | Dead
-and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
+
 and Projectile = { x: int; y: int }
 
 let defaultBunkers =
@@ -51,29 +38,14 @@ let init () =
     {
         player = Player.init ()
         bunkers = defaultBunkers
-        invaders = 
-            [|0..invaderRows-1|]
-            |> Array.map (fun row -> 
-                let kind = match row with 0 -> smallSize | 1 | 2 -> mediumSize | _ -> largeSize
-                {
-                    kind = kind
-                    y = invaderTop + row * (kind.height + invaderSpacing)
-                    xs = [|0..invadersPerRow-1|] |> Array.map (fun col -> 
-                        padding + col * (largeSize.width + invaderSpacing) + kind.offset, Alive) 
-                })
-        invaderDirection = Across (invaderRows - 1, 1)
-        invaderProjectiles = []
-        lastShuffle = 0L
-        shuffleInterval = 500L
-        shuffleMod = 0
+        invaders = Invaders.init ()
         freeze = false
         score = 0
     }, Cmd.none
 
 type Message = 
     | PlayerMessage of Player.Message
-    | InvaderShoot
-    | ShuffleInvaders of int64
+    | InvadersMessage of Invaders.Message
     | UpdateDying
     | MoveProjectiles
     | InvaderHit of row: int * index: int
@@ -110,72 +82,6 @@ let eraseBunkers invaders model =
             invaderRect.Intersects bunker) 
         |> not)
 
-let shuffleAcross targetRow dir model =
-    let newInvaders = model.invaders |> Array.mapi (fun i row -> 
-        if i <> targetRow then row
-        else
-            let shuffled = row.xs |> Array.map (fun (x, state) -> 
-                match state with
-                    | Alive -> x + (invaderShuffleAmount * dir), Alive
-                    | _ -> (x, state)) // the dying and dead don't shuffle
-            { row with xs = shuffled })
-    // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
-    if newInvaders.[targetRow].xs |> Array.exists (fun (x, state) -> state = Alive && x < padding || x + largeSize.width > (resWidth - padding))
-    then model.invaders, Down (model.invaders.Length - 1, dir * -1)
-    else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
-
-let shuffleDown targetRow nextDir model =
-    let newInvaders = 
-        model.invaders 
-        |> Array.mapi (fun i row -> 
-            if i <> targetRow then row
-            else
-                { row with y = row.y + invaderShuffleAmount })
-    let nextDirection = 
-        if targetRow = 0 then Across (newInvaders.Length - 1, nextDir) 
-        else Down (targetRow - 1, nextDir)
-    newInvaders, nextDirection
-
-let rec shuffleInvaders time model = 
-    // the shuffle mod is used for animations
-    let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
-    let (newInvaders, newDirection) = 
-        match model.invaderDirection with
-        | Across (targetRow, dir) -> shuffleAcross targetRow dir model
-        | Down (targetRow, nextDir) -> shuffleDown targetRow nextDir model
-    match model.invaderDirection, newDirection with
-    | Across _, Down _ -> 
-        // immediately do another shuffle, to eliminate the pause between going from across to down.
-        shuffleInvaders time { model with invaderDirection = newDirection }
-    | _ ->
-        // check to see if, as a result of this shuffle, the player has been touched.
-        let command = 
-            let playerHit = invaderImpact model.player.x playerY playerWidth playerHeight model
-            if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.ofMsg UpdateDying
-        { model with 
-            invaders = newInvaders
-            invaderDirection = newDirection
-            lastShuffle = time
-            bunkers = eraseBunkers newInvaders model }, command
-
-let shootFromInvader model = 
-    // only the invaders with a clear shot can shoot
-    // start at the bottom of each column and look up until a live one is found
-    let possibleShooters = 
-        [|0..invadersPerRow-1|]
-        |> Array.choose (fun col ->
-            [invaderRows-1..-1..0]
-            |> List.tryFind (fun row -> 
-                let row = model.invaders.[row]
-                row.y + row.kind.height < playerY && snd row.xs.[col] = Alive)
-            |> Option.map (fun row -> 
-                let row = model.invaders.[row]
-                fst row.xs.[col] + row.kind.width / 2, row.y + row.kind.height))
-    // pick a random shooter
-    let x, y = possibleShooters.[pick possibleShooters.Length]
-    let newProjectiles = { x = x; y = y }::model.invaderProjectiles
-    { model with invaderProjectiles = newProjectiles }, Cmd.none
-
 let movePlayerProjectile model =
     match model.player.laser with
     | None -> None, Cmd.none, model.bunkers
@@ -195,7 +101,7 @@ let movePlayerProjectile model =
 
 let moveInvaderProjectiles model =
     let playerRect = playerRect model
-    (([], Cmd.none, model.bunkers), model.invaderProjectiles)
+    (([], Cmd.none, model.bunkers), model.invaders.lasers)
     ||> List.fold (fun (acc, cmdResult, bunkers) p ->
         let next = { p with y = p.y + invaderProjectileSpeed }
         if next.y > resHeight then acc, cmdResult, bunkers
@@ -268,43 +174,13 @@ let view model dispatch =
         yield text "SCORE" (10, 10)
         yield text (sprintf "%04i" model.score) (10, 44)
 
-        yield! model.invaders 
-            |> Array.collect (fun row ->
-                let spriteRect = row.kind.animations.[model.shuffleMod]
-                row.xs 
-                |> Array.filter (fun (_, state) -> state <> Dead)
-                |> Array.map (fun (x, state) -> 
-                    match state with
-                    | Alive ->
-                        sprite spriteRect 
-                            (row.kind.width, row.kind.height) 
-                            (x, row.y) row.kind.colour
-                    | _ -> 
-                        sprite spritemap.["invader-death"] 
-                            (explosionWidth, explosionHeight) 
-                            (x, row.y) Colour.White))
-
         yield! model.bunkers
             |> List.map (fun r -> 
                 colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
 
         yield! Player.view model.player (PlayerMessage >> dispatch)
 
-        yield! model.invaderProjectiles
-            |> List.map (fun projectile ->
-                colour Colour.White (projectileWidth, projectileHeight) (projectile.x, projectile.y))
-
         if not model.freeze then
-            yield onupdate (fun inputs -> 
-                if not (Array.isEmpty model.invaders) && inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
-                    dispatch (ShuffleInvaders inputs.totalGameTime))
-
-            yield onupdate (fun _ -> 
-                if not (Array.isEmpty model.invaders)
-                    && List.length model.invaderProjectiles < maxInvaderProjectiles
-                    && check invaderShootChance then
-                        dispatch InvaderShoot)
-
             yield onupdate (fun _ -> dispatch MoveProjectiles)
 
         yield onkeydown Keys.Escape exit
