@@ -55,7 +55,7 @@ let main _ =
         assetsToLoad = [
             Font ("connection", "./connection")
         ]
-        showFpsInConsole = true
+        showFpsInConsole = false // best to not do this if using the console trace from Elmish
     }
 
     Program.mkSimple init update view
