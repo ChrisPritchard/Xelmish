@@ -10,8 +10,7 @@ let pick from =
     random.Next (0, from)
 
 type PlayingModel = {
-    playerX: int
-    playerProjectile: Projectile option
+    player: Player.Model
     bunkers: Rectangle list
     invaders: Row []
     invaderDirection: ShuffleState
@@ -50,8 +49,7 @@ let defaultBunkers =
 
 let init () = 
     {
-        playerX = resWidth / 2 - (playerWidth / 2)
-        playerProjectile = None
+        player = Player.init ()
         bunkers = defaultBunkers
         invaders = 
             [|0..invaderRows-1|]
@@ -73,8 +71,7 @@ let init () =
     }, Cmd.none
 
 type Message = 
-    | MovePlayer of dir: int
-    | PlayerShoot
+    | PlayerMessage of Player.Message
     | InvaderShoot
     | ShuffleInvaders of int64
     | UpdateDying
@@ -84,7 +81,7 @@ type Message =
     | Victory
     | Restart
 
-let playerRect model = rect model.playerX playerY playerWidth playerHeight
+let playerRect model = rect model.player.x playerY playerWidth playerHeight
 
 let invaderImpact x y w h model =
     let testRect = rect x y w h
@@ -153,7 +150,7 @@ let rec shuffleInvaders time model =
     | _ ->
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
-            let playerHit = invaderImpact model.playerX playerY playerWidth playerHeight model
+            let playerHit = invaderImpact model.player.x playerY playerWidth playerHeight model
             if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.ofMsg UpdateDying
         { model with 
             invaders = newInvaders
@@ -180,19 +177,19 @@ let shootFromInvader model =
     { model with invaderProjectiles = newProjectiles }, Cmd.none
 
 let movePlayerProjectile model =
-    match model.playerProjectile with
+    match model.player.laser with
     | None -> None, Cmd.none, model.bunkers
-    | Some p ->
-        let next = { p with y = p.y - playerProjectileSpeed }
-        if next.y < 0 then None, Cmd.none, model.bunkers
+    | Some (x, y) ->
+        let (nx, ny) = x, y - playerProjectileSpeed
+        if ny < 0 then None, Cmd.none, model.bunkers
         else
-            match invaderImpact p.x p.y projectileWidth projectileHeight model with
+            match invaderImpact nx ny projectileWidth projectileHeight model with
             | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
             | None -> 
-                let shotRect = rect p.x p.y projectileWidth projectileHeight
+                let shotRect = rect nx ny projectileWidth projectileHeight
                 let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
                 if List.isEmpty destroyed then
-                    Some next, Cmd.none, model.bunkers
+                    Some (nx, ny), Cmd.none, model.bunkers
                 else
                     None, Cmd.none, newBunkers
 
@@ -220,7 +217,7 @@ let moveProjectiles model =
         moveInvaderProjectiles { model with bunkers = newBunkers }
         
     { model with 
-        playerProjectile = nextPlayerProjectile 
+        player = { model.player with laser = nextPlayerProjectile }
         bunkers = newBunkers
         invaderProjectiles = nextInvaderProjectiles }, Cmd.batch [firstCommand;secondCommand]
 
@@ -243,14 +240,8 @@ let destroyInvader targetRow index model =
         
 let update message model =
     match message with
-    | MovePlayer dir ->
-        let newPos = min (resWidth - padding - playerWidth) (max padding (model.playerX + dir * playerSpeed))
-        { model with playerX = newPos }, Cmd.none
-    | PlayerShoot ->
-        let newProjectile = 
-            {   x = model.playerX + playerWidth / 2
-                y = resHeight - (playerHeight + padding) - projectileHeight - 1 }
-        { model with playerProjectile = Some newProjectile }, Cmd.none
+    | PlayerMessage message -> 
+        { model with player = Player.update message model.player }, Cmd.none
     | InvaderShoot -> shootFromInvader model
     | ShuffleInvaders time -> shuffleInvaders time model   
     | UpdateDying -> 
@@ -297,7 +288,7 @@ let view model dispatch =
             |> List.map (fun r -> 
                 colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
 
-        yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.playerX, playerY) Colour.White
+        yield! Player.view model.player (PlayerMessage >> dispatch)
 
         yield! model.invaderProjectiles
             |> List.map (fun projectile ->
@@ -307,12 +298,6 @@ let view model dispatch =
             yield onupdate (fun inputs -> 
                 if not (Array.isEmpty model.invaders) && inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (ShuffleInvaders inputs.totalGameTime))
-            
-            match model.playerProjectile with
-                | Some p -> 
-                    yield colour Colour.White (projectileWidth, projectileHeight) (p.x, p.y)
-                | _ -> 
-                    yield onkeydown Keys.Space (fun () -> dispatch PlayerShoot)
 
             yield onupdate (fun _ -> 
                 if not (Array.isEmpty model.invaders)
@@ -321,11 +306,6 @@ let view model dispatch =
                         dispatch InvaderShoot)
 
             yield onupdate (fun _ -> dispatch MoveProjectiles)
-
-            yield whilekeydown Keys.Left (fun () -> dispatch (MovePlayer -1))
-            yield whilekeydown Keys.A (fun () -> dispatch (MovePlayer -1))
-            yield whilekeydown Keys.Right (fun () -> dispatch (MovePlayer 1))
-            yield whilekeydown Keys.D (fun () -> dispatch (MovePlayer 1))
 
         yield onkeydown Keys.Escape exit
         yield onkeydown Keys.R (fun () -> dispatch Restart)

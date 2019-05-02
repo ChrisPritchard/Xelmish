@@ -15,6 +15,7 @@
     </Content>
     <None Include="readme.md" />
     <Compile Include="Config.fs" />
+    <Compile Include="Player.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
