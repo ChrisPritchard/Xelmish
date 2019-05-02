@@ -77,6 +77,7 @@ type Message =
     | PlayerShoot
     | InvaderShoot
     | ShuffleInvaders of int64
+    | UpdateDying
     | MoveProjectiles
     | InvaderHit of row: int * index: int
     | PlayerHit
@@ -97,10 +98,24 @@ let invaderImpact x y w h model =
     |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
     |> Option.map fst
 
+let eraseBunkers invaders model =
+    let invaderRects = 
+        invaders 
+        |> Seq.collect (fun row -> 
+            row.xs 
+            |> Seq.filter (fun (_, state) -> state = Alive) 
+            |> Seq.map (fun (x, _) -> rect x row.y row.kind.width row.kind.height))
+        |> Seq.toList
+    model.bunkers 
+    |> List.filter (fun bunker -> 
+        invaderRects 
+        |> List.exists (fun invaderRect -> 
+            invaderRect.Intersects bunker) 
+        |> not)
+
 let rec shuffleInvaders time model = 
     // the shuffle mod is used for animations
     let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
-    
     let (newInvaders, newDirection) = 
         match model.invaderDirection with
         | Across (targetRow, dir) ->
@@ -112,12 +127,10 @@ let rec shuffleInvaders time model =
                             | Alive -> x + (invaderShuffleAmount * dir), Alive
                             | _ -> (x, state)) // the dying and dead don't shuffle
                     { row with xs = shuffled })
-
             // if the new shuffle has resulted in out of bounds, then use the old shuffle and start down
             if newInvaders.[targetRow].xs |> Array.exists (fun (x, state) -> state = Alive && x < padding || x + largeSize.width > (resWidth - padding))
             then model.invaders, Down (model.invaders.Length - 1, dir * -1)
             else newInvaders, Across ((if targetRow = 0 then newInvaders.Length - 1 else targetRow - 1), dir)
-
         | Down (targetRow, nextDir) ->
             let newInvaders = 
                 model.invaders 
@@ -129,41 +142,20 @@ let rec shuffleInvaders time model =
                 if targetRow = 0 then Across (newInvaders.Length - 1, nextDir) 
                 else Down (targetRow - 1, nextDir)
             newInvaders, nextDirection
-
     match model.invaderDirection, newDirection with
     | Across _, Down _ -> 
         // immediately do another shuffle, to eliminate the pause between going from across to down.
         shuffleInvaders time { model with invaderDirection = newDirection }
     | _ ->
-        // update dying
-        let newInvaders = 
-            newInvaders 
-            |> Array.map (fun row ->
-                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Dying then x, Dead else x, state) })
-        // check to see if any bunkers have been erased
-        let invaderRects = 
-            newInvaders 
-            |> Seq.collect (fun row -> 
-                row.xs 
-                |> Seq.filter (fun (_, state) -> state = Alive) 
-                |> Seq.map (fun (x, _) -> rect x row.y row.kind.width row.kind.height))
-            |> Seq.toList
-        let newBunkers = 
-            model.bunkers 
-            |> List.filter (fun bunker -> 
-                invaderRects 
-                |> List.exists (fun invaderRect -> 
-                    invaderRect.Intersects bunker) 
-                |> not)
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
             let playerHit = invaderImpact model.playerX playerY playerWidth playerHeight model
-            if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.none
+            if playerHit <> None then Cmd.ofMsg PlayerHit else Cmd.ofMsg UpdateDying
         { model with 
             invaders = newInvaders
             invaderDirection = newDirection
             lastShuffle = time
-            bunkers = newBunkers }, command
+            bunkers = eraseBunkers newInvaders model }, command
 
 let shootFromInvader model = 
     // only the invaders with a clear shot can shoot
@@ -248,7 +240,13 @@ let update message model =
                 y = resHeight - (playerHeight + padding) - projectileHeight - 1 }
         { model with playerProjectile = Some newProjectile }, Cmd.none
     | InvaderShoot -> shootFromInvader model
-    | ShuffleInvaders time -> shuffleInvaders time model        
+    | ShuffleInvaders time -> shuffleInvaders time model   
+    | UpdateDying -> 
+        let newInvaders = 
+            model.invaders 
+            |> Array.map (fun row ->
+                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Dying then x, Dead else x, state) })
+        { model with invaders = newInvaders }, Cmd.none
     | MoveProjectiles -> moveProjectiles model
     | InvaderHit (row, index) -> destroyInvader row index model
     | PlayerHit -> { model with freeze = true }, Cmd.none
