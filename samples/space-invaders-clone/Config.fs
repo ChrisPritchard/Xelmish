@@ -18,6 +18,7 @@ let invaderShuffleIncrease = 25L
 let shuffleDecrease = 20L
 let minShuffle = 50L
 
+let projectileWidth = 2
 let projectileHeight = 10
 let invaderProjectileSpeed = 2
 let playerProjectileSpeed = 4

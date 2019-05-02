@@ -83,6 +83,8 @@ type Message =
     | Victory
     | Restart
 
+let playerRect model = rect model.playerX playerY playerWidth playerHeight
+
 let invaderImpact x y w h model =
     let testRect = rect x y w h
     model.invaders 
@@ -175,21 +177,27 @@ let moveProjectiles model =
                 | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex)
                 | None -> Some next, Cmd.none
 
-    let nextInvaderProjectiles, cmdResult =
-        (([], cmdResult), model.invaderProjectiles)
-        ||> List.fold (fun (acc, cmdResult) p ->
+    let playerRect = playerRect model
+
+    let nextInvaderProjectiles, cmdResult, newBunkers =
+        (([], cmdResult, model.bunkers), model.invaderProjectiles)
+        ||> List.fold (fun (acc, cmdResult, bunkers) p ->
             let next = { p with y = p.y + invaderProjectileSpeed }
-            if next.y > resHeight then acc, cmdResult
+            if next.y > resHeight then acc, cmdResult, bunkers
             else
-                if 
-                    p.x >= model.playerX && p.x < model.playerX + playerWidth
-                    && p.y >= playerY && p.y < playerY + playerHeight then
-                        acc, Cmd.batch [cmdResult; Cmd.ofMsg PlayerHit]
+                let shotRect = rect p.x p.y projectileWidth projectileHeight
+                if shotRect.Intersects playerRect then
+                    acc, Cmd.batch [cmdResult; Cmd.ofMsg PlayerHit], bunkers
                 else
-                    next::acc, cmdResult)
+                    let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
+                    if List.isEmpty destroyed then
+                        next::acc, cmdResult, bunkers
+                    else
+                        acc, cmdResult, newBunkers)
 
     { model with 
         playerProjectile = nextPlayerProjectile 
+        bunkers = newBunkers
         invaderProjectiles = nextInvaderProjectiles }, cmdResult
 
 let destroyInvader targetRow index model =
@@ -265,7 +273,7 @@ let view model dispatch =
 
         yield! model.invaderProjectiles
             |> List.map (fun projectile ->
-                colour Colour.White (1, projectileHeight) (projectile.x, projectile.y))
+                colour Colour.White (projectileWidth, projectileHeight) (projectile.x, projectile.y))
 
         if not model.freeze then
             yield onupdate (fun inputs -> 
@@ -274,7 +282,7 @@ let view model dispatch =
             
             match model.playerProjectile with
                 | Some p -> 
-                    yield colour Colour.White (1, projectileHeight) (p.x, p.y)
+                    yield colour Colour.White (projectileWidth, projectileHeight) (p.x, p.y)
                 | _ -> 
                     yield onkeydown Keys.Space (fun () -> dispatch PlayerShoot)
 
