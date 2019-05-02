@@ -156,7 +156,9 @@ let shootFromInvader model =
         [|0..invadersPerRow-1|]
         |> Array.choose (fun col ->
             [invaderRows-1..-1..0]
-            |> List.tryFind (fun row -> snd model.invaders.[row].xs.[col] = Alive)
+            |> List.tryFind (fun row -> 
+                let row = model.invaders.[row]
+                row.y + row.kind.height < playerY && snd row.xs.[col] = Alive)
             |> Option.map (fun row -> 
                 let row = model.invaders.[row]
                 fst row.xs.[col] + row.kind.width / 2, row.y + row.kind.height))
