@@ -23,9 +23,17 @@ let update msg m =
   | SetStepSize x -> { m with StepSize = x }
   | Reset -> init ()
 
+// all of the above is straight from the Elmish.WPF sample (with only some indentation changes)
+// the view function below, replacing Elmish.WPF's bindings function, is Xelmish specific,
+// though note it still follows the dispatch model common to Elmish implementations.
+
 let view model dispatch =
 
+    // because all text uses the same font, it is shadowed here with this param already applied
     let text = text "connection"
+    // a button is defined here as a background colour which some text and a click event.
+    // Xelmish doesn't provide a button viewable by default - too many possible variables. 
+    // it just provides the core building blocks
     let button s event (x, y) = 
         let width, height = 100, 30 
         [
@@ -34,6 +42,8 @@ let view model dispatch =
             onclick event (width, height) (x, y)
         ]
 
+    // the yield pattern is useful, as single elements like the text with no background can be yielded alongside
+    // multi-element elements like buttons with yield!
     [
         yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
         yield! button "- counter" (fun () -> dispatch Decrement) (100, 100)
@@ -43,22 +53,22 @@ let view model dispatch =
         yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (220, 180)
         yield! button "reset" (fun () -> dispatch Reset) (100, 220)
 
-        yield onkeydown Keys.Escape exit
+        yield onkeydown Keys.Escape exit // this is added in all the samples, to make it simple and intuitive to exit the app.
     ]
 
 [<EntryPoint>]
 let main _ =
     let config = {
         resolution = Windowed (420, 300)
-        clearColour = Some Colour.White
+        clearColour = Some Colour.White // if set to None, then each draw will layer over the previous. which looks weird.
         mouseVisible = true
         assetsToLoad = [
-            Font ("connection", "./connection")
+            Font ("connection", "./connection") // the font used in the game needs to be loaded. there is no default font.
         ]
         showFpsInConsole = false // best to not do this if using the console trace from Elmish
     }
 
-    Program.mkSimple init update view
-    |> Program.withConsoleTrace
-    |> Xelmish.Program.runGameLoop config
+    Program.mkSimple init update view // standard, out of the box Elmish initialisation
+    |> Program.withConsoleTrace // standard, out of the box Elmish console tracing.
+    |> Xelmish.Program.runGameLoop config // Xelmish specific run function
     0
