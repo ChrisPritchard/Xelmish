@@ -140,6 +140,21 @@ let rec shuffleInvaders time model =
             newInvaders 
             |> Array.map (fun row ->
                 { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Dying then x, Dead else x, state) })
+        // check to see if any bunkers have been erased
+        let invaderRects = 
+            newInvaders 
+            |> Seq.collect (fun row -> 
+                row.xs 
+                |> Seq.filter (fun (_, state) -> state = Alive) 
+                |> Seq.map (fun (x, _) -> rect x row.y row.kind.width row.kind.height))
+            |> Seq.toList
+        let newBunkers = 
+            model.bunkers 
+            |> List.filter (fun bunker -> 
+                invaderRects 
+                |> List.exists (fun invaderRect -> 
+                    invaderRect.Intersects bunker) 
+                |> not)
         // check to see if, as a result of this shuffle, the player has been touched.
         let command = 
             let playerHit = invaderImpact model.playerX playerY playerWidth playerHeight model
@@ -147,7 +162,8 @@ let rec shuffleInvaders time model =
         { model with 
             invaders = newInvaders
             invaderDirection = newDirection
-            lastShuffle = time }, command
+            lastShuffle = time
+            bunkers = newBunkers }, command
 
 let shootFromInvader model = 
     // only the invaders with a clear shot can shoot
