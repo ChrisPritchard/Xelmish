@@ -71,7 +71,7 @@ let invaderImpact x y w h model =
     |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
     |> Option.map fst
 
-let eraseBunkers (invaderRows: Invaders.Row []) model =
+let eraseBunkers (invaderRows: Invaders.Row []) bunkers =
     let invaderRects = 
         invaderRows 
         |> Seq.collect (fun row -> 
@@ -79,7 +79,7 @@ let eraseBunkers (invaderRows: Invaders.Row []) model =
             |> Seq.filter (fun (_, state) -> state = Invaders.Alive) 
             |> Seq.map (fun (x, _) -> rect x row.y row.kind.width row.kind.height))
         |> Seq.toList
-    model.bunkers 
+    bunkers 
     |> List.filter (fun bunker -> 
         invaderRects 
         |> List.exists (fun invaderRect -> 
@@ -125,6 +125,7 @@ let moveProjectiles model =
         movePlayerProjectile model
     let nextInvaderProjectiles, secondCommand, newBunkers = 
         moveInvaderProjectiles { model with bunkers = newBunkers }
+    let newBunkers = eraseBunkers model.invaders.rows newBunkers
         
     { model with 
         player = { model.player with laser = nextPlayerProjectile }
@@ -167,11 +168,6 @@ let update message model =
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
     | Restart -> init ()
-    
-let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
-    OnDraw (fun loadedAssets (spriteBatch: SpriteBatch) ->
-        let texture = loadedAssets.textures.["sprites"]
-        spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour))
 
 let text = text "PressStart2P" 24. Colour.White (0., 0.)
 
