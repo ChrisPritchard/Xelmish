@@ -51,7 +51,7 @@ type Message =
     | PlayerMessage of Player.Message
     | InvadersMessage of Invaders.Message
     | UpdateDying of int64
-    | MoveProjectiles
+    | CheckLaserCollisions
     | InvaderHit of row: int * index: int
     | PlayerHit
     | Victory
@@ -86,7 +86,7 @@ let eraseBunkers (invaderRows: Invaders.Row []) bunkers =
             invaderRect.Intersects bunker) 
         |> not)
 
-let movePlayerProjectile model =
+let movePlayerLaserCollisions model =
     match model.player.laser with
     | None -> None, Cmd.none, model.bunkers
     | Some (x, y) ->
@@ -100,7 +100,7 @@ let movePlayerProjectile model =
             else
                 None, Cmd.none, newBunkers
 
-let moveInvaderProjectiles model =
+let checkInvaderLaserCollisions model =
     let playerRect = playerRect model
     (([], Cmd.none, model.bunkers), model.invaders.lasers)
     ||> List.fold (fun (acc, cmdResult, bunkers) (x, y) ->
@@ -114,17 +114,17 @@ let moveInvaderProjectiles model =
             else
                 acc, cmdResult, newBunkers)
 
-let moveProjectiles model =
-    let nextPlayerProjectile, firstCommand, newBunkers = 
-        movePlayerProjectile model
-    let nextInvaderProjectiles, secondCommand, newBunkers = 
-        moveInvaderProjectiles { model with bunkers = newBunkers }
+let checkLaserCollisions model =
+    let nextPlayerLaser, firstCommand, newBunkers = 
+        movePlayerLaserCollisions model
+    let nextInvaderLasers, secondCommand, newBunkers = 
+        checkInvaderLaserCollisions { model with bunkers = newBunkers }
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
         
     { model with 
-        player = { model.player with laser = nextPlayerProjectile }
+        player = { model.player with laser = nextPlayerLaser }
         bunkers = newBunkers
-        invaders = { model.invaders with lasers = nextInvaderProjectiles } }, Cmd.batch [firstCommand;secondCommand]
+        invaders = { model.invaders with lasers = nextInvaderLasers } }, Cmd.batch [firstCommand;secondCommand]
 
 let destroyInvader targetRow index model =
     let newInvaders =
@@ -157,7 +157,7 @@ let update message model =
         { model with 
             invaders = { model.invaders with rows = newInvaders }
             lastTick = atTime }, Cmd.none
-    | MoveProjectiles -> moveProjectiles model
+    | CheckLaserCollisions -> checkLaserCollisions model
     | InvaderHit (row, index) -> destroyInvader row index model
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
@@ -179,7 +179,7 @@ let view model dispatch =
         yield! Invaders.view model.invaders (InvadersMessage >> dispatch) model.freeze
 
         if not model.freeze then
-            yield onupdate (fun _ -> dispatch MoveProjectiles)
+            yield onupdate (fun _ -> dispatch CheckLaserCollisions)
             yield onupdate (fun inputs -> 
                 if inputs.totalGameTime - model.lastTick > tickInterval then
                     dispatch (UpdateDying inputs.totalGameTime))
