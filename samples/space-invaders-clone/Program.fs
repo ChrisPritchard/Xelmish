@@ -3,7 +3,10 @@ open Xelmish.Model
 open Xelmish.Viewables
 open Config
 
+let tickInterval = 500L
+
 type PlayingModel = {
+    lastTick: int64
     player: Player.Model
     bunkers: Rectangle list
     invaders: Invaders.Model
@@ -36,6 +39,7 @@ let defaultBunkers =
 
 let init () = 
     {
+        lastTick = 0L
         player = Player.init ()
         bunkers = defaultBunkers
         invaders = Invaders.init ()
@@ -46,7 +50,7 @@ let init () =
 type Message = 
     | PlayerMessage of Player.Message
     | InvadersMessage of Invaders.Message
-    | UpdateDying
+    | UpdateDying of int64
     | MoveProjectiles
     | InvaderHit of row: int * index: int
     | PlayerHit
@@ -150,12 +154,14 @@ let update message model =
         { model with player = Player.update message model.player }, Cmd.none
     | InvadersMessage message -> 
         { model with invaders = Invaders.update message model.invaders }, Cmd.none
-    | UpdateDying -> 
+    | UpdateDying atTime -> 
         let newInvaders = 
             model.invaders.rows
             |> Array.map (fun row ->
                 { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Invaders.Dying then x, Invaders.Dead else x, state) })
-        { model with invaders = { model.invaders with rows = newInvaders } }, Cmd.none
+        { model with 
+            invaders = { model.invaders with rows = newInvaders }
+            lastTick = atTime }, Cmd.none
     | MoveProjectiles -> moveProjectiles model
     | InvaderHit (row, index) -> destroyInvader row index model
     | PlayerHit -> { model with freeze = true }, Cmd.none
@@ -184,6 +190,9 @@ let view model dispatch =
 
         if not model.freeze then
             yield onupdate (fun _ -> dispatch MoveProjectiles)
+            yield onupdate (fun inputs -> 
+                if inputs.totalGameTime - model.lastTick > tickInterval then
+                    dispatch (UpdateDying inputs.totalGameTime))
 
         yield onkeydown Keys.Escape exit
         yield onkeydown Keys.R (fun () -> dispatch Restart)
