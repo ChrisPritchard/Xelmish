@@ -23,6 +23,7 @@ let init () = {
 type Message = 
     | Move of dir: int
     | Shoot
+    | MoveLaser
 
 let leftClamp, rightClamp = padding, resWidth - padding - playerWidth
 
@@ -38,6 +39,13 @@ let update message model =
         | None ->
             let pos = model.x + playerWidth / 2, resHeight - (playerHeight + padding) - projectileHeight - 1
             { model with laser = Some pos }
+    | MoveLaser ->
+        match model.laser with
+        | None -> model
+        | Some (x, y) ->
+            let (nx, ny) = x, y - playerProjectileSpeed
+            if ny < 0 then { model with laser = None }
+            else { model with laser = Some (nx, ny) }
 
 let view model dispatch freeze =
     match model.state with
@@ -52,6 +60,9 @@ let view model dispatch freeze =
                 if not freeze then yield onkeydown Keys.Space (fun () -> dispatch Shoot)
 
             if not freeze then
+
+                yield onupdate (fun _ -> if model.laser <> None then dispatch MoveLaser)
+
                 yield whilekeydown Keys.Left (fun () -> dispatch (Move -1))
                 yield whilekeydown Keys.A (fun () -> dispatch (Move -1))
                 yield whilekeydown Keys.Right (fun () -> dispatch (Move 1))

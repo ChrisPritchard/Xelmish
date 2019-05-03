@@ -40,6 +40,7 @@ let init () =
 type Message = 
     | Shoot
     | Shuffle of atTime:int64
+    | MoveLasers
 
 let shootFromRandom model =
     let possibleShooters = 
@@ -105,6 +106,15 @@ let update message model =
     match message with
     | Shoot -> shootFromRandom model
     | Shuffle atTime -> shuffleRows atTime model
+    | MoveLasers ->
+        let rec advance acc rem =
+            match rem with
+            | [] -> acc
+            | (x, y)::tail ->
+                let ny = y + invaderProjectileSpeed
+                if ny > resHeight then advance acc tail
+                else advance ((x, ny)::acc) tail
+        { model with lasers = advance [] model.lasers }
 
 let view model dispatch freeze =
     [
@@ -135,7 +145,8 @@ let view model dispatch freeze =
                 if inputs.totalGameTime - model.lastShuffle > model.shuffleInterval then
                     dispatch (Shuffle inputs.totalGameTime))
 
-            yield onupdate (fun _ -> 
+            yield onupdate (fun _ ->
+                dispatch MoveLasers
                 if  List.length model.lasers < maxInvaderProjectiles
                     && check invaderShootChance then
                         dispatch Shoot)

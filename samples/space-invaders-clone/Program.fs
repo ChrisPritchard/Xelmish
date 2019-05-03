@@ -90,35 +90,29 @@ let movePlayerProjectile model =
     match model.player.laser with
     | None -> None, Cmd.none, model.bunkers
     | Some (x, y) ->
-        let (nx, ny) = x, y - playerProjectileSpeed
-        if ny < 0 then None, Cmd.none, model.bunkers
-        else
-            match invaderImpact nx ny projectileWidth projectileHeight model with
-            | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
-            | None -> 
-                let shotRect = rect nx ny projectileWidth projectileHeight
-                let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
-                if List.isEmpty destroyed then
-                    Some (nx, ny), Cmd.none, model.bunkers
-                else
-                    None, Cmd.none, newBunkers
+        match invaderImpact x y projectileWidth projectileHeight model with
+        | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
+        | None -> 
+            let shotRect = rect x y projectileWidth projectileHeight
+            let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
+            if List.isEmpty destroyed then
+                Some (x, y), Cmd.none, model.bunkers
+            else
+                None, Cmd.none, newBunkers
 
 let moveInvaderProjectiles model =
     let playerRect = playerRect model
     (([], Cmd.none, model.bunkers), model.invaders.lasers)
     ||> List.fold (fun (acc, cmdResult, bunkers) (x, y) ->
-        let nx, ny = x, y + invaderProjectileSpeed
-        if ny > resHeight then acc, cmdResult, bunkers
+        let shotRect = rect x y projectileWidth projectileHeight
+        if shotRect.Intersects playerRect then
+            acc, Cmd.ofMsg PlayerHit, bunkers
         else
-            let shotRect = rect nx ny projectileWidth projectileHeight
-            if shotRect.Intersects playerRect then
-                acc, Cmd.ofMsg PlayerHit, bunkers
+            let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
+            if List.isEmpty destroyed then
+                (x, y)::acc, cmdResult, bunkers
             else
-                let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
-                if List.isEmpty destroyed then
-                    (nx, ny)::acc, cmdResult, bunkers
-                else
-                    acc, cmdResult, newBunkers)
+                acc, cmdResult, newBunkers)
 
 let moveProjectiles model =
     let nextPlayerProjectile, firstCommand, newBunkers = 
