@@ -39,7 +39,7 @@ let update message model =
             let pos = model.x + playerWidth / 2, resHeight - (playerHeight + padding) - projectileHeight - 1
             { model with laser = Some pos }
 
-let view model dispatch =
+let view model dispatch freeze =
     match model.state with
     | Alive ->
         [
@@ -49,12 +49,13 @@ let view model dispatch =
             | Some (x, y) -> 
                 yield colour Colour.White (projectileWidth, projectileHeight) (x, y)
             | _ -> 
-                yield onkeydown Keys.Space (fun () -> dispatch Shoot)
+                if not freeze then yield onkeydown Keys.Space (fun () -> dispatch Shoot)
 
-            yield whilekeydown Keys.Left (fun () -> dispatch (Move -1))
-            yield whilekeydown Keys.A (fun () -> dispatch (Move -1))
-            yield whilekeydown Keys.Right (fun () -> dispatch (Move 1))
-            yield whilekeydown Keys.D (fun () -> dispatch (Move 1))
+            if not freeze then
+                yield whilekeydown Keys.Left (fun () -> dispatch (Move -1))
+                yield whilekeydown Keys.A (fun () -> dispatch (Move -1))
+                yield whilekeydown Keys.Right (fun () -> dispatch (Move 1))
+                yield whilekeydown Keys.D (fun () -> dispatch (Move 1))
         ]
     | Dying _ ->
         [

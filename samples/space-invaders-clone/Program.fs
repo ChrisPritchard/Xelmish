@@ -176,7 +176,7 @@ let view model dispatch =
         yield text "SCORE" (10, 10)
         yield text (sprintf "%04i" model.score) (10, 44)
 
-        yield! Player.view model.player (PlayerMessage >> dispatch)
+        yield! Player.view model.player (PlayerMessage >> dispatch) model.freeze
 
         yield! model.bunkers
             |> List.map (fun r -> 
