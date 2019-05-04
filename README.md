@@ -10,15 +10,23 @@ Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not
 
 ## Simple Example of Usage
 
+The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
+
+Once you have processed that, see the samples section below for a guide on the other, progressively more involved samples in the project.
+
 ## Development Info
 
 Xelmish was developed first with Visual Studio Community 2017, then later with Visual Studio Community 2019, on various Windows 10 machines. A Visual Studio solution file is in the root of the project if you wish to build using these IDEs. However, it should be fully compilable from the command line and other IDEs if that is your preference.
 
-It has been built with pure dotnet core 2.2, and you will need to have this installed to compile it. Xelmish and its samples have been tested on Windows 10 only.
+It has been built with pure dotnet core 2.2, and you will need to have this installed to compile it. Xelmish and its samples have been tested on Windows 10 and Mac OSX.
 
 ## Samples description
 
 Under /samples, there are numerous projects that use Elmish and Xelmish. These are described below, in their order of complexity.
+
+### 0. Xelmish-first
+
+The most basic sample, described above. Just a coloured rectangle on the screen with move/resize commands.
 
 ### 1. Simple-Counter
 
@@ -34,7 +42,7 @@ The game tetris, implemented using several elmish components for screens, with a
 
 ### 4. Space-Invaders-Clone
 
-A clone of 1979's space invaders, though not a hundred percent accurate to the old version. Space invaders is a little simpler than Tetris as a game, but requires a great deal more events, animations and individual entities, so it serves as a good demonstration of how the bulky (compared to direct imperative style) Elmish eventing model performs in such a context.
+A clone of 1979's space invaders, though not a hundred percent accurate to the old version. Compared to Tetris, Space Invaders requires a great deal more events, animations and individual entities, so it serves as a good demonstration of how the bulky (compared to direct imperative style) Elmish eventing model performs in such a context.
 
 ## History and Reasoning
 
@@ -43,6 +51,18 @@ Xelmish has been built for the **[2019 F# Applied Competition](http://foundation
 While I have successfully built several small games with gamecore, I was finding that as my games increased in complexity the very simplistic model/view architecture in gamecore started to get stretched and warp. Things which were view-specific started to leak into model, and vice versa. 
 
 In contrast the battle-tested Elmish model has, so far, proved a pleasure to work with. Much more elegant, and it has also achieved in a far better way my goal of having games being purely functional (where performance permits) and agnostic of engine. The MVU architecture, and parent-child relationships that the Elm architecture handles so well, mean that a game can be designed and theorised without having the engine get in the way, which is (in my opinion) ideal.
+
+### On the MonoGame/XNA content pipeline
+
+Monogame comes with a tool called the **monogame content pipeline**. This is a build task that converts textures, fonts and sounds etc and processes them into per-platform optimised xmb files, which are more efficient to load. Especially on low spec machines like mobile phones where space might be at a premium, xmb resources are much more efficient.
+
+*However*, the pipeline is a bit painful to use, and runs entirely at compile time. The first presents itself in initial setup, requiring a tool to add resources (the monogame content pipeline tool, available generally with the standard monogame download), and in cross-platform compatibility issues (a seperate download for mac, and sound/image processing dependencies that can require some troubleshooting to solve).
+
+The second problem is that you might want to support custom resources, e.g. modding of raw textures by users post-compile, which only works if the assets are loaded directly.
+
+Accordingly, Xelmish follows a model where, by default, the only assets you need to run through the pipeline are fonts. Textures in the form of bitmaps or pngs or whatever can be loaded directly. This has the added benefit that from 0-to-running game is usually quicker.
+
+You could of course switch to fully using the pipeline if you have something you want to publish. 
 
 ## License
 
