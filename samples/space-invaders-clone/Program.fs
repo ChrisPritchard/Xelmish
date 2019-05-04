@@ -10,8 +10,8 @@ type PlayingModel = {
     player: Player.Model
     bunkers: Rectangle list
     invaders: Invaders.Model
-    freeze: bool
     score: int
+    lives: int
 } 
 
 and Projectile = { x: int; y: int }
@@ -43,8 +43,8 @@ let init () =
         player = Player.init ()
         bunkers = defaultBunkers
         invaders = Invaders.init ()
-        freeze = false
         score = 0
+        lives = 3
     }, Cmd.none
 
 type Message = 
@@ -55,6 +55,7 @@ type Message =
     | InvaderHit of row: int * index: int
     | PlayerHit
     | Victory
+    | GameOver
     | Restart
 
 let playerRect model = rect model.player.x playerY playerWidth playerHeight
@@ -126,26 +127,43 @@ let checkLaserCollisions model =
         bunkers = newBunkers
         invaders = { model.invaders with lasers = nextInvaderLasers } }, Cmd.batch [firstCommand;secondCommand]
         
+let updateDying atTime model = 
+    match model.player.state with
+    | Player.Dying 0 when model.lives = 0 ->
+        model, Cmd.ofMsg GameOver
+    | Player.Dying 0 ->
+        { model with
+            player = Player.init ()
+            lives = model.lives - 1
+            invaders = { model.invaders with lasers = [] } }, Cmd.none
+    | _ ->
+        let newInvaders = 
+            model.invaders.rows
+            |> Array.map (fun row ->
+                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Invaders.Dying then x, Invaders.Dead else x, state) })
+        let newPlayer = 
+            match model.player.state with 
+            | Player.Dying n -> { model.player with state = Player.Dying (n - 1) } 
+            | _ -> model.player
+        { model with 
+            invaders = { model.invaders with rows = newInvaders }
+            player = newPlayer
+            lastTick = atTime }, Cmd.none
+
 let update message model =
     match message with
     | PlayerMessage message -> 
         { model with player = Player.update message model.player }, Cmd.none
     | InvadersMessage message -> 
         { model with invaders = Invaders.update message model.invaders }, Cmd.none
-    | UpdateDying atTime -> 
-        let newInvaders = 
-            model.invaders.rows
-            |> Array.map (fun row ->
-                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Invaders.Dying then x, Invaders.Dead else x, state) })
-        { model with 
-            invaders = { model.invaders with rows = newInvaders }
-            lastTick = atTime }, Cmd.none
+    | UpdateDying atTime -> updateDying atTime model
     | CheckLaserCollisions -> checkLaserCollisions model
     | InvaderHit (row, index) -> 
         { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
-    | PlayerHit -> { model with freeze = true }, Cmd.none
-    | Victory -> { model with freeze = true }, Cmd.none
+    | PlayerHit -> { model with player = { model.player with state = Player.Dying dieLength } }, Cmd.none
+    | Victory -> model, Cmd.none // todo
+    | GameOver -> model, Cmd.none // todo
     | Restart -> init ()
 
 let text = text "PressStart2P" 24. Colour.White (0., 0.)
@@ -155,18 +173,22 @@ let view model dispatch =
         yield text "SCORE" (10, 10)
         yield text (sprintf "%04i" model.score) (10, 44)
 
-        yield! Player.view model.player (PlayerMessage >> dispatch) model.freeze
-        yield! Invaders.view model.invaders (InvadersMessage >> dispatch) model.freeze
+        yield text "LIVES" (150, 10)
+        yield text (sprintf "%02i" model.lives) (150, 44)
+
+        yield! Player.view model.player (PlayerMessage >> dispatch)
+        yield! Invaders.view model.invaders (InvadersMessage >> dispatch) (model.player.state <> Player.Alive)
 
         yield! model.bunkers
             |> List.map (fun r -> 
                 colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
 
-        if not model.freeze then
+        if model.player.state = Player.Alive then
             yield onupdate (fun _ -> dispatch CheckLaserCollisions)
-            yield onupdate (fun inputs -> 
-                if inputs.totalGameTime - model.lastTick > tickInterval then
-                    dispatch (UpdateDying inputs.totalGameTime))
+
+        yield onupdate (fun inputs -> 
+            if inputs.totalGameTime - model.lastTick > tickInterval then
+                dispatch (UpdateDying inputs.totalGameTime))
 
         yield onkeydown Keys.Escape exit
         yield onkeydown Keys.R (fun () -> dispatch Restart)

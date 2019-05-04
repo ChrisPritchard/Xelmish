@@ -100,6 +100,7 @@ let playerWidth, playerHeight =
 
 let playerY = resHeight - (playerHeight + padding)
 let playerSpeed = 5
+let dieLength = 3
 
 let bunkerSpace = 20
 let bunkerBitDim = 6

@@ -47,7 +47,7 @@ let update message model =
             if ny < 0 then { model with laser = None }
             else { model with laser = Some (nx, ny) }
 
-let view model dispatch freeze =
+let view model dispatch =
     match model.state with
     | Alive ->
         [
@@ -57,9 +57,9 @@ let view model dispatch freeze =
             | Some (x, y) -> 
                 yield colour Colour.White (projectileWidth, projectileHeight) (x, y)
             | _ -> 
-                if not freeze then yield onkeydown Keys.Space (fun () -> dispatch Shoot)
+                if model.state = Alive then yield onkeydown Keys.Space (fun () -> dispatch Shoot)
 
-            if not freeze then
+            if model.state = Alive then
 
                 yield onupdate (fun _ -> if model.laser <> None then dispatch MoveLaser)
 
