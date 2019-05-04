@@ -11,3 +11,12 @@ let runGameLoop config (program: Program<_, _, _, Viewable list>) =
         loop.View <- program.view model dispatch
     Program.run { program with setState = setState }
     loop.Run ()
+
+let runSimpleGameLoop assetsToLoad (windowWidth, windowHeight) clearColour (program: Program<_, _, _, Viewable list>) =
+    let config = {
+        resolution = Windowed (windowWidth, windowHeight)
+        clearColour = Some clearColour
+        mouseVisible = true
+        assetsToLoad = assetsToLoad
+        showFpsInConsole = false }
+    runGameLoop config program
