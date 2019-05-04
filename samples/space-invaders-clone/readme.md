@@ -11,3 +11,5 @@ Space Invader sprites by [GooperBlooper22](https://www.deviantart.com/gooperbloo
 The game itself, for mechanic reference, was played via the [Internet Archive](https://archive.org) where it is published [here](https://archive.org/details/Space_Invaders_1985_Sega_Taito). Space Invaders was a bit before my time (i.e. published years before I was born) so having a reference to recreate was very useful. [This article](http://www.classicgaming.cc/classics/space-invaders/play-guide) was also very useful.
 
 The font used is "Press Start 2P" from [here](https://fontlibrary.org/en/font/press-start-2p). It is available under the SIL Open Font License, a copy of which is in the root of this solution.
+
+The sounds are from user [Krial](https://opengameart.org/users/krial) on [OpenGameArt.Org](https://opengameart.org), specifically the [siclone sound effects pack](https://opengameart.org/content/siclone-sound-effects), under the [CCO 1.0 license](http://creativecommons.org/publicdomain/zero/1.0/).

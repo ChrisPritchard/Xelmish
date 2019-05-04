@@ -25,6 +25,9 @@ let text font (fontSize: float) colour (ox: float, oy: float) (text: string) (x,
         let position = Vector2.Add(origin, vector2 x y)
         spriteBatch.DrawString (font, text, position, colour, 0.f, Vector2.Zero, scale, SpriteEffects.None, 0.f))
 
+let playSound key =
+    OnDraw (fun loadedAssets _ -> ignore (loadedAssets.sounds.[key].Play ()))
+
 let onupdate event = 
     OnUpdate event
 

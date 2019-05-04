@@ -36,7 +36,7 @@ let maxInvaderProjectiles = 3
 let invaderShootChance = 0.1
 
 let spritemap = 
-    System.IO.File.ReadAllLines "./spritemap.txt"
+    System.IO.File.ReadAllLines "./content/spritemap.txt"
     |> Array.map (fun line -> 
         let sa = line.Split ([|'\t';','|], System.StringSplitOptions.RemoveEmptyEntries)
         sa.[0], (int sa.[1], int sa.[2], int sa.[3], int sa.[4]))

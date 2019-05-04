@@ -75,7 +75,15 @@ type GameLoop (config: GameConfig) as this =
                     { assets with textures = Map.add key texture assets.textures }
                 | Font (key, path) -> 
                     let font = this.Content.Load<SpriteFont> path
-                    { assets with fonts = Map.add key font assets.fonts })
+                    { assets with fonts = Map.add key font assets.fonts }
+                | Sound (key, path) -> 
+                    use stream = File.OpenRead path
+                    let sound = SoundEffect.FromStream stream
+                    { assets with sounds = Map.add key sound assets.sounds }
+                | Music (key, path) -> 
+                    let uri = new System.Uri (path, System.UriKind.RelativeOrAbsolute)
+                    let music = Song.FromUri (key, uri)
+                    { assets with music = Map.add key music assets.music })
         assets <- loadedAssets
 
     override __.Update gameTime =

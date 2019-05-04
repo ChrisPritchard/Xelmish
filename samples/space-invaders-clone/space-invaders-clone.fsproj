@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="spritemap.txt">
+    <Content Include="content\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="sprites.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
     <None Include="readme.md" />
     <Compile Include="Common.fs" />
     <Compile Include="Player.fs" />

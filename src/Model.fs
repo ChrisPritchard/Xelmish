@@ -46,6 +46,10 @@ and Loadable =
 | Texture of key:string * path:string
 /// key (how it is referenced) and path (full relative path (without extension) to spriteFont)
 | Font of key:string * path:string
+/// key (how it is referenced) and path (full relative path to file)
+| Sound of key:string * path:string
+/// key (how it is referenced) and path (full relative path to file)
+| Music of key:string * path:string
 
 /// Current and previous state of input devices
 type Inputs = {
