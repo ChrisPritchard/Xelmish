@@ -41,6 +41,7 @@ type Message =
     | Shoot
     | Shuffle of atTime:int64
     | MoveLasers
+    | Destroy of row:int * col:int
 
 let shootFromRandom model =
     let possibleShooters = 
@@ -99,8 +100,12 @@ let rec shuffleRows time model =
             rows = newRows
             direction = newDirection
             lastShuffle = time }
-
-// TODO erase bunkers and check for player touch in parent
+            
+let destroyInvader targetRow index model =
+    let (x, _) = model.rows.[targetRow].xs.[index]
+    model.rows.[targetRow].xs.[index] <- (x, Dying)
+    let newShuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease)
+    { model with shuffleInterval = newShuffleInterval }
 
 let update message model =
     match message with
@@ -115,25 +120,23 @@ let update message model =
                 if ny > resHeight then advance acc tail
                 else advance ((x, ny)::acc) tail
         { model with lasers = advance [] model.lasers }
+    | Destroy (row, col) -> destroyInvader row col model
 
 let view model dispatch freeze =
     [
-        yield! 
-            model.rows 
-            |> Array.collect (fun row ->
-                let spriteRect = row.kind.animations.[model.shuffleMod]
-                row.xs 
-                |> Array.filter (fun (_, state) -> state <> Dead)
-                |> Array.map (fun (x, state) -> 
+        for row in model.rows do
+            let spriteRect = row.kind.animations.[model.shuffleMod]
+            for (x, state) in row.xs do
+                if state <> Dead then
                     match state with
                     | Alive ->
-                        sprite spriteRect 
+                        yield sprite spriteRect 
                             (row.kind.width, row.kind.height) 
                             (x, row.y) row.kind.colour
                     | _ ->
-                        sprite spritemap.["invader-death"] 
+                        yield sprite spritemap.["invader-death"] 
                             (explosionWidth, explosionHeight) 
-                            (x, row.y) Colour.White))
+                            (x, row.y) Colour.White
         
         yield! 
             model.lasers

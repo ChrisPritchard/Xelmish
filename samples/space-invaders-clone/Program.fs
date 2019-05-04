@@ -86,7 +86,7 @@ let eraseBunkers (invaderRows: Invaders.Row []) bunkers =
             invaderRect.Intersects bunker) 
         |> not)
 
-let movePlayerLaserCollisions model =
+let checkPlayerLaserCollisions model =
     match model.player.laser with
     | None -> None, Cmd.none, model.bunkers
     | Some (x, y) ->
@@ -116,7 +116,7 @@ let checkInvaderLaserCollisions model =
 
 let checkLaserCollisions model =
     let nextPlayerLaser, firstCommand, newBunkers = 
-        movePlayerLaserCollisions model
+        checkPlayerLaserCollisions model
     let nextInvaderLasers, secondCommand, newBunkers = 
         checkInvaderLaserCollisions { model with bunkers = newBunkers }
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
@@ -125,23 +125,6 @@ let checkLaserCollisions model =
         player = { model.player with laser = nextPlayerLaser }
         bunkers = newBunkers
         invaders = { model.invaders with lasers = nextInvaderLasers } }, Cmd.batch [firstCommand;secondCommand]
-
-let destroyInvader targetRow index model =
-    let newInvaders =
-        model.invaders.rows
-            |> Array.mapi (fun i row ->
-                if i <> targetRow then row
-                else
-                    let newXs = 
-                        row.xs 
-                        |> Array.mapi (fun i (x, state) -> 
-                            if i <> index then (x, state) else (x, Invaders.Dying))
-                    { row with xs = newXs })
-    let scoreIncrease = model.invaders.rows.[targetRow].kind.score
-    let newShuffleInterval = max minShuffle (model.invaders.shuffleInterval - shuffleDecrease)
-    { model with
-        invaders = { model.invaders with rows = newInvaders; shuffleInterval = newShuffleInterval }
-        score = model.score + scoreIncrease }, Cmd.none
         
 let update message model =
     match message with
@@ -158,7 +141,9 @@ let update message model =
             invaders = { model.invaders with rows = newInvaders }
             lastTick = atTime }, Cmd.none
     | CheckLaserCollisions -> checkLaserCollisions model
-    | InvaderHit (row, index) -> destroyInvader row index model
+    | InvaderHit (row, index) -> 
+        { model with score = model.score + model.invaders.rows.[row].kind.score },
+        Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
     | PlayerHit -> { model with freeze = true }, Cmd.none
     | Victory -> { model with freeze = true }, Cmd.none
     | Restart -> init ()
@@ -171,12 +156,11 @@ let view model dispatch =
         yield text (sprintf "%04i" model.score) (10, 44)
 
         yield! Player.view model.player (PlayerMessage >> dispatch) model.freeze
+        yield! Invaders.view model.invaders (InvadersMessage >> dispatch) model.freeze
 
         yield! model.bunkers
             |> List.map (fun r -> 
                 colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
-
-        yield! Invaders.view model.invaders (InvadersMessage >> dispatch) model.freeze
 
         if not model.freeze then
             yield onupdate (fun _ -> dispatch CheckLaserCollisions)
