@@ -16,14 +16,14 @@ let image key colour (width, height) (x, y) =
     OnDraw (fun loadedAssets spriteBatch -> 
         spriteBatch.Draw(loadedAssets.textures.[key], rect x y width height, colour))
 
-let text font (fontSize: float) colour (ox, oy) (text: string) (x, y) =
+let text font (fontSize: float) colour (ox: float, oy: float) (text: string) (x, y) =
     OnDraw (fun loadedAssets spriteBatch -> 
         let font = loadedAssets.fonts.[font]
         let measured = font.MeasureString (text)
         let scale = let v = float32 fontSize / measured.Y in Vector2(v, v)
-        let origin = Vector2(float32 (ox % 1.) * measured.X * scale.X, float32 (oy % 1.) * measured.Y * scale.Y)
+        let origin = Vector2 (float32 ox * measured.X * scale.X, float32 oy * measured.Y * scale.Y)
         let position = Vector2.Add(origin, vector2 x y)
-        spriteBatch.DrawString(font, text, position, colour, 0.f, Vector2.Zero, scale, SpriteEffects.None, 0.f))
+        spriteBatch.DrawString (font, text, position, colour, 0.f, Vector2.Zero, scale, SpriteEffects.None, 0.f))
 
 let onupdate event = 
     OnUpdate event

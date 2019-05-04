@@ -12,9 +12,7 @@ type Model = {
     invaders: Invaders.Model
     score: int
     lives: int
-} 
-
-and Projectile = { x: int; y: int }
+}
 
 let defaultBunkers =
     let dim = bunkerBitDim
@@ -50,15 +48,13 @@ let init () =
 type Message = 
     | PlayerMessage of Player.Message
     | InvadersMessage of Invaders.Message
-    | UpdateDying of int64
+    | UpdateDying of tickTime:int64
     | CheckLaserCollisions
-    | InvaderHit of row: int * index: int
+    | InvaderHit of row:int * index:int
     | PlayerHit
     | Victory
     | GameOver
     | Restart
-
-let playerRect model = rect model.player.x playerY playerWidth playerHeight
 
 let invaderImpact x y w h model =
     let testRect = rect x y w h
@@ -102,7 +98,7 @@ let checkPlayerLaserCollisions model =
                 None, Cmd.none, newBunkers
 
 let checkInvaderLaserCollisions model =
-    let playerRect = playerRect model
+    let playerRect = rect model.player.x playerY playerWidth playerHeight
     (([], Cmd.none, model.bunkers), model.invaders.lasers)
     ||> List.fold (fun (acc, cmdResult, bunkers) (x, y) ->
         let shotRect = rect x y projectileWidth projectileHeight
@@ -125,7 +121,8 @@ let checkLaserCollisions model =
     { model with 
         player = { model.player with laser = nextPlayerLaser }
         bunkers = newBunkers
-        invaders = { model.invaders with lasers = nextInvaderLasers } }, Cmd.batch [firstCommand;secondCommand]
+        invaders = { model.invaders with lasers = nextInvaderLasers } }, 
+    Cmd.batch [firstCommand; secondCommand]
         
 let updateDying atTime model = 
     match model.player.state with
@@ -166,15 +163,19 @@ let update message model =
     | GameOver -> model, Cmd.none // todo
     | Restart -> init ()
 
-let text = text "PressStart2P" 24. Colour.White (0., 0.)
+let statusText = text "PressStart2P" 24. Colour.White (0., 0.)
+let infoText = text "PressStart2P" 24. Colour.White (-1., 0.)
 
 let view model dispatch =
     [
-        yield text "SCORE" (10, 10)
-        yield text (sprintf "%04i" model.score) (10, 44)
+        yield statusText "SCORE" (10, 10)
+        yield statusText (sprintf "%04i" model.score) (10, 44)
 
-        yield text "LIVES" (150, 10)
-        yield text (sprintf "%02i" model.lives) (150, 44)
+        yield statusText "LIVES" (150, 10)
+        yield statusText (sprintf "%02i" model.lives) (150, 44)
+
+        yield infoText "PRESS R TO RESTART" (resWidth - 10, 10)
+        yield infoText "PRESS ESC TO EXIT" (resWidth - 10, 44)
 
         yield! Player.view model.player (PlayerMessage >> dispatch)
         yield! Invaders.view model.invaders (InvadersMessage >> dispatch) (model.player.state <> Player.Alive)
