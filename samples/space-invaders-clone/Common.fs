@@ -1,5 +1,6 @@
-﻿/// Constants and loaded configuration (e.g. the spritemap) are specified in here
-module Config
+﻿/// Constants and loaded configuration (e.g. the spritemap) are specified in here,
+/// along with a few utility functions shared across components
+module Common
 
 open Xelmish.Model
 
@@ -11,6 +12,8 @@ let pick from =
 
 let resWidth = 800
 let resHeight = 600
+
+let tickInterval = 500L
 
 let padding = 30
 let invaderTop = padding * 3

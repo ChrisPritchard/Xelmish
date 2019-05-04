@@ -14,9 +14,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="readme.md" />
-    <Compile Include="Config.fs" />
+    <Compile Include="Common.fs" />
     <Compile Include="Player.fs" />
     <Compile Include="Invaders.fs" />
+    <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

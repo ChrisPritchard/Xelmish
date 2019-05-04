@@ -5,7 +5,7 @@ module Player
 open Elmish
 open Xelmish.Model
 open Xelmish.Viewables
-open Config
+open Common
 
 type Model = {
     x: int
