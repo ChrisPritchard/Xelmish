@@ -3,6 +3,8 @@
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Graphics
+open Microsoft.Xna.Framework.Audio
+open Microsoft.Xna.Framework.Media
 
 // Aliases here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
 
@@ -57,9 +59,11 @@ with member __.totalGameTime with get() = int64 __.gameTime.TotalGameTime.TotalM
 
 /// Assets loaded at startup for use
 type LoadedAssets = {
-    textures: Map<string, Texture2D>
     whiteTexture: Texture2D
+    textures: Map<string, Texture2D>
     fonts: Map<string, SpriteFont>
+    sounds: Map<string, SoundEffect>
+    music: Map<string, Song>
 }
 
 /// On each draw and update of the core loop, a list of viewables provided by the main Xelmish component will be run 

@@ -4,6 +4,8 @@ open System.IO
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
+open Microsoft.Xna.Framework.Audio
+open Microsoft.Xna.Framework.Media
 open Model
 open Helpers
 
@@ -54,21 +56,27 @@ type GameLoop (config: GameConfig) as this =
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch (graphics.GraphicsDevice)
-        let whiteTexture = new Texture2D (this.GraphicsDevice, 1, 1)
-        whiteTexture.SetData<Color> [| Color.White |]
+        
+        let loadedAssets = 
+            { whiteTexture = new Texture2D (this.GraphicsDevice, 1, 1)
+              textures = Map.empty 
+              fonts = Map.empty 
+              sounds = Map.empty 
+              music = Map.empty }
+        loadedAssets.whiteTexture.SetData<Color> [| Color.White |]
 
-        let (textures, fonts) =
-            ((Map.empty, Map.empty), config.assetsToLoad)
-            ||> List.fold (fun (textures, fonts) ->
+        let loadedAssets =
+            (loadedAssets, config.assetsToLoad)
+            ||> List.fold (fun assets ->
                 function
                 | Texture (key, path) -> 
                     use stream = File.OpenRead path
                     let texture = Texture2D.FromStream (this.GraphicsDevice, stream)
-                    Map.add key texture textures, fonts
+                    { assets with textures = Map.add key texture assets.textures }
                 | Font (key, path) -> 
                     let font = this.Content.Load<SpriteFont> path
-                    textures, Map.add key font fonts)
-        assets <- { textures = textures; fonts = fonts; whiteTexture = whiteTexture }
+                    { assets with fonts = Map.add key font assets.fonts })
+        assets <- loadedAssets
 
     override __.Update gameTime =
         inputs <- 
