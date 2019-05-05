@@ -12,12 +12,7 @@ type Model = {
     invaders: Invaders.Model
     score: int
     lives: int
-    soundToPlay: SoundEffect option
 }
-and SoundEffect =
-    | Shot
-    | Explosion
-    | Shuffle
 
 let defaultBunkers =
     let dim = bunkerBitDim
@@ -48,7 +43,6 @@ let init () =
         invaders = Invaders.init ()
         score = 0
         lives = 3
-        soundToPlay = None
     }, Cmd.none
 
 type Message = 
@@ -154,7 +148,6 @@ let updateDying atTime model =
             lastTick = atTime }, Cmd.none
 
 let update message model =
-    //let model = { model with soundToPlay = None }
     match message with
     | PlayerMessage message -> 
         { model with player = Player.update message model.player }, Cmd.none
@@ -163,9 +156,7 @@ let update message model =
     | UpdateDying atTime -> updateDying atTime model
     | CheckLaserCollisions -> checkLaserCollisions model
     | InvaderHit (row, index) -> 
-        { model with 
-            score = model.score + model.invaders.rows.[row].kind.score
-            soundToPlay = Some Explosion },
+        { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
     | PlayerHit -> { model with player = { model.player with state = Player.Dying dieLength } }, Cmd.none
     | Victory -> model, Cmd.none // todo
@@ -177,12 +168,6 @@ let infoText = text "PressStart2P" 24. Colour.White (-1., 0.)
 
 let view model dispatch =
     [
-        match model.soundToPlay with
-        | Some Shot -> yield playSound "shoot"
-        | Some Explosion -> yield playSound "explosion"
-        | Some Shuffle -> yield playSound "beef"
-        | _ -> ()
-
         yield statusText "SCORE" (10, 10)
         yield statusText (sprintf "%04i" model.score) (10, 44)
 
