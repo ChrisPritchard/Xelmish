@@ -52,18 +52,6 @@ While I have successfully built several small games with gamecore, I was finding
 
 In contrast the battle-tested Elmish model has, so far, proved a pleasure to work with. Much more elegant, and it has also achieved in a far better way my goal of having games being purely functional (where performance permits) and agnostic of engine. The MVU architecture, and parent-child relationships that the Elm architecture handles so well, mean that a game can be designed and theorised without having the engine get in the way, which is (in my opinion) ideal.
 
-### On the MonoGame/XNA content pipeline
-
-Monogame comes with a tool called the **monogame content pipeline**. This is a build task that converts textures, fonts and sounds etc and processes them into per-platform optimised xmb files, which are more efficient to load. Especially on low spec machines like mobile phones where space might be at a premium, xmb resources are much more efficient.
-
-*However*, the pipeline is a bit painful to use, and runs entirely at compile time. The first presents itself in initial setup, requiring a tool to add resources (the monogame content pipeline tool, available generally with the standard monogame download), and in cross-platform compatibility issues (a seperate download for mac, and sound/image processing dependencies that can require some troubleshooting to solve).
-
-The second problem is that you might want to support custom resources, e.g. modding of raw textures by users post-compile, which only works if the assets are loaded directly.
-
-Accordingly, Xelmish follows a model where, by default, the only assets you need to run through the pipeline are fonts. Textures in the form of bitmaps or pngs or whatever can be loaded directly. This has the added benefit that from 0-to-running game is usually quicker.
-
-You could of course switch to fully using the pipeline if you have something you want to publish. 
-
 ## License
 
 Xelmish is provided under the **MIT** license. PLease contact me if you have issue with this. In addition, many if not all of the sample projects use fonts that are provided under the **SIL Open Font License**, a copy of which is in the root of the solution.
