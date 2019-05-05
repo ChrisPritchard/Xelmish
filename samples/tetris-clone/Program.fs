@@ -52,7 +52,7 @@ let main _ =
         clearColour = Some Colour.Gray
         mouseVisible = true
         assetsToLoad = [
-            Font ("connection", "./connection")
+            PipelineFont ("connection", "./connection")
         ]
         showFpsInConsole = true
     }

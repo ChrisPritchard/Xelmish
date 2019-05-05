@@ -8,13 +8,13 @@ let main _ =
         clearColour = Some Colour.Black
         resolution = Windowed (resWidth, resHeight)
         assetsToLoad = [ 
-            Texture ("sprites", "./content/sprites.png")
-            Font ("PressStart2P", "./content/PressStart2P")
-            Sound ("shoot", "./content/siclone_shoot.wav")
-            Sound ("shoot-enemy", "./content/siclone_shoot_enemy.wav")
-            Sound ("explosion", "./content/siclone_explosion.wav")
-            Sound ("explosion-small", "./content/siclone_explosion_small.wav") 
-            Sound ("beep", "./content/siclone_menu.wav") ]
+            FileTexture ("sprites", "./content/sprites.png")
+            PipelineFont ("PressStart2P", "./content/PressStart2P")
+            FileSound ("shoot", "./content/siclone_shoot.wav")
+            FileSound ("shoot-enemy", "./content/siclone_shoot_enemy.wav")
+            FileSound ("explosion", "./content/siclone_explosion.wav")
+            FileSound ("explosion-small", "./content/siclone_explosion_small.wav") 
+            FileSound ("beep", "./content/siclone_menu.wav") ]
         mouseVisible = false
         showFpsInConsole = true
     }

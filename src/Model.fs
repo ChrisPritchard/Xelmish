@@ -42,14 +42,20 @@ and Resolution = Windowed of int * int
 /// except for fonts, which MUST be relative paths (without extensions) to spritefonts built using the content pipeline.
 /// This is because fonts cannot be direct loaded, and must be processed via the pipeline.
 and Loadable =
-/// key (how it is referenced) and path (full relative path to file)
-| Texture of key:string * path:string
+/// key (how it is referenced) and path (full relative path to texture file)
+| FileTexture of key:string * path:string
+/// key (how it is referenced) and path (full relative path (without extension) to texture source)
+| PipelineTexture of key:string * path:string
 /// key (how it is referenced) and path (full relative path (without extension) to spriteFont)
-| Font of key:string * path:string
-/// key (how it is referenced) and path (full relative path to file)
-| Sound of key:string * path:string
-/// key (how it is referenced) and path (full relative path to file)
-| Music of key:string * path:string
+| PipelineFont of key:string * path:string
+/// key (how it is referenced) and path (full relative path to sound file)
+| FileSound of key:string * path:string
+/// key (how it is referenced) and path (full relative path (without extension) to sound source)
+| PipelineSound of key:string * path:string
+/// key (how it is referenced) and path (full relative path to music file)
+| FileMusic of key:string * path:string
+/// key (how it is referenced) and path (full relative path (without extension) to music source)
+| PipelineMusic of key:string * path:string
 
 /// Current and previous state of input devices
 type Inputs = {

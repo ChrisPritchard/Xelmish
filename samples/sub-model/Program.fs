@@ -145,7 +145,7 @@ let main _ =
         clearColour = Some Colour.White
         mouseVisible = true
         assetsToLoad = [
-            Font ("connection", "./connection")
+            PipelineFont ("connection", "./connection")
         ]
         showFpsInConsole = false
     }

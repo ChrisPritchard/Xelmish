@@ -56,7 +56,34 @@ type GameLoop (config: GameConfig) as this =
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch (graphics.GraphicsDevice)
-        
+
+        let loadIntoAssets assets loadable =
+            match loadable with
+            | FileTexture (key, path) -> 
+                use stream = File.OpenRead path
+                let texture = Texture2D.FromStream (this.GraphicsDevice, stream)
+                { assets with textures = Map.add key texture assets.textures }
+            | PipelineTexture (key, path) ->
+                let texture = this.Content.Load<Texture2D> path
+                { assets with textures = Map.add key texture assets.textures }
+            | PipelineFont (key, path) -> 
+                let font = this.Content.Load<SpriteFont> path
+                { assets with fonts = Map.add key font assets.fonts }
+            | FileSound (key, path) -> 
+                use stream = File.OpenRead path
+                let sound = SoundEffect.FromStream stream
+                { assets with sounds = Map.add key sound assets.sounds }
+            | PipelineSound (key, path) ->
+                let sound = this.Content.Load<SoundEffect> path
+                { assets with sounds = Map.add key sound assets.sounds }
+            | FileMusic (key, path) -> 
+                let uri = new System.Uri (path, System.UriKind.RelativeOrAbsolute)
+                let music = Song.FromUri (key, uri)
+                { assets with music = Map.add key music assets.music }
+            | PipelineMusic (key, path) ->
+                let music = this.Content.Load<Song> path
+                { assets with music = Map.add key music assets.music }
+
         let loadedAssets = 
             { whiteTexture = new Texture2D (this.GraphicsDevice, 1, 1)
               textures = Map.empty 
@@ -64,27 +91,7 @@ type GameLoop (config: GameConfig) as this =
               sounds = Map.empty 
               music = Map.empty }
         loadedAssets.whiteTexture.SetData<Color> [| Color.White |]
-
-        let loadedAssets =
-            (loadedAssets, config.assetsToLoad)
-            ||> List.fold (fun assets ->
-                function
-                | Texture (key, path) -> 
-                    use stream = File.OpenRead path
-                    let texture = Texture2D.FromStream (this.GraphicsDevice, stream)
-                    { assets with textures = Map.add key texture assets.textures }
-                | Font (key, path) -> 
-                    let font = this.Content.Load<SpriteFont> path
-                    { assets with fonts = Map.add key font assets.fonts }
-                | Sound (key, path) -> 
-                    use stream = File.OpenRead path
-                    let sound = SoundEffect.FromStream stream
-                    { assets with sounds = Map.add key sound assets.sounds }
-                | Music (key, path) -> 
-                    let uri = new System.Uri (path, System.UriKind.RelativeOrAbsolute)
-                    let music = Song.FromUri (key, uri)
-                    { assets with music = Map.add key music assets.music })
-        assets <- loadedAssets
+        assets <- List.fold loadIntoAssets loadedAssets config.assetsToLoad
 
     override __.Update gameTime =
         inputs <- 

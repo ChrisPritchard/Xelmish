@@ -1,7 +1,8 @@
-﻿module Helpers
+﻿module Xelmish.Helpers
 
 open System
 
+/// function used to display a primitive FPS counter in the console out
 let printFps fps =
     let left, top, fore, back, shown = 
         Console.CursorLeft, Console.CursorTop,
