@@ -164,7 +164,7 @@ let update message model =
     | InvaderHit (row, index) -> 
         { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
-    | PlayerHit -> { model with player = { model.player with state = Player.Dying dieLength } }, Cmd.none
+    | PlayerHit -> { model with player = { model.player with state = Player.Dying playerTimeToDie } }, Cmd.none
     | Restart -> init ()
     | _ -> failwith "unhandled combination" // these messages (victory/gameover) should be caught by parent
 
@@ -193,7 +193,7 @@ let view model dispatch =
             yield onupdate (fun _ -> dispatch CheckCollisions)
 
         yield onupdate (fun inputs -> 
-            if inputs.totalGameTime - model.lastTick > tickInterval then
+            if inputs.totalGameTime - model.lastTick > dyingTickInterval then
                 dispatch (UpdateDying inputs.totalGameTime))
 
         yield onkeydown Keys.Escape exit

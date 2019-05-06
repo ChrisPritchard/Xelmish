@@ -15,16 +15,16 @@ let pick from =
 let resWidth = 800
 let resHeight = 600
 
-let tickInterval = 500L
+let dyingTickInterval = 500L
 
 let padding = 30
+// the start height of the invaders
 let invaderTop = padding * 3
 
 let invaderSpacing = 12
 let invadersPerRow = 11
 let invaderRows = 5
 let invaderShuffleAmount = 20
-let invaderShuffleIncrease = 25L
 
 let shuffleDecrease = 20L
 let minShuffle = 50L
@@ -96,16 +96,14 @@ let smallSize =
                 spritemap.["invader-small-1"]
             |]
         score = 30 }
-
-let animationSpeed = 100L
-
+        
 let playerWidth, playerHeight = 
     let (w, h, _, _) = spritemap.["player"]
     w * sizeMulti, h * sizeMulti
 
 let playerY = resHeight - (playerHeight + padding)
 let playerSpeed = 5
-let dieLength = 3
+let playerTimeToDie = 3
 
 let bunkerSpace = 20
 let bunkerBitDim = 6
@@ -127,7 +125,6 @@ let bunkerColour = rgba 0uy 255uy 0uy 255uy
 let explosionWidth, explosionHeight = 
     let (w, h, _, _) = spritemap.["invader-death"]
     w * sizeMulti, h * sizeMulti
-let explosionDuration = 1
 
 let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
     OnDraw (fun loadedAssets (spriteBatch: SpriteBatch) ->

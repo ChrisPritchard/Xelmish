@@ -27,6 +27,10 @@
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="bin\**" />
+    <MonoGameContentReference Remove="bin\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
