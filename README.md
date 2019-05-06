@@ -44,6 +44,8 @@ The game tetris, implemented using several elmish components for screens, with a
 
 A clone of 1979's space invaders, though not a hundred percent accurate to the old version. Compared to Tetris, Space Invaders requires a great deal more events, animations and individual entities, so it serves as a good demonstration of how the bulky (compared to direct imperative style) Elmish eventing model performs in such a context.
 
+This is also the first sample that uses audio, with retro beeps and explosions based on game events. Sounds and music are a little complex to handle in the Elmish/Monogame structure, due to their temporal differences from textures, which makes it worth seeing a real world example.
+
 ## History and Reasoning
 
 Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine. 
