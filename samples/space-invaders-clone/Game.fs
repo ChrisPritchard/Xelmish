@@ -48,7 +48,7 @@ let init highScore =
         score = 0
         highScore = highScore
         lives = 3
-        soundQueue = KeyQueue()
+        soundQueue = KeyQueue (["startgame"])
     }, Cmd.none
 
 type Message = 

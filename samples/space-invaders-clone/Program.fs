@@ -51,10 +51,13 @@ let main _ =
         assetsToLoad = [ 
             FileTexture ("sprites", "./content/sprites.png")
             PipelineFont ("PressStart2P", "./content/PressStart2P")
+            FileSound ("startgame", "./content/siclone_menu_enter.wav")
             FileSound ("shoot", "./content/siclone_shoot.wav")
             FileSound ("explosion", "./content/siclone_explosion.wav")
             FileSound ("explosion-small", "./content/siclone_explosion_small.wav") 
-            FileSound ("beep", "./content/siclone_menu.wav") ]
+            FileSound ("beep", "./content/siclone_menu.wav")
+            FileSound ("gameover", "./content/siclone_death.wav")
+            FileSound ("victory", "./content/siclone_saucer.wav") ]
         mouseVisible = false
         showFpsInConsole = true
     }

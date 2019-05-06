@@ -9,12 +9,16 @@ type Model = {
     highScore: int
     score: int
     wasVictory: bool
+    soundQueue: KeyQueue
 }
 
 let init wasVictory score highScore =
     if highScore < score then
         File.WriteAllText (highScoreFile, score.ToString())
-    { highScore = highScore; score = score; wasVictory = wasVictory }
+    {   highScore = highScore
+        score = score
+        wasVictory = wasVictory
+        soundQueue = KeyQueue (if wasVictory then ["victory"] else ["gameover"]) }
 
 type Message = | StartGame of highScore: int
 
@@ -22,6 +26,8 @@ let view model dispatch =
     let centredText colour = text "PressStart2P" 24. colour (-0.5, 0.)
     let textMid = resWidth / 2
     [
+        yield playQueuedSound model.soundQueue
+
         if not model.wasVictory then
             yield centredText Colour.Red "GAME  OVER!" (textMid, 90)
             yield centredText Colour.OrangeRed "YOU  FAILED  TO  FEND  OFF  THE  INVADERS  :(" (textMid, 130)
