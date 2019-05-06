@@ -52,7 +52,7 @@ type Message =
     | CheckLaserCollisions
     | InvaderHit of row:int * index:int
     | PlayerHit
-    | Victory
+    | Victory of score:int
     | GameOver of score:int
     | Restart
 
@@ -159,9 +159,8 @@ let update message model =
         { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
     | PlayerHit -> { model with player = { model.player with state = Player.Dying dieLength } }, Cmd.none
-    | Victory -> model, Cmd.none // todo
-    | GameOver _ -> model, Cmd.none // todo
     | Restart -> init ()
+    | _ -> failwith "unhandled combination" // these messages (victory/gameover) should be caught by parent
 
 let statusText = text "PressStart2P" 24. Colour.White (0., 0.)
 let infoText = text "PressStart2P" 24. Colour.White (-1., 0.)

@@ -13,20 +13,19 @@ type Message =
     | GameOverMessage of GameOver.Message
 
 let init () =
-    //Start (StartScreen.init ()), Cmd.none
-    GameOver (GameOver.init 888), Cmd.none
+    Start (StartScreen.init ()), Cmd.none
 
 let update message model =
     match model, message with
     | Start _, StartMessage _ -> let model, command = Game.init () in Playing model, command
     | Playing game, PlayingMessage msg -> 
         match msg with
-        | Game.GameOver score -> GameOver (GameOver.init score), Cmd.none
+        | Game.GameOver score -> GameOver (GameOver.init false score), Cmd.none
+        | Game.Victory score -> GameOver (GameOver.init true score), Cmd.none
         | _ -> 
             let newModel, newCommand = Game.update msg game
             Playing newModel, Cmd.map PlayingMessage newCommand
     | GameOver _, GameOverMessage _ -> let model, command = Game.init () in Playing model, command
-
     | _ -> model, Cmd.none // invalid combination
 
 let view model dispatch =
