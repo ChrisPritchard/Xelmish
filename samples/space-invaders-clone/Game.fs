@@ -16,7 +16,7 @@ type Model = {
     soundQueue: KeyQueue
 }
 
-let earthRect = rect padding (resHeight - padding) (resWidth - padding * 2) 2
+let earthLine = rect padding (resHeight - padding) (resWidth - padding * 2) 2
 
 let defaultBunkers =
     let dim = bunkerBitDim
@@ -62,8 +62,7 @@ type Message =
     | GameOver of score:int * highScore:int
     | Restart
 
-let invaderImpact x y w h model =
-    let testRect = rect x y w h
+let indexedInvaders model =
     model.invaders.rows
     |> Seq.indexed 
     |> Seq.collect (fun (r, row) -> 
@@ -71,30 +70,15 @@ let invaderImpact x y w h model =
         |> Seq.indexed 
         |> Seq.filter (fun (_, (_, state)) -> state = Invaders.Alive)
         |> Seq.map (fun (c, (x, _)) -> (r, c), rect x row.y row.kind.width row.kind.height))
-    |> Seq.tryFind (fun (_, rect) -> rect.Intersects testRect)
-    |> Option.map fst
+    |> Seq.toList
 
-let eraseBunkers (invaderRows: Invaders.Row []) bunkers =
-    let invaderRects = 
-        invaderRows 
-        |> Seq.collect (fun row -> 
-            row.xs 
-            |> Seq.filter (fun (_, state) -> state = Invaders.Alive) 
-            |> Seq.map (fun (x, _) -> rect x row.y row.kind.width row.kind.height))
-        |> Seq.toList
-    bunkers 
-    |> List.filter (fun bunker -> 
-        invaderRects 
-        |> List.exists (fun invaderRect -> 
-            invaderRect.Intersects bunker) 
-        |> not)
-
-let checkPlayerLaserCollisions model =
+let checkPlayerLaserCollisions indexedInvaders model =
     match model.player.laser with
     | None -> None, Cmd.none, model.bunkers
     | Some (x, y) ->
-        match invaderImpact x y projectileWidth projectileHeight model with
-        | Some invaderIndex -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
+        let laserRect = rect x y projectileWidth projectileHeight
+        match indexedInvaders |> List.tryFind (fun (_, invaderRect) -> laserRect.Intersects invaderRect) with
+        | Some (invaderIndex, _) -> None, Cmd.ofMsg (InvaderHit invaderIndex), model.bunkers
         | None -> 
             let shotRect = rect x y projectileWidth projectileHeight
             let destroyed, newBunkers = model.bunkers |> List.partition (fun b -> b.Intersects shotRect)
@@ -103,16 +87,17 @@ let checkPlayerLaserCollisions model =
             else
                 None, Cmd.none, newBunkers
 
-let checkInvaderLaserCollisions model =
-    let playerRect = rect model.player.x playerY playerWidth playerHeight
-    (([], Cmd.none, model.bunkers), model.invaders.lasers)
+let checkInvaderLaserCollisions playerRect bunkers model =
+    (([], Cmd.none, bunkers), model.invaders.lasers)
     ||> List.fold (fun (acc, cmdResult, bunkers) (x, y) ->
         let shotRect = rect x y projectileWidth projectileHeight
         if shotRect.Intersects playerRect then
             model.soundQueue.Enqueue "explosion"
             acc, Cmd.ofMsg PlayerHit, bunkers
         else
-            let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
+            let destroyed, newBunkers = 
+                bunkers |> List.partition (fun bunker -> 
+                    shotRect.Intersects bunker)
             if List.isEmpty destroyed then
                 (x, y)::acc, cmdResult, bunkers
             else
@@ -122,22 +107,21 @@ let checkCollisions model =
     if model.invaders.alive = 0 then
         model, Cmd.ofMsg (Victory (model.score, model.highScore))
     else
-        let nextPlayerLaser, firstCommand, newBunkers = 
-            checkPlayerLaserCollisions model
-        let nextInvaderLasers, secondCommand, newBunkers = 
-            checkInvaderLaserCollisions { model with bunkers = newBunkers }
+        let indexedInvaders = indexedInvaders model
+        let playerRect = rect model.player.x playerY playerWidth playerHeight
+        let nextPlayerLaser, invaderHit, newBunkers = checkPlayerLaserCollisions indexedInvaders model
+        let nextInvaderLasers, playerHit, newBunkers = checkInvaderLaserCollisions playerRect newBunkers model
+        let finalBunkers = 
+            newBunkers |> List.filter (fun bunker -> 
+                not (indexedInvaders |> List.exists (fun (_, invaderRect) -> invaderRect.Intersects bunker)))
     
-        let lives, thirdCommand = 
-            match invaderImpact model.player.x playerY playerWidth playerHeight model with
+        let lives, gameOver =
+            let fatalImpact = 
+                indexedInvaders 
+                |> List.tryFind (fun (_, invaderRect) -> 
+                    invaderRect.Intersects earthLine || invaderRect.Intersects playerRect)
+            match fatalImpact with
             | None -> model.lives, Cmd.none
-            | Some _ -> 
-                model.soundQueue.Enqueue "explosion"
-                0, Cmd.ofMsg PlayerHit
-        let newBunkers = eraseBunkers model.invaders.rows newBunkers
-
-        let lives, fourthCommand = 
-            match invaderImpact earthRect.Left earthRect.Top earthRect.Width earthRect.Height model with
-            | None -> lives, Cmd.none
             | Some _ -> 
                 model.soundQueue.Enqueue "explosion"
                 0, Cmd.ofMsg PlayerHit
@@ -145,10 +129,10 @@ let checkCollisions model =
         { model with 
             player = { model.player with laser = nextPlayerLaser }
             lives = lives
-            bunkers = newBunkers
+            bunkers = finalBunkers
             invaders = { model.invaders with lasers = nextInvaderLasers } }, 
 
-        Cmd.batch [firstCommand; secondCommand; thirdCommand; fourthCommand]
+        Cmd.batch [invaderHit; playerHit; gameOver]
         
 let updateDying atTime model = 
     match model.player.state with
@@ -217,7 +201,7 @@ let view model dispatch =
         if model.player.state = Player.Alive then
             yield onupdate (fun _ -> dispatch CheckCollisions)
 
-        yield colour Colour.OrangeRed (earthRect.Width, earthRect.Height) (earthRect.Left, earthRect.Top)
+        yield colour Colour.OrangeRed (earthLine.Width, earthLine.Height) (earthLine.Left, earthLine.Top)
 
         yield onupdate (fun inputs -> 
             if inputs.totalGameTime - model.lastTick > dyingTickInterval then
