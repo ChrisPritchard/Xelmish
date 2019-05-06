@@ -11,6 +11,7 @@ type Model = {
     bunkers: Rectangle list
     invaders: Invaders.Model
     score: int
+    highScore: int
     lives: int
 }
 
@@ -35,13 +36,14 @@ let defaultBunkers =
         bunkerAt (spacing * 4 - bunkerOffset) bunkerY
     ]
 
-let init () = 
+let init highScore = 
     {
         lastTick = 0L
         player = Player.init ()
         bunkers = defaultBunkers
         invaders = Invaders.init ()
         score = 0
+        highScore = highScore
         lives = 3
     }, Cmd.none
 
@@ -52,8 +54,8 @@ type Message =
     | CheckCollisions
     | InvaderHit of row:int * index:int
     | PlayerHit
-    | Victory of score:int
-    | GameOver of score:int
+    | Victory of score:int * highScore:int
+    | GameOver of score:int * highScore:int
     | Restart
 
 let invaderImpact x y w h model =
@@ -120,7 +122,7 @@ let checkCollisions model =
     let thirdCommand = 
         match invaderImpact model.player.x playerY playerWidth playerHeight model with
         | None -> Cmd.none
-        | Some _ -> Cmd.ofMsg (GameOver model.score)
+        | Some _ -> Cmd.ofMsg (GameOver (model.score, model.highScore))
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
         
     { model with 
@@ -133,7 +135,7 @@ let checkCollisions model =
 let updateDying atTime model = 
     match model.player.state with
     | Player.Dying 0 when model.lives = 0 ->
-        model, Cmd.ofMsg (GameOver model.score)
+        model, Cmd.ofMsg (GameOver (model.score, model.highScore))
     | Player.Dying 0 ->
         { model with
             player = Player.init ()
@@ -165,22 +167,21 @@ let update message model =
         { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
     | PlayerHit -> { model with player = { model.player with state = Player.Dying playerTimeToDie } }, Cmd.none
-    | Restart -> init ()
+    | Restart -> init model.highScore
     | _ -> failwith "unhandled combination" // these messages (victory/gameover) should be caught by parent
 
-let statusText = text "PressStart2P" 24. Colour.White (0., 0.)
-let infoText = text "PressStart2P" 24. Colour.White (-1., 0.)
+let text = text "PressStart2P" 24.
 
 let view model dispatch =
     [
-        yield statusText "SCORE" (10, 10)
-        yield statusText (sprintf "%04i" model.score) (10, 44)
+        yield text Colour.White (0., 0.) "SCORE" (10, 10)
+        yield text Colour.White (0., 0.) (sprintf "%04i" model.score) (10, 44)
+        
+        yield text Colour.Cyan (0., 0.)  "HIGH  SCORE" (150, 10)
+        yield text Colour.White (0., 0.) (sprintf "%04i" model.highScore) (150, 44)
 
-        yield statusText "LIVES" (150, 10)
-        yield statusText (sprintf "%02i" model.lives) (150, 44)
-
-        yield infoText "PRESS  R  TO  RESTART" (resWidth - 10, 10)
-        yield infoText "PRESS  ESC  TO  EXIT" (resWidth - 10, 44)
+        yield text Colour.White (-1., 0.) "LIVES" (resWidth - 10, 10)
+        yield text Colour.White (-1., 0.) (sprintf "%02i" model.lives) (resWidth - 10, 44)
 
         yield! Player.view model.player (PlayerMessage >> dispatch)
         yield! Invaders.view model.invaders (InvadersMessage >> dispatch) (model.player.state <> Player.Alive)

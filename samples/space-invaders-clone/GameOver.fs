@@ -1,30 +1,22 @@
 ﻿module GameOver
 
-open System
 open System.IO
 open Common
 open Xelmish.Viewables
 open Xelmish.Model
 
 type Model = {
-    highScore: int option
+    highScore: int
     score: int
-    newHighScore: bool
     wasVictory: bool
 }
 
-let init wasVictory score =
-    let highScore = 
-        if File.Exists highScoreFile 
-        then Some (int (File.ReadAllText highScoreFile))
-        else None
-    let newHighScore = match highScore with Some i when i >= score -> false | _ -> true
-    if newHighScore then
+let init wasVictory score highScore =
+    if highScore < score then
         File.WriteAllText (highScoreFile, score.ToString())
-    { highScore = highScore; score = score; newHighScore = newHighScore; wasVictory = wasVictory }
+    { highScore = highScore; score = score; wasVictory = wasVictory }
 
-type Message = 
-    | StartGame
+type Message = | StartGame of highScore: int
 
 let view model dispatch = 
     let centredText colour = text "PressStart2P" 24. colour (-0.5, 0.)
@@ -40,19 +32,16 @@ let view model dispatch =
         yield centredText Colour.White "SCORE" (textMid, 200)
         yield centredText Colour.White (sprintf "%04i" model.score) (textMid, 240)
 
-        if not model.newHighScore then
-            match model.highScore with
-            | Some score -> 
-                yield centredText Colour.Cyan "HIGH  SCORE" (textMid, 280)
-                yield centredText Colour.Cyan (sprintf "%04i" score) (textMid, 320)
-            | _ -> ()
+        if model.highScore >= model.score then
+            yield centredText Colour.Cyan "HIGH  SCORE" (textMid, 280)
+            yield centredText Colour.Cyan (sprintf "%04i" model.highScore) (textMid, 320)
         else
             yield centredText Colour.Cyan "NEW  HIGH  SCORE!" (textMid, 280)
 
         yield centredText Colour.OrangeRed "(P)LAY  AGAIN" (textMid, 450)
         yield centredText Colour.OrangeRed "(Q)UIT" (textMid, 480)
 
-        yield onkeydown Keys.P (fun () -> dispatch StartGame)
+        yield onkeydown Keys.P (fun () -> dispatch (StartGame (if model.highScore < model.score then model.score else model.highScore)))
         yield onkeydown Keys.Q exit
         yield onkeydown Keys.Escape exit
     ]

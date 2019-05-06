@@ -1,4 +1,5 @@
-﻿open Elmish
+﻿open System.IO
+open Elmish
 open Xelmish.Model
 open Common
 
@@ -13,19 +14,27 @@ type Message =
     | GameOverMessage of GameOver.Message
 
 let init () =
-    Start (StartScreen.init ()), Cmd.none
+    let score = 
+        if File.Exists highScoreFile 
+        then int (File.ReadAllText highScoreFile)
+        else 0
+    Start (StartScreen.init score), Cmd.none
 
 let update message model =
     match model, message with
-    | Start _, StartMessage _ -> let model, command = Game.init () in Playing model, command
+    | Start _, StartMessage (StartScreen.StartGame highScore) -> 
+        let model, command = Game.init highScore
+        Playing model, command
     | Playing game, PlayingMessage msg -> 
         match msg with
-        | Game.GameOver score -> GameOver (GameOver.init false score), Cmd.none
-        | Game.Victory score -> GameOver (GameOver.init true score), Cmd.none
+        | Game.GameOver (score, highScore) -> GameOver (GameOver.init false score highScore), Cmd.none
+        | Game.Victory (score, highScore) -> GameOver (GameOver.init true score highScore), Cmd.none
         | _ -> 
             let newModel, newCommand = Game.update msg game
             Playing newModel, Cmd.map PlayingMessage newCommand
-    | GameOver _, GameOverMessage _ -> let model, command = Game.init () in Playing model, command
+    | GameOver _, GameOverMessage (GameOver.StartGame highScore) -> 
+        let model, command = Game.init highScore
+        Playing model, command
     | _ -> model, Cmd.none // invalid combination
 
 let view model dispatch =
