@@ -122,14 +122,17 @@ let checkCollisions model =
     let nextInvaderLasers, secondCommand, newBunkers = 
         checkInvaderLaserCollisions { model with bunkers = newBunkers }
     
-    let thirdCommand = 
+    let lives, thirdCommand = 
         match invaderImpact model.player.x playerY playerWidth playerHeight model with
-        | None -> Cmd.none
-        | Some _ -> Cmd.ofMsg (GameOver (model.score, model.highScore))
+        | None -> model.lives, Cmd.none
+        | Some _ -> 
+            model.soundQueue.Enqueue "explosion"
+            1, Cmd.ofMsg PlayerHit
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
         
     { model with 
         player = { model.player with laser = nextPlayerLaser }
+        lives = lives
         bunkers = newBunkers
         invaders = { model.invaders with lasers = nextInvaderLasers } }, 
 
