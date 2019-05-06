@@ -58,7 +58,6 @@ let shootFromRandom model =
                 fst row.xs.[col] + row.kind.width / 2, row.y + row.kind.height))
     // pick a random shooter
     let x, y = possibleShooters.[pick possibleShooters.Length]
-    model.soundQueue.Enqueue "shoot-enemy"
     { model with lasers = (x, y)::model.lasers }
 
 let shuffleAcross targetRow dir model =
@@ -99,6 +98,7 @@ let rec shuffleRows time model =
         // immediately do another shuffle, to eliminate the pause between going from across to down.
         shuffleRows time { model with direction = newDirection }
     | _ ->
+        model.soundQueue.Enqueue "beep"
         { model with 
             rows = newRows
             direction = newDirection

@@ -52,7 +52,6 @@ let main _ =
             FileTexture ("sprites", "./content/sprites.png")
             PipelineFont ("PressStart2P", "./content/PressStart2P")
             FileSound ("shoot", "./content/siclone_shoot.wav")
-            FileSound ("shoot-enemy", "./content/siclone_shoot_enemy.wav")
             FileSound ("explosion", "./content/siclone_explosion.wav")
             FileSound ("explosion-small", "./content/siclone_explosion_small.wav") 
             FileSound ("beep", "./content/siclone_menu.wav") ]
