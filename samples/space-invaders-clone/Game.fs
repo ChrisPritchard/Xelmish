@@ -49,7 +49,7 @@ type Message =
     | PlayerMessage of Player.Message
     | InvadersMessage of Invaders.Message
     | UpdateDying of tickTime:int64
-    | CheckLaserCollisions
+    | CheckCollisions
     | InvaderHit of row:int * index:int
     | PlayerHit
     | Victory of score:int
@@ -111,18 +111,24 @@ let checkInvaderLaserCollisions model =
             else
                 acc, cmdResult, newBunkers)
 
-let checkLaserCollisions model =
+let checkCollisions model =
     let nextPlayerLaser, firstCommand, newBunkers = 
         checkPlayerLaserCollisions model
     let nextInvaderLasers, secondCommand, newBunkers = 
         checkInvaderLaserCollisions { model with bunkers = newBunkers }
+    
+    let thirdCommand = 
+        match invaderImpact model.player.x playerY playerWidth playerHeight model with
+        | None -> Cmd.none
+        | Some _ -> Cmd.ofMsg (GameOver model.score)
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
         
     { model with 
         player = { model.player with laser = nextPlayerLaser }
         bunkers = newBunkers
         invaders = { model.invaders with lasers = nextInvaderLasers } }, 
-    Cmd.batch [firstCommand; secondCommand]
+
+    Cmd.batch [firstCommand; secondCommand; thirdCommand]
         
 let updateDying atTime model = 
     match model.player.state with
@@ -154,7 +160,7 @@ let update message model =
     | InvadersMessage message -> 
         { model with invaders = Invaders.update message model.invaders }, Cmd.none
     | UpdateDying atTime -> updateDying atTime model
-    | CheckLaserCollisions -> checkLaserCollisions model
+    | CheckCollisions -> checkCollisions model
     | InvaderHit (row, index) -> 
         { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
@@ -184,7 +190,7 @@ let view model dispatch =
                 colour bunkerColour (r.Width, r.Height) (r.Left, r.Top))
 
         if model.player.state = Player.Alive then
-            yield onupdate (fun _ -> dispatch CheckLaserCollisions)
+            yield onupdate (fun _ -> dispatch CheckCollisions)
 
         yield onupdate (fun inputs -> 
             if inputs.totalGameTime - model.lastTick > tickInterval then
