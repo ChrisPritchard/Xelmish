@@ -53,7 +53,7 @@ type Message =
     | InvaderHit of row:int * index:int
     | PlayerHit
     | Victory
-    | GameOver
+    | GameOver of score:int
     | Restart
 
 let invaderImpact x y w h model =
@@ -127,7 +127,7 @@ let checkLaserCollisions model =
 let updateDying atTime model = 
     match model.player.state with
     | Player.Dying 0 when model.lives = 0 ->
-        model, Cmd.ofMsg GameOver
+        model, Cmd.ofMsg (GameOver model.score)
     | Player.Dying 0 ->
         { model with
             player = Player.init ()
@@ -160,7 +160,7 @@ let update message model =
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
     | PlayerHit -> { model with player = { model.player with state = Player.Dying dieLength } }, Cmd.none
     | Victory -> model, Cmd.none // todo
-    | GameOver -> model, Cmd.none // todo
+    | GameOver _ -> model, Cmd.none // todo
     | Restart -> init ()
 
 let statusText = text "PressStart2P" 24. Colour.White (0., 0.)

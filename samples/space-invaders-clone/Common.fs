@@ -4,6 +4,8 @@ module Common
 
 open Xelmish.Model
 
+let highScoreFile = "./highscore.txt"
+
 let random = System.Random()
 let check chance =
     random.NextDouble () <= chance
