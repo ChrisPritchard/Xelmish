@@ -13,7 +13,8 @@ type Message =
     | GameOverMessage of GameOver.Message
 
 let init () =
-    Start (StartScreen.init ()), Cmd.none
+    //Start (StartScreen.init ()), Cmd.none
+    GameOver (GameOver.init 888), Cmd.none
 
 let update message model =
     match model, message with

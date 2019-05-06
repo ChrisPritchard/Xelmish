@@ -17,7 +17,7 @@ let init score =
         if File.Exists highScoreFile 
         then Some (int (File.ReadAllText highScoreFile), File.GetLastWriteTime highScoreFile)
         else None
-    let newHighScore = match highScore with Some (i, _) when i > score -> false | _ -> true
+    let newHighScore = match highScore with Some (i, _) when i >= score -> false | _ -> true
     if newHighScore then
         File.WriteAllText (highScoreFile, score.ToString())
     { highScore = highScore; score = score; newHighScore = newHighScore }

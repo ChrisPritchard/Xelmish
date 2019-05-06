@@ -174,8 +174,8 @@ let view model dispatch =
         yield statusText "LIVES" (150, 10)
         yield statusText (sprintf "%02i" model.lives) (150, 44)
 
-        yield infoText "PRESS R TO RESTART" (resWidth - 10, 10)
-        yield infoText "PRESS ESC TO EXIT" (resWidth - 10, 44)
+        yield infoText "PRESS  R  TO  RESTART" (resWidth - 10, 10)
+        yield infoText "PRESS  ESC  TO  EXIT" (resWidth - 10, 44)
 
         yield! Player.view model.player (PlayerMessage >> dispatch)
         yield! Invaders.view model.invaders (InvadersMessage >> dispatch) (model.player.state <> Player.Alive)

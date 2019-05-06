@@ -1,6 +1,5 @@
 ﻿module StartScreen
 
-open System
 open System.IO
 open Common
 open Xelmish.Viewables
