@@ -134,7 +134,7 @@ let checkCollisions model =
         
 let updateDying atTime model = 
     match model.player.state with
-    | Player.Dying 0 when model.lives = 0 ->
+    | Player.Dying 0 when model.lives = 1 ->
         model, Cmd.ofMsg (GameOver (model.score, model.highScore))
     | Player.Dying 0 ->
         { model with
