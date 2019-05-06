@@ -145,7 +145,10 @@ let updateDying atTime model =
         let newInvaders = 
             model.invaders.rows
             |> Array.map (fun row ->
-                { row with xs = row.xs |> Array.map (fun (x, state) -> if state = Invaders.Dying then x, Invaders.Dead else x, state) })
+                { row with 
+                    xs = row.xs |> Array.map (fun (x, state) -> 
+                        if state = Invaders.Dying then x, Invaders.Dead 
+                        else x, state) })
         let newPlayer = 
             match model.player.state with 
             | Player.Dying n -> { model.player with state = Player.Dying (n - 1) } 
