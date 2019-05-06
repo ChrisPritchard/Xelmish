@@ -7,7 +7,6 @@ open Microsoft.Xna.Framework.Input
 open Microsoft.Xna.Framework.Audio
 open Microsoft.Xna.Framework.Media
 open Model
-open Helpers
 
 /// GameLoop is an inherited implementation of XNA's Game class
 type GameLoop (config: GameConfig) as this = 
@@ -27,11 +26,6 @@ type GameLoop (config: GameConfig) as this =
         lastMouseState = Unchecked.defaultof<_>
         gameTime = Unchecked.defaultof<_>
     }
-    
-    // used for fps counting
-    let mutable fps = 0
-    let mutable lastFpsUpdate = 0.
-    let fpsUpdateInterval = 200.
 
     // these two collections are set by the Elmish setState call
     let mutable updatable: (Inputs -> Unit) list = []
@@ -131,9 +125,3 @@ type GameLoop (config: GameConfig) as this =
         spriteBatch.Begin (SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
         for drawFunc in drawable do drawFunc assets spriteBatch
         spriteBatch.End ()
-        
-        if config.showFpsInConsole then 
-            if gameTime.TotalGameTime.TotalMilliseconds - lastFpsUpdate > fpsUpdateInterval then
-                fps <- int (1. / gameTime.ElapsedGameTime.TotalSeconds)
-                lastFpsUpdate <- gameTime.TotalGameTime.TotalMilliseconds
-                printFps fps

@@ -17,6 +17,5 @@ let runSimpleGameLoop assetsToLoad (windowWidth, windowHeight) clearColour (prog
         resolution = Windowed (windowWidth, windowHeight)
         clearColour = Some clearColour
         mouseVisible = true
-        assetsToLoad = assetsToLoad
-        showFpsInConsole = false }
+        assetsToLoad = assetsToLoad }
     runGameLoop config program

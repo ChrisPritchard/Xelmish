@@ -7,7 +7,6 @@
   <ItemGroup>
     <Compile Include="Model.fs" />
     <Compile Include="Viewables.fs" />
-    <Compile Include="Helpers.fs" />
     <Compile Include="GameLoop.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

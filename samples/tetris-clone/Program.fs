@@ -54,10 +54,9 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("connection", "./connection")
         ]
-        showFpsInConsole = true
     }
 
     Program.mkProgram init update view
-    //|> Program.withConsoleTrace
+    |> Program.withConsoleTrace
     |> Xelmish.Program.runGameLoop config
     0

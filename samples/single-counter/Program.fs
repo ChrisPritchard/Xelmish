@@ -65,7 +65,6 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("connection", "./connection") // the font used in the game needs to be loaded. there is no default font.
         ]
-        showFpsInConsole = false // best to not do this if using the console trace from Elmish
     }
 
     Program.mkSimple init update view // standard, out of the box Elmish initialisation

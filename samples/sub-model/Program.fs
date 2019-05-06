@@ -147,7 +147,6 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("connection", "./connection")
         ]
-        showFpsInConsole = false
     }
 
     Program.mkSimple App.init App.update App.view // standard, out of the box Elmish mkSimple
