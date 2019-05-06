@@ -13,6 +13,7 @@ type Model =
         lastShuffle: int64
         shuffleInterval: int64
         shuffleMod: int
+        soundQueue: KeyQueue
     }
 and Row = { kind: InvaderKind; y: int; xs: (int * InvaderState) [] }
 and InvaderState = Alive | Dying | Dead
@@ -35,6 +36,7 @@ let init () =
         lastShuffle = 0L
         shuffleInterval = 500L
         shuffleMod = 0
+        soundQueue = KeyQueue ()
     }
 
 type Message = 
@@ -56,6 +58,7 @@ let shootFromRandom model =
                 fst row.xs.[col] + row.kind.width / 2, row.y + row.kind.height))
     // pick a random shooter
     let x, y = possibleShooters.[pick possibleShooters.Length]
+    model.soundQueue.Enqueue "shoot-enemy"
     { model with lasers = (x, y)::model.lasers }
 
 let shuffleAcross targetRow dir model =
@@ -124,6 +127,8 @@ let update message model =
 
 let view model dispatch freeze =
     [
+        yield playQueuedSound model.soundQueue
+
         for row in model.rows do
             let spriteRect = row.kind.animations.[model.shuffleMod]
             for (x, state) in row.xs do

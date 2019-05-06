@@ -11,6 +11,7 @@ type Model = {
     x: int
     laser: (int * int) option
     state: PlayerState
+    soundQueue: KeyQueue
 }
 and PlayerState = Alive | Dying of int
 
@@ -18,6 +19,7 @@ let init () = {
         x = resWidth / 2 - (playerWidth / 2)
         laser = None
         state = Alive
+        soundQueue = KeyQueue ()
     }
 
 type Message = 
@@ -37,6 +39,7 @@ let update message model =
         match model.laser with
         | Some _ -> model
         | None ->
+            model.soundQueue.Enqueue "shoot"
             let pos = model.x + playerWidth / 2, resHeight - (playerHeight + padding) - projectileHeight - 1
             { model with laser = Some pos }
     | MoveLaser ->
@@ -51,6 +54,8 @@ let view model dispatch =
     match model.state with
     | Alive ->
         [
+            yield playQueuedSound model.soundQueue
+
             yield sprite spritemap.["player"] (playerWidth, playerHeight) (model.x, playerY) Colour.White
 
             match model.laser with

@@ -5,6 +5,10 @@ open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 open Model
 
+/// An alias for the .NET Queue of string class. For 'play once' things like sounds, this
+/// is useful to add to your model in order to play effects properly. See the space invaders sample for usage
+type KeyQueue = System.Collections.Generic.Queue<string>
+
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
@@ -27,6 +31,13 @@ let text font (fontSize: float) colour (ox: float, oy: float) (text: string) (x,
 
 let playSound key =
     OnDraw (fun loadedAssets _ -> ignore (loadedAssets.sounds.[key].Play ()))
+
+let playQueuedSound (soundQueue: KeyQueue) =
+    OnDraw (fun loadedAssets _ ->
+        if soundQueue.Count > 0 then 
+            let nextSound = soundQueue.Dequeue ()
+            ignore (loadedAssets.sounds.[nextSound].Play ()))
+    
 
 let onupdate event = 
     OnUpdate event

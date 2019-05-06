@@ -13,6 +13,7 @@ type Model = {
     score: int
     highScore: int
     lives: int
+    soundQueue: KeyQueue
 }
 
 let defaultBunkers =
@@ -45,6 +46,7 @@ let init highScore =
         score = 0
         highScore = highScore
         lives = 3
+        soundQueue = KeyQueue()
     }, Cmd.none
 
 type Message = 
@@ -105,6 +107,7 @@ let checkInvaderLaserCollisions model =
     ||> List.fold (fun (acc, cmdResult, bunkers) (x, y) ->
         let shotRect = rect x y projectileWidth projectileHeight
         if shotRect.Intersects playerRect then
+            model.soundQueue.Enqueue "explosion"
             acc, Cmd.ofMsg PlayerHit, bunkers
         else
             let destroyed, newBunkers = bunkers |> List.partition (fun b -> b.Intersects shotRect)
@@ -167,6 +170,7 @@ let update message model =
     | UpdateDying atTime -> updateDying atTime model
     | CheckCollisions -> checkCollisions model
     | InvaderHit (row, index) -> 
+        model.soundQueue.Enqueue "explosion-small"
         { model with score = model.score + model.invaders.rows.[row].kind.score },
         Cmd.ofMsg (InvadersMessage (Invaders.Destroy (row, index)))
     | PlayerHit -> { model with player = { model.player with state = Player.Dying playerTimeToDie } }, Cmd.none
@@ -177,6 +181,8 @@ let text = text "PressStart2P" 24.
 
 let view model dispatch =
     [
+        yield playQueuedSound model.soundQueue
+
         yield text Colour.White (0., 0.) "SCORE" (10, 10)
         yield text Colour.White (0., 0.) (sprintf "%04i" model.score) (10, 44)
         
