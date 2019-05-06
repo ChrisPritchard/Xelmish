@@ -16,6 +16,8 @@ type Model = {
     soundQueue: KeyQueue
 }
 
+let earthRect = rect padding (resHeight - padding) (resWidth - padding * 2) 2
+
 let defaultBunkers =
     let dim = bunkerBitDim
     let bunkerAt x y =
@@ -129,6 +131,13 @@ let checkCollisions model =
             model.soundQueue.Enqueue "explosion"
             1, Cmd.ofMsg PlayerHit
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
+
+    let lives, fourthCommand = 
+        match invaderImpact earthRect.Left earthRect.Top earthRect.Width earthRect.Height model with
+        | None -> lives, Cmd.none
+        | Some _ -> 
+            model.soundQueue.Enqueue "explosion"
+            1, Cmd.ofMsg PlayerHit
         
     { model with 
         player = { model.player with laser = nextPlayerLaser }
@@ -136,7 +145,7 @@ let checkCollisions model =
         bunkers = newBunkers
         invaders = { model.invaders with lasers = nextInvaderLasers } }, 
 
-    Cmd.batch [firstCommand; secondCommand; thirdCommand]
+    Cmd.batch [firstCommand; secondCommand; thirdCommand; fourthCommand]
         
 let updateDying atTime model = 
     match model.player.state with
@@ -204,6 +213,8 @@ let view model dispatch =
 
         if model.player.state = Player.Alive then
             yield onupdate (fun _ -> dispatch CheckCollisions)
+
+        yield colour Colour.OrangeRed (earthRect.Width, earthRect.Height) (earthRect.Left, earthRect.Top)
 
         yield onupdate (fun inputs -> 
             if inputs.totalGameTime - model.lastTick > dyingTickInterval then
