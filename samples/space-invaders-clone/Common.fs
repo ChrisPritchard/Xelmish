@@ -26,7 +26,7 @@ let invadersPerRow = 11
 let invaderRows = 5
 let invaderShuffleAmount = 20
 
-let shuffleDecrease = 20L
+let shuffleDecrease = 10L
 let minShuffle = 50L
 
 let projectileWidth = 2

@@ -119,33 +119,36 @@ let checkInvaderLaserCollisions model =
                 acc, cmdResult, newBunkers)
 
 let checkCollisions model =
-    let nextPlayerLaser, firstCommand, newBunkers = 
-        checkPlayerLaserCollisions model
-    let nextInvaderLasers, secondCommand, newBunkers = 
-        checkInvaderLaserCollisions { model with bunkers = newBunkers }
+    if model.invaders.alive = 0 then
+        model, Cmd.ofMsg (Victory (model.score, model.highScore))
+    else
+        let nextPlayerLaser, firstCommand, newBunkers = 
+            checkPlayerLaserCollisions model
+        let nextInvaderLasers, secondCommand, newBunkers = 
+            checkInvaderLaserCollisions { model with bunkers = newBunkers }
     
-    let lives, thirdCommand = 
-        match invaderImpact model.player.x playerY playerWidth playerHeight model with
-        | None -> model.lives, Cmd.none
-        | Some _ -> 
-            model.soundQueue.Enqueue "explosion"
-            0, Cmd.ofMsg PlayerHit
-    let newBunkers = eraseBunkers model.invaders.rows newBunkers
+        let lives, thirdCommand = 
+            match invaderImpact model.player.x playerY playerWidth playerHeight model with
+            | None -> model.lives, Cmd.none
+            | Some _ -> 
+                model.soundQueue.Enqueue "explosion"
+                0, Cmd.ofMsg PlayerHit
+        let newBunkers = eraseBunkers model.invaders.rows newBunkers
 
-    let lives, fourthCommand = 
-        match invaderImpact earthRect.Left earthRect.Top earthRect.Width earthRect.Height model with
-        | None -> lives, Cmd.none
-        | Some _ -> 
-            model.soundQueue.Enqueue "explosion"
-            0, Cmd.ofMsg PlayerHit
+        let lives, fourthCommand = 
+            match invaderImpact earthRect.Left earthRect.Top earthRect.Width earthRect.Height model with
+            | None -> lives, Cmd.none
+            | Some _ -> 
+                model.soundQueue.Enqueue "explosion"
+                0, Cmd.ofMsg PlayerHit
         
-    { model with 
-        player = { model.player with laser = nextPlayerLaser }
-        lives = lives
-        bunkers = newBunkers
-        invaders = { model.invaders with lasers = nextInvaderLasers } }, 
+        { model with 
+            player = { model.player with laser = nextPlayerLaser }
+            lives = lives
+            bunkers = newBunkers
+            invaders = { model.invaders with lasers = nextInvaderLasers } }, 
 
-    Cmd.batch [firstCommand; secondCommand; thirdCommand; fourthCommand]
+        Cmd.batch [firstCommand; secondCommand; thirdCommand; fourthCommand]
         
 let updateDying atTime model = 
     match model.player.state with

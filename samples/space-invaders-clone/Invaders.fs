@@ -7,6 +7,7 @@ open Common
 
 type Model =
     {
+        alive: int
         rows: Row []
         direction: ShuffleState
         lasers: (int * int) list
@@ -21,6 +22,7 @@ and ShuffleState = Across of row:int * dir:int | Down of row:int * nextDir:int
 
 let init () =
     {
+        alive = invaderRows * invadersPerRow
         rows = 
             [|0..invaderRows-1|]
             |> Array.map (fun row -> 
@@ -89,6 +91,7 @@ let shuffleDown targetRow nextDir model =
 let rec shuffleRows time model = 
     // the shuffle mod is used for animations
     let model = { model with shuffleMod = (model.shuffleMod + 1) % 2 }
+    if model.shuffleMod = 0 then model.soundQueue.Enqueue "beep"
     let (newRows, newDirection) = 
         match model.direction with
         | Across (targetRow, dir) -> shuffleAcross targetRow dir model
@@ -98,7 +101,6 @@ let rec shuffleRows time model =
         // immediately do another shuffle, to eliminate the pause between going from across to down.
         shuffleRows time { model with direction = newDirection }
     | _ ->
-        model.soundQueue.Enqueue "beep"
         { model with 
             rows = newRows
             direction = newDirection
@@ -108,7 +110,7 @@ let destroyInvader targetRow index model =
     let (x, _) = model.rows.[targetRow].xs.[index]
     model.rows.[targetRow].xs.[index] <- (x, Dying)
     let newShuffleInterval = max minShuffle (model.shuffleInterval - shuffleDecrease)
-    { model with shuffleInterval = newShuffleInterval }
+    { model with shuffleInterval = newShuffleInterval; alive = model.alive - 1 }
 
 let update message model =
     match message with
