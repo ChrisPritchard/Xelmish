@@ -9,13 +9,17 @@ open Microsoft.Xna.Framework.Media
 open Model
 open Helpers
 
+/// GameLoop is an inherited implementation of XNA's Game class
 type GameLoop (config: GameConfig) as this = 
     inherit Game ()
 
     let graphics = new GraphicsDeviceManager (this)
+    
+    // these are set during LoadContent
     let mutable spriteBatch = Unchecked.defaultof<_>
-
     let mutable assets = Unchecked.defaultof<_>
+    
+    // this is set and updated every Update (60 times a second)
     let mutable inputs = {
         keyboardState = Unchecked.defaultof<_>
         lastKeyboardState = Unchecked.defaultof<_>
@@ -24,25 +28,33 @@ type GameLoop (config: GameConfig) as this =
         gameTime = Unchecked.defaultof<_>
     }
     
+    // used for fps counting
     let mutable fps = 0
     let mutable lastFpsUpdate = 0.
     let fpsUpdateInterval = 200.
 
+    // these two collections are set by the Elmish setState call
     let mutable updatable: (Inputs -> Unit) list = []
     let mutable drawable: (LoadedAssets -> SpriteBatch -> Unit) list = []
 
     do 
+        // presently Xelmish only supports windowed - fullscreen will come eventually (tm)
         match config.resolution with
         | Windowed (w, h) -> 
             graphics.PreferredBackBufferWidth <- w
             graphics.PreferredBackBufferHeight <- h
 
         this.IsMouseVisible <- config.mouseVisible
-        graphics.SynchronizeWithVerticalRetrace <- true
-        this.IsFixedTimeStep <- false 
         
+        // this makes draw run at monitor fps, rather than 60fps
+        graphics.SynchronizeWithVerticalRetrace <- true 
+        
+    /// Used by Xelmish with the Elmish setState. 
+    /// Viewables from the Elmish components are accepted 
+    /// and assigned internally here for update and drawing
     member __.View
         with set value = 
+            // we split the viewables by their DU type to be more efficient during draw/update
             let newUpdatables, newDrawables =
                 (([], []), Seq.rev value)
                 ||> Seq.fold (fun (updatable, drawable) -> 
@@ -57,6 +69,8 @@ type GameLoop (config: GameConfig) as this =
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch (graphics.GraphicsDevice)
 
+        // Assets are loaded into a reference record type (LoadedAssets) here.
+        // Both file based and content pipeline based resources are accepted. 
         let loadIntoAssets assets loadable =
             match loadable with
             | FileTexture (key, path) -> 
@@ -90,10 +104,13 @@ type GameLoop (config: GameConfig) as this =
               fonts = Map.empty 
               sounds = Map.empty 
               music = Map.empty }
+        // for rendering pure colour, rather than requiring the user load a colour texture
+        // we create one, a single white pixel, that can be resized and coloured as needed.
         loadedAssets.whiteTexture.SetData<Color> [| Color.White |]
         assets <- List.fold loadIntoAssets loadedAssets config.assetsToLoad
 
     override __.Update gameTime =
+        // update inputs. last keyboard and mouse state are preserved so changes can be detected
         inputs <- 
             {   lastKeyboardState = inputs.keyboardState
                 keyboardState = Keyboard.GetState ()
@@ -104,6 +121,8 @@ type GameLoop (config: GameConfig) as this =
         try
             for updateFunc in updatable do updateFunc inputs
         with
+            // quit game is a custom exception used by elmish 
+            // components to tell the game to quit gracefully
             | :? QuitGame -> __.Exit()
 
     override __.Draw gameTime =
