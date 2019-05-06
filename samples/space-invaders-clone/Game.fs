@@ -129,7 +129,7 @@ let checkCollisions model =
         | None -> model.lives, Cmd.none
         | Some _ -> 
             model.soundQueue.Enqueue "explosion"
-            1, Cmd.ofMsg PlayerHit
+            0, Cmd.ofMsg PlayerHit
     let newBunkers = eraseBunkers model.invaders.rows newBunkers
 
     let lives, fourthCommand = 
@@ -137,7 +137,7 @@ let checkCollisions model =
         | None -> lives, Cmd.none
         | Some _ -> 
             model.soundQueue.Enqueue "explosion"
-            1, Cmd.ofMsg PlayerHit
+            0, Cmd.ofMsg PlayerHit
         
     { model with 
         player = { model.player with laser = nextPlayerLaser }
@@ -149,7 +149,7 @@ let checkCollisions model =
         
 let updateDying atTime model = 
     match model.player.state with
-    | Player.Dying 0 when model.lives = 1 ->
+    | Player.Dying 0 when model.lives = 1 || model.lives = 0 ->
         model, Cmd.ofMsg (GameOver (model.score, model.highScore))
     | Player.Dying 0 ->
         { model with
