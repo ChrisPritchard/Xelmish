@@ -1,6 +1,6 @@
 ﻿/// This module contains functions that provide some stock viewables for use.
- /// For example, drawing a rect of a given colour is defined here.
- module Xelmish.Viewables
+/// For example, drawing a rect of a given colour is defined here.
+module Xelmish.Viewables
 
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
