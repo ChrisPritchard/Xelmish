@@ -10,7 +10,7 @@ Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not
 
 ## Simple Example of Usage
 
-The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
+The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/Program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
 
 Once you have processed that, see the samples section below for a guide on the other, progressively more involved samples in the project.
 
@@ -22,7 +22,7 @@ It has been built with pure dotnet core 2.2, and you will need to have this inst
 
 ## Samples description
 
-Under /samples, there are numerous projects that use Elmish and Xelmish. These are described below, in their order of complexity.
+Under [/samples](./samples), there are numerous projects that use Elmish and Xelmish. These are described below, in their order of complexity.
 
 ### 0. Xelmish-first
 
