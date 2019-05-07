@@ -18,7 +18,13 @@ Once you have processed that, see the samples section below for a guide on the o
 
 Xelmish was developed first with Visual Studio Community 2017, then later with Visual Studio Community 2019, on various Windows 10 machines. A Visual Studio solution file is in the root of the project if you wish to build using these IDEs. However, it should be fully compilable from the command line and other IDEs if that is your preference.
 
-It has been built with pure dotnet core 2.2, and you will need to have this installed to compile it. Xelmish and its samples have been tested on Windows 10 and Mac OSX.
+It has been built with pure dotnet core 2.2, and you will need to have this installed to compile it. Xelmish and its samples have been tested on Windows 10, Mac OSX and Ubuntu 18.
+
+### A note for Linux builders
+
+On Linux the Monogame Content Pipeline may not work by default. If you get mono failure errors, try installing mono-complete, e.g. `sudo apt install mono-complete`. I was able to compile and run the samples on Ubuntu 18.04 after this without issue.
+
+Note you also need the dotnet core 2.2 SDK to be installed on Linux in order to compile Xelmish and the samples.
 
 ## Samples description
 
