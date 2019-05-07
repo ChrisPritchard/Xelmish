@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="content\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <MonoGameContentReference Include="**\*.mgcb" />
     <None Include="readme.md" />
     <Compile Include="Constants.fs" />
     <Compile Include="StartScreen.fs" />
@@ -15,9 +22,7 @@
   </ItemGroup>
 
   <!-- Processed by content pipeline on build into xnb files -->
-  <ItemGroup>
-    <MonoGameContentReference Include="**\*.mgcb" />
-  </ItemGroup>
+  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />

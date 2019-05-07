@@ -63,7 +63,7 @@ let main _ =
         clearColour = Some Colour.White // if set to None, then each draw will layer over the previous. which looks weird.
         mouseVisible = true
         assetsToLoad = [
-            PipelineFont ("connection", "./connection") // the font used in the game needs to be loaded. there is no default font.
+            PipelineFont ("connection", "./content/connection") // the font used in the game needs to be loaded. there is no default font.
         ]
     }
 

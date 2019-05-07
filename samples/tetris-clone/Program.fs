@@ -52,7 +52,7 @@ let main _ =
         clearColour = Some Colour.Gray
         mouseVisible = true
         assetsToLoad = [
-            PipelineFont ("connection", "./connection")
+            PipelineFont ("connection", "./content/connection")
         ]
     }
 
