@@ -16,19 +16,19 @@ let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <
 
 /// Draw a coloured rect
 let colour colour (width, height) (x, y) = 
-    OnDraw (fun loadedAssets spriteBatch -> 
+    OnDraw (fun loadedAssets _ spriteBatch -> 
         spriteBatch.Draw(loadedAssets.whiteTexture, rect x y width height, colour))
 
 /// Draw the image specified by the given key
 let image key colour (width, height) (x, y) = 
-    OnDraw (fun loadedAssets spriteBatch -> 
+    OnDraw (fun loadedAssets _ spriteBatch -> 
         spriteBatch.Draw(loadedAssets.textures.[key], rect x y width height, colour))
 
 /// Draw text at the given size, colour and position. 
 /// The ox, oy origin vars determine where the text should be placed relative to the given position,
 /// e.g. 0., 0. would be right down from x, y whereas -1., 0. would be left, down, with the last character just before x.
 let text font (fontSize: float) colour (ox: float, oy: float) (text: string) (x, y) =
-    OnDraw (fun loadedAssets spriteBatch -> 
+    OnDraw (fun loadedAssets _ spriteBatch -> 
         let font = loadedAssets.fonts.[font]
         let measured = font.MeasureString (text)
         let scale = let v = float32 fontSize / measured.Y in Vector2(v, v)
@@ -38,11 +38,11 @@ let text font (fontSize: float) colour (ox: float, oy: float) (text: string) (x,
 
 /// Play the next sound in a sound queue (a Queue<string> containing keys of sound effects to play)
 let playQueuedSound (soundQueue: KeyQueue) =
-    OnDraw (fun loadedAssets _ ->
+    OnDraw (fun loadedAssets _ _ ->
         if soundQueue.Count > 0 then 
             let nextSound = soundQueue.Dequeue ()
             ignore (loadedAssets.sounds.[nextSound].Play ()))
-    
+
 /// Run the given event function on every call to Update by the game loop (approx 60 times a second)
 let onupdate event = 
     OnUpdate event
@@ -54,6 +54,13 @@ let onclick event (width, height) (x, y) =
             if inputs.mouseState.LeftButton = ButtonState.Pressed 
             && inputs.lastMouseState.LeftButton <> ButtonState.Pressed then
                 event ())
+
+/// Run the given event with the current mouse pos if the left mouse button has just been pressed
+let onclickpoint event =
+    onupdate (fun inputs -> 
+        if inputs.mouseState.LeftButton = ButtonState.Pressed 
+        && inputs.lastMouseState.LeftButton <> ButtonState.Pressed then
+            event (inputs.mouseState.X, inputs.mouseState.Y))
 
 /// Run the given event if the given key has just been pressed
 let onkeydown key event =

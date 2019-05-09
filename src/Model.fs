@@ -78,7 +78,7 @@ type LoadedAssets = {
 /// the current input state if on update.
 /// In the Viewables module, there are functions that create viewables for common tasks, like drawing colours or images.
 type Viewable = 
-    | OnDraw of (LoadedAssets -> SpriteBatch -> unit)
+    | OnDraw of (LoadedAssets -> Inputs -> SpriteBatch -> unit)
     | OnUpdate of (Inputs -> unit)
 
 /// If a game throws this exception, the gameloop will catch it and quit.

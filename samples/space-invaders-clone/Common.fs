@@ -127,6 +127,6 @@ let explosionWidth, explosionHeight =
     w * sizeMulti, h * sizeMulti
 
 let sprite (sw, sh, sx, sy) (w, h) (x, y) colour =
-    OnDraw (fun loadedAssets (spriteBatch: SpriteBatch) ->
+    OnDraw (fun loadedAssets _ (spriteBatch: SpriteBatch) ->
         let texture = loadedAssets.textures.["sprites"]
         spriteBatch.Draw (texture, rect x y w h, System.Nullable(rect sx sy sw sh), colour))
