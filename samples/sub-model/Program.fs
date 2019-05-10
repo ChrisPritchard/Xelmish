@@ -4,12 +4,12 @@ open Xelmish.Model
 open Xelmish.Viewables
 
 // because all text uses the same font, it is shadowed here with this param already applied
-let text = text "connection"
+let text = text "defaultFont"
 // a button is defined here as a background colour which some text and a click event.
 // Xelmish doesn't provide a button viewable by default - too many possible variables. 
 // it just provides the core building blocks
 let button s event (x, y) = 
-    let width, height = 100, 30 
+    let width, height = 120, 36 
     [
         colour Colour.Blue (width, height) (x, y)
         text 20. Colour.White (-0.5, -0.5) s (x + width/2, y+height/2)
@@ -50,7 +50,7 @@ module Clock =
             else timeFormat model.Time.LocalDateTime
         [
             yield text 20. Colour.Black (0., 0.) timeString (x, y)
-            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x + 550, y)
+            yield! button "Toggle UTC" (fun () -> dispatch ToggleUtc) (x, y + 30)
         ]
 
 module CounterWithClock =
@@ -86,12 +86,12 @@ module CounterWithClock =
         [
             yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (x, y)
             yield! button "- counter" (fun () -> dispatch Decrement) (x, y + 40)
-            yield! button "+ counter" (fun () -> dispatch Increment) (x + 120, y + 40)
+            yield! button "+ counter" (fun () -> dispatch Increment) (x + 140, y + 40)
             yield text 20. Colour.Black (0., 0.) (sprintf "Step size: %i" model.StepSize) (x, y + 80)
-            yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (x, y + 120)
-            yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (x + 120, y + 120)
-            yield! button "reset" (fun () -> dispatch Reset) (x, y + 160)
-            yield! Clock.view model.Clock (ClockMsg >> dispatch) (x, y + 200)
+            yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (x, y + 110)
+            yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (x + 140, y + 110)
+            yield! button "reset" (fun () -> dispatch Reset) (x, y + 150)
+            yield! Clock.view model.Clock (ClockMsg >> dispatch) (x, y + 190)
         ]
 
 module App =
@@ -117,8 +117,8 @@ module App =
 
     let view model dispatch =
         [
-            yield! CounterWithClock.view model.ClockCounter1 (ClockCounter1Msg >> dispatch) (100, 50)
-            yield! CounterWithClock.view model.ClockCounter2 (ClockCounter2Msg >> dispatch) (100, 290)
+            yield! CounterWithClock.view model.ClockCounter1 (ClockCounter1Msg >> dispatch) (100, 30)
+            yield! CounterWithClock.view model.ClockCounter2 (ClockCounter2Msg >> dispatch) (100, 300)
             
             yield onkeydown Keys.Escape exit
         ]
@@ -145,7 +145,7 @@ let main _ =
         clearColour = Some Colour.White
         mouseVisible = true
         assetsToLoad = [
-            PipelineFont ("connection", "./content/Connection")
+            PipelineFont ("defaultFont", "./content/SourceCodePro")
         ]
         stretchMode = Blended
     }
