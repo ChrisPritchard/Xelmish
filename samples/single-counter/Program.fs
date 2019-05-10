@@ -30,12 +30,12 @@ let update msg m =
 let view model dispatch =
 
     // because all text uses the same font, it is shadowed here with this param already applied
-    let text = text "connection"
+    let text = text "defaultFont"
     // a button is defined here as a background colour which some text and a click event.
     // Xelmish doesn't provide a button viewable by default - too many possible variables. 
     // it just provides the core building blocks
     let button s event (x, y) = 
-        let width, height = 100, 30 
+        let width, height = 120, 36 
         [
             colour Colour.Blue (width, height) (x, y)
             text 20. Colour.White (-0.5, -0.5) s (x + width/2, y+height/2)
@@ -47,11 +47,11 @@ let view model dispatch =
     [
         yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
         yield! button "- counter" (fun () -> dispatch Decrement) (100, 100)
-        yield! button "+ counter" (fun () -> dispatch Increment) (220, 100)
+        yield! button "+ counter" (fun () -> dispatch Increment) (240, 100)
         yield text 20. Colour.Black (0., 0.) (sprintf "Step size: %i" model.StepSize) (100, 140)
-        yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 180)
-        yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (220, 180)
-        yield! button "reset" (fun () -> dispatch Reset) (100, 220)
+        yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 170)
+        yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (240, 170)
+        yield! button "reset" (fun () -> dispatch Reset) (100, 215)
 
         yield onkeydown Keys.Escape exit // this is added in all the samples, to make it simple and intuitive to exit the app.
     ]
@@ -63,7 +63,7 @@ let main _ =
         clearColour = Some Colour.White // if set to None, then each draw will layer over the previous. which looks weird.
         mouseVisible = true
         assetsToLoad = [
-            PipelineFont ("connection", "./content/Connection") // the font used in the game needs to be loaded. there is no default font.
+            PipelineFont ("defaultFont", "./content/SourceCodePro") // the font used in the game needs to be loaded. there is no built-in font.
         ]
         stretchMode = Blended
     }

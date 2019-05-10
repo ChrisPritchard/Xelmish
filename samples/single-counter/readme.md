@@ -6,6 +6,4 @@ Like sub model, this sample project also demonstrates Xelmish's compatibility wi
 
 Worth looking at if you would like to see the near minimum architecture you can have with Xelmish/Elmish. However note that this sample and the next are UI heavy, where Xelmish and XNA in general is weaker than a UI-focused framework like Fable and Elmish.WPF. Other samples are more game like.
 
-## Font
-
-The font used is 'Connection' which is under the SIL Open Font License.
+The font used is 'SourceCodePro-Semibold' which is under the SIL Open Font License.
