@@ -59,6 +59,7 @@ let main _ =
             FileSound ("gameover", "./content/siclone_death.wav")
             FileSound ("victory", "./content/siclone_saucer.wav") ]
         mouseVisible = false
+        stretchMode = PointClamp
     }
 
     Program.mkProgram init update view

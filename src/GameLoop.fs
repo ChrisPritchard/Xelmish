@@ -120,6 +120,10 @@ type GameLoop (config: GameConfig) as this =
     override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear config.clearColour
 
-        spriteBatch.Begin ()
+        match config.stretchMode with
+        | Blended -> spriteBatch.Begin ()
+        | PointClamp -> spriteBatch.Begin (SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
+
         for drawFunc in drawable do drawFunc assets inputs spriteBatch
+
         spriteBatch.End ()

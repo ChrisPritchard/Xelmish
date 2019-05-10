@@ -65,6 +65,7 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("connection", "./content/Connection") // the font used in the game needs to be loaded. there is no default font.
         ]
+        stretchMode = Blended
     }
 
     Program.mkSimple init update view // standard, out of the box Elmish initialisation
