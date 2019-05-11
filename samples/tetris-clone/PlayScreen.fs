@@ -14,7 +14,6 @@ type Model = {
     shapeType: Shape
     nextShapeType: Shape
     rotationIndex: int
-    lastTick: int64
     tickInterval: int64
     dropPressed: bool
     lines: int
@@ -28,7 +27,6 @@ let init () =
         shapeType = shapes.[random.Next(shapes.Length)]
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
-        lastTick = 0L
         tickInterval = 1000L
         dropPressed = false
         lines = 0
