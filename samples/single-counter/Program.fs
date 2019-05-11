@@ -45,13 +45,13 @@ let view model dispatch =
     // the yield pattern is useful, as single elements like the text with no background can be yielded alongside
     // multi-element elements like buttons with yield!
     [
-        yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (100, 60)
-        yield! button "- counter" (fun () -> dispatch Decrement) (100, 100)
-        yield! button "+ counter" (fun () -> dispatch Increment) (240, 100)
-        yield text 20. Colour.Black (0., 0.) (sprintf "Step size: %i" model.StepSize) (100, 140)
-        yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (100, 170)
-        yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (240, 170)
-        yield! button "reset" (fun () -> dispatch Reset) (100, 215)
+        yield text 30. Colour.Black (0., 0.) (sprintf "Counter value: %i" model.Count) (80, 40)
+        yield! button "- counter" (fun () -> dispatch Decrement) (80, 80)
+        yield! button "+ counter" (fun () -> dispatch Increment) (220, 80)
+        yield text 20. Colour.Black (0., 0.) (sprintf "Step size: %i" model.StepSize) (80, 140)
+        yield! button "- step size" (fun () -> dispatch (SetStepSize (model.StepSize - 1))) (80, 170)
+        yield! button "+ step size" (fun () -> dispatch (SetStepSize (model.StepSize + 1))) (220, 170)
+        yield! button "reset" (fun () -> dispatch Reset) (80, 215)
 
         yield onkeydown Keys.Escape exit // this is added in all the samples, to make it simple and intuitive to exit the app.
     ]
@@ -65,7 +65,6 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("defaultFont", "./content/SourceCodePro") // the font used in the game needs to be loaded. there is no built-in font.
         ]
-        stretchMode = Blended
     }
 
     Program.mkSimple init update view // standard, out of the box Elmish initialisation

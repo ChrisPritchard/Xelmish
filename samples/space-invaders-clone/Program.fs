@@ -1,6 +1,7 @@
 ﻿open System.IO
 open Elmish
 open Xelmish.Model
+open Xelmish.Viewables
 open Common
 
 type Model = 
@@ -38,10 +39,13 @@ let update message model =
     | _ -> model, Cmd.none // invalid combination
 
 let view model dispatch =
-    match model with
-    | Start startScreen -> StartScreen.view startScreen (StartMessage >> dispatch)
-    | Playing game -> Game.view game (PlayingMessage >> dispatch)
-    | GameOver gameOverScreen -> GameOver.view gameOverScreen (GameOverMessage >> dispatch)
+    let sampling = setPixelSampling () // this will ensure all our pixel graphics look sharp
+    let screen = 
+        match model with
+        | Start startScreen -> StartScreen.view startScreen (StartMessage >> dispatch)
+        | Playing game -> Game.view game (PlayingMessage >> dispatch)
+        | GameOver gameOverScreen -> GameOver.view gameOverScreen (GameOverMessage >> dispatch)
+    sampling::screen
 
 [<EntryPoint>]
 let main _ =
@@ -59,7 +63,6 @@ let main _ =
             FileSound ("gameover", "./content/siclone_death.wav")
             FileSound ("victory", "./content/siclone_saucer.wav") ]
         mouseVisible = false
-        stretchMode = PointClamp
     }
 
     Program.mkProgram init update view

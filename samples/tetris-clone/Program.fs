@@ -54,7 +54,6 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("connection", "./content/Connection")
         ]
-        stretchMode = Blended
     }
 
     Program.mkProgram init update view

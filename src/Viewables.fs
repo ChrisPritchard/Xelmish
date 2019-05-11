@@ -14,6 +14,14 @@ type KeyQueue = System.Collections.Generic.Queue<string>
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
+let setPixelSampling () =
+    OnDraw (fun _ _ spriteBatch -> 
+        spriteBatch.GraphicsDevice.SamplerStates.[0] <- SamplerState.PointClamp)
+
+let setSmoothSampling () =
+    OnDraw (fun _ _ spriteBatch -> 
+        spriteBatch.GraphicsDevice.SamplerStates.[0] <- SamplerState.LinearClamp)
+
 /// Draw a coloured rect
 let colour colour (width, height) (x, y) = 
     OnDraw (fun loadedAssets _ spriteBatch -> 

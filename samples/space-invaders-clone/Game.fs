@@ -190,7 +190,7 @@ let view model dispatch =
 
         yield text Colour.White (-1., 0.) "LIVES" (resWidth - 10, 10)
         yield text Colour.White (-1., 0.) (sprintf "%02i" model.lives) (resWidth - 10, 44)
-
+        
         yield! Player.view model.player (PlayerMessage >> dispatch)
         yield! Invaders.view model.invaders (InvadersMessage >> dispatch) (model.player.state <> Player.Alive)
 

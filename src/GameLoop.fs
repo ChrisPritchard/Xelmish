@@ -120,9 +120,10 @@ type GameLoop (config: GameConfig) as this =
     override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear config.clearColour
 
-        match config.stretchMode with
-        | Blended -> spriteBatch.Begin ()
-        | PointClamp -> spriteBatch.Begin (SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp)
+        // by default, all sprites are drawing on .End() in a batch
+        // immediate changes this so they are drawn as called, which allows us to
+        // change the sampler state (e.g. for pixel graphics vs text) between different sprite calls
+        spriteBatch.Begin (sortMode = SpriteSortMode.Immediate)
 
         for drawFunc in drawable do drawFunc assets inputs spriteBatch
 

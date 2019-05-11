@@ -147,7 +147,6 @@ let main _ =
         assetsToLoad = [
             PipelineFont ("defaultFont", "./content/SourceCodePro")
         ]
-        stretchMode = Blended
     }
 
     Program.mkSimple App.init App.update App.view // standard, out of the box Elmish mkSimple
