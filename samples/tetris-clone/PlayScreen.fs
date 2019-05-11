@@ -14,8 +14,8 @@ type Model = {
     shapeType: Shape
     nextShapeType: Shape
     rotationIndex: int
-    lastDrop: int64
-    dropInterval: int64
+    lastTick: int64
+    tickInterval: int64
     dropPressed: bool
     lines: int
     score: int
@@ -28,15 +28,15 @@ let init () =
         shapeType = shapes.[random.Next(shapes.Length)]
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
-        lastDrop = 0L
-        dropInterval = 1000L
+        lastTick = 0L
+        tickInterval = 1000L
         dropPressed = false
         lines = 0
         score = 0
     }
 
 type Message = 
-    | Tick of int64
+    | Tick
     | Drop of bool
     | Left
     | Right
@@ -82,11 +82,10 @@ let rotateShape model =
             rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
     ifValid model proposed
 
-let dropShape time model =
+let dropShape model =
     let newModel = 
         { model with 
-            blockPosition = let (x, y) = model.blockPosition in x, y + 1
-            lastDrop = time }
+            blockPosition = let (x, y) = model.blockPosition in x, y + 1 }
     let newTiles = tilesForModel newModel
 
     if outOfBounds newTiles then model, Cmd.none
@@ -112,15 +111,15 @@ let removeLine staticBlocks line =
 let removeLines toRemove model =
     let newStatics = (model.staticBlocks, toRemove) ||> List.fold removeLine
     let newScore = model.score + scoreFor toRemove.Length
-    let newDrop = 
+    let newTickInterval = 
         if level newScore > level model.score 
-        then max minDrop (model.dropInterval - dropPerLevel)
-        else model.dropInterval
+        then max minDrop (model.tickInterval - dropPerLevel)
+        else model.tickInterval
     { model with 
         lines = model.lines + List.length toRemove
         staticBlocks = newStatics
         score = newScore
-        dropInterval = newDrop }, Cmd.ofMsg SpawnBlock
+        tickInterval = newTickInterval }, Cmd.ofMsg SpawnBlock
 
 let checkLines model =
     let (_, y) = model.blockPosition
@@ -151,7 +150,7 @@ let spawnBlock model =
 
 let update message model =
     match message with
-    | Tick time -> dropShape time model
+    | Tick -> dropShape model
     | Left -> moveShape -1 model
     | Right -> moveShape 1 model
     | Rotate -> rotateShape model
@@ -159,6 +158,8 @@ let update message model =
     | CheckLines -> checkLines model
     | SpawnBlock -> spawnBlock model
     | GameOver _ -> model, Cmd.none // caught by parent
+
+let mutable lastTick = 0L // we use a mutable tick counter here in order to ensure precision
 
 let view model dispatch =
     [
@@ -208,7 +209,8 @@ let view model dispatch =
         // This can be more effective than using an Elmish subscription, especially if smoothness is needed
         yield onupdate (fun inputs ->
             // check to see if a drop tick is due
-            let interval = if model.dropPressed then 100L else model.dropInterval
-            if inputs.totalGameTime - model.lastDrop > interval then
-                dispatch (Tick inputs.totalGameTime))
+            let interval = if model.dropPressed then 100L else model.tickInterval
+            if (inputs.totalGameTime - lastTick) >= interval then
+                lastTick <- inputs.totalGameTime
+                dispatch Tick)
     ]
