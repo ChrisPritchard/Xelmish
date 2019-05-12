@@ -36,8 +36,6 @@ type Message =
     | Left
     | Right
     | Rotate
-    | CheckLines
-    | SpawnBlock
     | GameOver of int
 
 let tilesFor (x, y) shape rotation =
@@ -76,59 +74,7 @@ let rotateShape model =
         { model with 
             rotationIndex = (model.rotationIndex + 1) % model.shapeType.rotations.Length }
     ifValid model proposed
-
-let dropShape model =
-    let newModel = 
-        { model with 
-            blockPosition = let (x, y) = model.blockPosition in x, y + 1 }
-    let newTiles = tilesForModel newModel
-
-    if outOfBounds newTiles then model, Cmd.none
-    elif overlap model.staticBlocks newTiles || belowFloor newTiles then
-        let oldTiles = tilesForModel model
-        let newStatics = 
-            (model.staticBlocks, oldTiles) 
-            ||> List.fold (fun statics tile -> 
-                Map.add tile model.shapeType.colour statics)
-        { model with staticBlocks = newStatics }, Cmd.ofMsg CheckLines
-    else
-        newModel, Cmd.none
-
-let removeLine staticBlocks line =
-    staticBlocks 
-    |> Map.toList
-    |> List.choose (fun ((x, y), v) -> 
-        if y = line then None
-        elif y > line then Some ((x, y), v)
-        else Some ((x, y + 1), v))
-    |> Map.ofList
-
-let removeLines toRemove model =
-    let newStatics = (model.staticBlocks, toRemove) ||> List.fold removeLine
-    let newScore = model.score + scoreFor toRemove.Length
-    let newTickInterval = 
-        if level newScore > level model.score 
-        then max minDrop (model.tickInterval - dropPerLevel)
-        else model.tickInterval
-    { model with 
-        lines = model.lines + List.length toRemove
-        staticBlocks = newStatics
-        score = newScore
-        tickInterval = newTickInterval }, Cmd.ofMsg SpawnBlock
-
-let checkLines model =
-    let (_, y) = model.blockPosition
-    let complete =
-        [y..y+3] 
-        |> List.filter (fun line ->
-            line < gridHeight
-            && List.forall (fun x -> 
-                Map.containsKey (x, line) model.staticBlocks) [0..gridWidth-1])
-    if List.isEmpty complete then
-        model, Cmd.ofMsg SpawnBlock
-    else
-        removeLines complete model
-
+       
 let spawnBlock model =
     let newModel = 
         { model with 
@@ -143,14 +89,65 @@ let spawnBlock model =
         else Cmd.none
     newModel, command
 
+let removeLines toRemove model =
+    let removeLine staticBlocks line =
+        staticBlocks 
+        |> Map.toList
+        |> List.choose (fun ((x, y), v) -> 
+            if y = line then None
+            elif y > line then Some ((x, y), v)
+            else Some ((x, y + 1), v))
+        |> Map.ofList
+    let newStatics = (model.staticBlocks, toRemove) ||> List.fold removeLine
+    let newScore = model.score + scoreFor toRemove.Length
+    let newTickInterval = 
+        if level newScore > level model.score 
+        then max minDrop (model.tickInterval - dropPerLevel)
+        else model.tickInterval
+    let next = 
+        { model with 
+            lines = model.lines + List.length toRemove
+            staticBlocks = newStatics
+            score = newScore
+            tickInterval = newTickInterval }
+    spawnBlock next
+
+let checkLines model =
+    let (_, y) = model.blockPosition
+    let complete =
+        [y..y+3] 
+        |> List.filter (fun line ->
+            line < gridHeight
+            && List.forall (fun x -> 
+                Map.containsKey (x, line) model.staticBlocks) [0..gridWidth-1])
+    if List.isEmpty complete then
+        spawnBlock model
+    else
+        removeLines complete model
+
+let dropShape model =
+    let newModel = 
+        { model with 
+            blockPosition = let (x, y) = model.blockPosition in x, y + 1 }
+    let newTiles = tilesForModel newModel
+
+    if outOfBounds newTiles then model, Cmd.none
+    elif overlap model.staticBlocks newTiles || belowFloor newTiles then
+        let oldTiles = tilesForModel model
+        let newStatics = 
+            (model.staticBlocks, oldTiles) 
+            ||> List.fold (fun statics tile -> 
+                Map.add tile model.shapeType.colour statics)
+        checkLines { model with staticBlocks = newStatics }
+    else
+        newModel, Cmd.none
+
 let update message model =
     match message with
     | Tick -> dropShape model
     | Left -> moveShape -1 model
     | Right -> moveShape 1 model
     | Rotate -> rotateShape model
-    | CheckLines -> checkLines model
-    | SpawnBlock -> spawnBlock model
     | GameOver _ -> model, Cmd.none // caught by parent
 
 let mutable lastTick = 0L // we use a mutable tick counter here in order to ensure precision
