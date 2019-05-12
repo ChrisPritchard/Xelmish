@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{376DD74C-0
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		LICENSE = LICENSE
+		logo.png = logo.png
 		README.md = README.md
 		SIL Open Font License.txt = SIL Open Font License.txt
 	EndProjectSection
@@ -25,7 +26,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "tetris-clone", "samples\tet
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "space-invaders-clone", "samples\space-invaders-clone\space-invaders-clone.fsproj", "{07B7E788-E4EF-42CE-B0E8-02C01A60B2C0}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "xelmish-first", "samples\xelmish-first\xelmish-first.fsproj", "{8E986E34-0BA2-4F04-8516-4EEA0CA56226}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "xelmish-first", "samples\xelmish-first\xelmish-first.fsproj", "{8E986E34-0BA2-4F04-8516-4EEA0CA56226}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

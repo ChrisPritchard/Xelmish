@@ -8,6 +8,8 @@ To use Xelmish, the Elmish program must provide a view function that returns a l
 
 Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not rendering vertices). Hopefully it allows users to develop such games rapidly using the Elm architecture and F#!
 
+**Update: Available on Nuget [here](https://www.nuget.org/packages/xelmish)**
+
 ## Simple Example of Usage
 
 The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/Program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
