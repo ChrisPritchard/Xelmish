@@ -15,7 +15,6 @@ type Model = {
     nextShapeType: Shape
     rotationIndex: int
     tickInterval: int64
-    dropPressed: bool
     lines: int
     score: int
 }
@@ -28,14 +27,12 @@ let init () =
         nextShapeType = shapes.[random.Next(shapes.Length)]
         rotationIndex = 0
         tickInterval = 1000L
-        dropPressed = false
         lines = 0
         score = 0
     }
 
 type Message = 
     | Tick
-    | Drop of bool
     | Left
     | Right
     | Rotate
@@ -152,7 +149,6 @@ let update message model =
     | Left -> moveShape -1 model
     | Right -> moveShape 1 model
     | Rotate -> rotateShape model
-    | Drop v -> { model with dropPressed = v }, Cmd.none
     | CheckLines -> checkLines model
     | SpawnBlock -> spawnBlock model
     | GameOver _ -> model, Cmd.none // caught by parent
@@ -199,15 +195,13 @@ let view model dispatch =
         yield onkeydown Keys.Left (fun () -> dispatch Left)
         yield onkeydown Keys.Right (fun () -> dispatch Right)
         yield onkeydown Keys.Up (fun () -> dispatch Rotate)
-        yield onkeydown Keys.Down (fun () -> dispatch (Drop true))
-        yield onkeyup Keys.Down (fun () -> dispatch (Drop false))
         yield onkeydown Keys.Escape exit
 
         // by placing the below code in a viewable function, it will get evaluated on every game draw
         // This can be more effective than using an Elmish subscription, especially if smoothness is needed
         yield onupdate (fun inputs ->
             // check to see if a drop tick is due
-            let interval = if model.dropPressed then 100L else model.tickInterval
+            let interval = if inputs.keyboardState.IsKeyDown Keys.Down then 100L else model.tickInterval
             if (inputs.totalGameTime - lastTick) >= interval then
                 lastTick <- inputs.totalGameTime
                 dispatch Tick)
