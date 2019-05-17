@@ -14,7 +14,11 @@ Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not
 
 The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/Program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
 
+I have decorated the code of Xelmish-first (what little there is) to give some general notes on Xelmish development, that will hopefully be useful in your own projects.
+
 Once you have processed that, see the samples section below for a guide on the other, progressively more involved samples in the project.
+
+Note: As Xelmish uses monogame, eventually you will have to learn about the monogame content pipeline. I suggest using the Monogame [official documentation](http://www.monogame.net/documentation/?page=Using_The_Pipeline_Tool) for this.
 
 ## Development Info
 
