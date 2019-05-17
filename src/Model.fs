@@ -81,7 +81,8 @@ type Viewable =
     | OnDraw of (LoadedAssets -> Inputs -> SpriteBatch -> unit)
     | OnUpdate of (Inputs -> unit)
 
-/// If a game throws this exception, the gameloop will catch it and quit.
+/// If a game throws this exception during the update call (e.g. via an OnUpdate viewable), the gameloop will catch it and quit.
+/// Note: when referencing via Nuget or .dll, debuggers will halt on this exception. However, you can safely continue if they do.
 type QuitGame() =
     inherit System.Exception()
 
