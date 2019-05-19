@@ -69,3 +69,7 @@ In contrast the battle-tested Elmish model has, so far, proved a pleasure to wor
 ## License
 
 Xelmish is provided under the **MIT** license. PLease contact me if you have issue with this. In addition, many if not all of the sample projects use fonts that are provided under the **SIL Open Font License**, a copy of which is in the root of the solution.
+
+## Credits
+
+Everything in this repo has been built solely by me, in line with the requirements of the competition. That said, it references the [Elmish](https://github.com/elmish/elmish) library over Nuget, created by @et1975 and others. The ease of use of their library was what inspired the creation of this. I also learnt how to integrate with Elmish via [Elmish.WPF](https://github.com/elmish/Elmish.WPF), and how to use it well via this excellent article by @MangelMaxime, ["My tips for working with Elmish"](https://medium.com/@MangelMaxime/my-tips-for-working-with-elmish-ab8d193d52fd)
