@@ -8,6 +8,7 @@ open Microsoft.Xna.Framework.Media
 // Aliases here so that games don't need to understand/reference XNA namespaces (also to fix the spelling)
 
 type Keys = Microsoft.Xna.Framework.Input.Keys
+type ButtonState = Microsoft.Xna.Framework.Input.ButtonState
 type Colour = Microsoft.Xna.Framework.Color
 type Rectangle = Microsoft.Xna.Framework.Rectangle
 type SpriteBatch = Microsoft.Xna.Framework.Graphics.SpriteBatch

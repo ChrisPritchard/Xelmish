@@ -1,4 +1,4 @@
-module internal Xelmish.GameLoop
+﻿module internal Xelmish.GameLoop
 
 open System.IO
 open Microsoft.Xna.Framework
@@ -14,11 +14,11 @@ type GameLoop (config: GameConfig) as this =
 
     let graphics = new GraphicsDeviceManager (this)
     
-    // These are set during LoadContent.
+    // these are set during LoadContent
     let mutable spriteBatch = Unchecked.defaultof<_>
     let mutable assets = Unchecked.defaultof<_>
     
-    // This is set and updated every Update (60 times a second).
+    // this is set and updated every Update (60 times a second)
     let mutable inputs = {
         keyboardState = Unchecked.defaultof<_>
         lastKeyboardState = Unchecked.defaultof<_>
@@ -27,22 +27,20 @@ type GameLoop (config: GameConfig) as this =
         gameTime = Unchecked.defaultof<_>
     }
 
-    // These two collections are set by the Elmish setState call.
+    // these two collections are set by the Elmish setState call
     let mutable updatable: (Inputs -> Unit) list = []
     let mutable drawable: (LoadedAssets -> Inputs -> SpriteBatch -> Unit) list = []
 
     do 
-        // Presently Xelmish only supports windowed - fullscreen will come eventually (tm).
+        // presently Xelmish only supports windowed - fullscreen will come eventually (tm)
         match config.resolution with
         | Windowed (w, h) -> 
             graphics.PreferredBackBufferWidth <- w
             graphics.PreferredBackBufferHeight <- h
 
-        // This draws the hardware mouse if true. 
-        // Otherwise you will need to provide your own cursor graphic (if appropriate).
         this.IsMouseVisible <- config.mouseVisible
         
-        // This makes draw run at monitor fps, rather than 60fps.
+        // this makes draw run at monitor fps, rather than 60fps
         graphics.SynchronizeWithVerticalRetrace <- true 
         
     /// Used by Xelmish with the Elmish setState. 
@@ -57,7 +55,7 @@ type GameLoop (config: GameConfig) as this =
                     drawable <- drawableAcc
                 | (OnUpdate f)::rest -> splitter (f::updatableAcc) drawableAcc rest
                 | (OnDraw f)::rest -> splitter updatableAcc (f::drawableAcc) rest
-            // We split the viewables by their DU type to be more efficient during draw/update
+            // we split the viewables by their DU type to be more efficient during draw/update
             splitter [] [] (List.rev value)
 
     override __.LoadContent () = 
@@ -98,13 +96,13 @@ type GameLoop (config: GameConfig) as this =
               fonts = Map.empty 
               sounds = Map.empty 
               music = Map.empty }
-        // For rendering pure colour, rather than requiring the user load a colour texture,
-        // we create one. It is set with a single white pixel, that can be resized and coloured as needed.
+        // for rendering pure colour, rather than requiring the user load a colour texture
+        // we create one, a single white pixel, that can be resized and coloured as needed.
         loadedAssets.whiteTexture.SetData<Color> [| Color.White |]
         assets <- List.fold loadIntoAssets loadedAssets config.assetsToLoad
 
     override __.Update gameTime =
-        // Update inputs. Last keyboard and mouse state are preserved so changes can be detected.
+        // update inputs. last keyboard and mouse state are preserved so changes can be detected
         inputs <- 
             {   lastKeyboardState = inputs.keyboardState
                 keyboardState = Keyboard.GetState ()
@@ -113,23 +111,20 @@ type GameLoop (config: GameConfig) as this =
                 gameTime = gameTime }
 
         try
-            for updateFunc in updatable do 
-                updateFunc inputs
+            for updateFunc in updatable do updateFunc inputs
         with
-            // Quit game is a custom exception used by xelmish 
-            // components to tell the game to quit gracefully.
+            // quit game is a custom exception used by elmish 
+            // components to tell the game to quit gracefully
             | :? QuitGame -> __.Exit()
 
     override __.Draw gameTime =
         Option.iter this.GraphicsDevice.Clear config.clearColour
 
-        // By default, a spritebatch doesn't draw until its .End() method is called.
-        // Setting the sort mode to immediate changes this so they are drawn as called, which allows us to
-        // change the sampler state (e.g. for pixel graphics vs text) between different sprite calls.
-        // A slight performance hit but an improvement in rendering quality, when mixing pixel graphics and smoothed text.
+        // by default, all sprites are drawing on .End() in a batch
+        // immediate changes this so they are drawn as called, which allows us to
+        // change the sampler state (e.g. for pixel graphics vs text) between different sprite calls
         spriteBatch.Begin (sortMode = SpriteSortMode.Immediate)
 
-        for drawFunc in drawable do 
-            drawFunc assets inputs spriteBatch
+        for drawFunc in drawable do drawFunc assets inputs spriteBatch
 
         spriteBatch.End ()
