@@ -14,10 +14,12 @@ type KeyQueue = System.Collections.Generic.Queue<string>
 let private vector2 x y = Vector2(float32 x, float32 y)
 let private isInside tx ty tw th x y = x >= tx && x <= tx + tw && y >= ty && y <= ty + th
 
+/// Sets the sampler state to pointClamp, which results in pixellated resizing
 let setPixelSampling () =
     OnDraw (fun _ _ spriteBatch -> 
         spriteBatch.GraphicsDevice.SamplerStates.[0] <- SamplerState.PointClamp)
 
+/// Sets the sampler state to linearClamp, which gives a anti-aliased/blurred look to resizing
 let setSmoothSampling () =
     OnDraw (fun _ _ spriteBatch -> 
         spriteBatch.GraphicsDevice.SamplerStates.[0] <- SamplerState.LinearClamp)
@@ -27,22 +29,10 @@ let colour colour (width, height) (x, y) =
     OnDraw (fun loadedAssets _ spriteBatch -> 
         spriteBatch.Draw(loadedAssets.whiteTexture, rect x y width height, colour))
 
-/// Draw a coloured rect if the predicate is true for the current inputs
-let conditionalColour colour (width, height) (x, y) predicate = 
-    OnDraw (fun loadedAssets inputs spriteBatch -> 
-        if predicate inputs then
-            spriteBatch.Draw(loadedAssets.whiteTexture, rect x y width height, colour))
-
 /// Draw the image specified by the given key
 let image key colour (width, height) (x, y) = 
     OnDraw (fun loadedAssets _ spriteBatch -> 
-        spriteBatch.Draw(loadedAssets.textures.[key], rect x y width height, colour))
-
-/// Draw the image specified by the given key if the predicate is true for the current inputs
-let conditionalImage key colour (width, height) (x, y) predicate = 
-    OnDraw (fun loadedAssets inputs spriteBatch -> 
-        if predicate inputs then
-            spriteBatch.Draw(loadedAssets.textures.[key], rect x y width height, colour))
+        spriteBatch.Draw(loadedAssets.textures.[key], rect x y width height, colour)) 
 
 /// Draw text at the given size, colour and position. 
 /// The ox, oy origin vars determine where the text should be placed relative to the given position,
@@ -54,20 +44,7 @@ let text font (fontSize: float) colour (ox: float, oy: float) (text: string) (x,
         let scale = let v = float32 fontSize / measured.Y in Vector2(v, v)
         let origin = Vector2 (float32 ox * measured.X * scale.X, float32 oy * measured.Y * scale.Y)
         let position = Vector2.Add(origin, vector2 x y)
-        spriteBatch.DrawString (font, text, position, colour, 0.f, Vector2.Zero, scale, SpriteEffects.None, 0.f))
-
-/// Draw text at the given size, colour and position if the predicate is true for the current inputs. 
-/// The ox, oy origin vars determine where the text should be placed relative to the given position,
-/// e.g. 0., 0. would be right down from x, y whereas -1., 0. would be left, down, with the last character just before x.
-let conditionalText font (fontSize: float) colour (ox: float, oy: float) (text: string) (x, y) predicate =
-    OnDraw (fun loadedAssets inputs spriteBatch -> 
-        if predicate inputs then
-            let font = loadedAssets.fonts.[font]
-            let measured = font.MeasureString (text)
-            let scale = let v = float32 fontSize / measured.Y in Vector2(v, v)
-            let origin = Vector2 (float32 ox * measured.X * scale.X, float32 oy * measured.Y * scale.Y)
-            let position = Vector2.Add(origin, vector2 x y)
-            spriteBatch.DrawString (font, text, position, colour, 0.f, Vector2.Zero, scale, SpriteEffects.None, 0.f))    
+        spriteBatch.DrawString (font, text, position, colour, 0.f, Vector2.Zero, scale, SpriteEffects.None, 0.f)) 
 
 /// Play the next sound in a sound queue (a Queue<string> containing keys of sound effects to play)
 let playQueuedSound (soundQueue: KeyQueue) =
