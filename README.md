@@ -10,6 +10,8 @@ Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not
 
 **Update: Available on Nuget [here](https://www.nuget.org/packages/xelmish)**
 
+**Update Update**: the project and its samples were recently upgraded to .NET 5. The older, dotnet core 2.2 version can be found in [this branch](https://github.com/ChrisPritchard/Xelmish/tree/fs-applied-2019), though its mainly just the framework that changed, not any code effectively.
+
 ## Simple Example of Usage
 
 The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/Program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
@@ -24,13 +26,13 @@ Note: As Xelmish uses monogame, eventually you will have to learn about the mono
 
 Xelmish was developed first with Visual Studio Community 2017, then later with Visual Studio Community 2019, on various Windows 10 machines. A Visual Studio solution file is in the root of the project if you wish to build using these IDEs. However, it should be fully compilable from the command line and other IDEs if that is your preference.
 
-It has been built with pure dotnet core 2.2, and you will need to have this installed to compile it. Xelmish and its samples have been tested on Windows 10, Mac OSX and Ubuntu 18.
+It has been built with pure dotnet core 2.2, but has been upgraded without issue to .NET 5. So you will need to have the SDK for .NET 5 in order to compile. Xelmish and its samples have been tested on Windows 10, Mac OSX and Ubuntu 18.
 
 ### A note for Linux builders
 
 On Linux the Monogame Content Pipeline may not work by default. If you get mono failure errors, try installing mono-complete, e.g. `sudo apt install mono-complete`. I was able to compile and run the samples on Ubuntu 18.04 after this without issue.
 
-Note you also need the dotnet core 2.2 SDK to be installed on Linux in order to compile Xelmish and the samples.
+Note you also need the .NET 5 SDK to be installed on Linux in order to compile Xelmish and the samples.
 
 ## Samples description
 
@@ -62,7 +64,7 @@ This is also the first sample that uses audio, with retro beeps and explosions b
 
 Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine. 
 
-**Update:** While Xelmish unfortunately did not win in the competition, my [other](https://github.com/ChrisPritchard/FSH) submission did. Full results [here](http://foundation.fsharp.org/results_applied_fsharp_2019).
+> **Update:** While Xelmish unfortunately did not win in the competition, my [other](https://github.com/ChrisPritchard/FSH) submission did. Full results [here](http://foundation.fsharp.org/results_applied_fsharp_2019).
 
 While I have successfully built several small games with gamecore, I was finding that as my games increased in complexity the very simplistic model/view architecture in gamecore started to get stretched and warp. Things which were view-specific started to leak into model, and vice versa. 
 
