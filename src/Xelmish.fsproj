@@ -20,11 +20,11 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <PackageVersion>0.0.1</PackageVersion>
+    <PackageVersion>0.0.2</PackageVersion>
     <PackageId>xelmish</PackageId>
     <Title>Xelmish</Title>
     <Authors>Christopher Pritchard (https://github.com/ChrisPritchard)</Authors>
-    <Description>A set of helpers and types that allow you to write XNA games using the Elmish framework</Description>
+    <Description>A set of helpers and types that allow you to write XNA games using the Elmish framework. Updated for NET 5</Description>
     <PackageTags>monogame fsharp xna elmish</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/ChrisPritchard/Xelmish</RepositoryUrl>
