@@ -1,5 +1,7 @@
 # Xelmish - XNA + Elmish!
 
+[![Nuget](https://img.shields.io/nuget/v/xelmish.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/xelmish)
+
 **Xelmish** is a small project that creates an **X**NA Game loop (via Mono Game) and connects it to the **Elmish** MVU architecture, via a custom setState method in its own version of the classic Elmish.Program module (Xelmish.Program). 
 
 In this way, you can develop games using the excellent Elmish architecture, with all the power of an XNA renderer! You can also convert existing Elmish applications to use Xelmish by rewriting their view functions.
