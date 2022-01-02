@@ -22,7 +22,6 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <!-- Processed by content pipeline on build into xnb files -->
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
@@ -33,9 +32,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
-    <!-- Required to trigger the content build -->
-    <PackageReference Include="MonoGame.Content.Builder" Version="3.7.0.4" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.7.0.7" />
+    <PackageReference Include="Elmish" Version="3.1.0" />
+    <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
   </ItemGroup>
 
 </Project>
