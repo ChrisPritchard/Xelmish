@@ -7,3 +7,5 @@ Each 'screen' in the game is an Elmish component with its own model, messages an
 The progression of the game is driven through listening to keystrokes and through event methods that run on every update in the core game loop (all nicely abstracted away to fit with the Elmish model).
 
 The font used is 'Connection' which is under the SIL Open Font License.
+
+The game also demonstrates the use of an app.manifest with desktopGL monogame to control DPI awareness. Note this only works on windows (file is ignored in linux builds)
