@@ -47,31 +47,30 @@ type GameLoop (config: GameConfig) as this =
             splitter [] [] (List.rev value)
 
     override __.Initialize () = 
-        // mingrate the "do" stuffs in constructor to here. 
-        match config.resolution with
-        | Windowed (w, h) -> 
+        // Set up overall run settings here, like resolution, screen type and fps
+
+        let setRes w h = 
             graphics.PreferredBackBufferWidth <- w
             graphics.PreferredBackBufferHeight <- h
+            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
+
+        match config.resolution with
+        | Windowed (w, h) -> 
             this.Window.AllowUserResizing <- true 
-            // set render target 
-            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
+            setRes w h
         | FullScreen (w, h) -> 
-            graphics.PreferredBackBufferWidth <- w 
-            graphics.PreferredBackBufferHeight <- h 
             graphics.IsFullScreen <- true
-            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
+            setRes w h
         | Borderless (w, h) -> 
-            graphics.PreferredBackBufferWidth <- w 
-            graphics.PreferredBackBufferHeight <- h 
             this.Window.IsBorderless <- true 
-            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
+            setRes w h
+       
 
         this.IsMouseVisible <- config.mouseVisible
         
-        // this makes draw run at monitor fps, rather than 60fps
+        // This makes draw run at monitor fps, rather than 60fps
         graphics.SynchronizeWithVerticalRetrace <- true 
 
-        // important 
         graphics.ApplyChanges()
         base.Initialize() 
 
