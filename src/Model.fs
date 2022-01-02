@@ -33,7 +33,10 @@ type GameConfig = {
 } 
 /// Specifies the resolution to run the game at. For now, this is set once at initiation.
 /// Also, presently fullscreen is not supported.
-and Resolution = Windowed of int * int
+and Resolution = 
+    | Windowed of int * int
+    | FullScreen of int * int 
+    | Borderless of int * int 
 /// Definitions of assets to load on start, e.g. named texture files.
 /// IMPORTANT: all paths are relative paths to content files, e.g. /Content/Sprite.png, 
 /// except for fonts, which MUST be relative paths (without extensions) to spritefonts built using the content pipeline.

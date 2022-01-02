@@ -30,18 +30,6 @@ type GameLoop (config: GameConfig) as this =
     // these two collections are set by the Elmish setState call
     let mutable updatable: (Inputs -> Unit) list = []
     let mutable drawable: (LoadedAssets -> Inputs -> SpriteBatch -> Unit) list = []
-
-    do 
-        // presently Xelmish only supports windowed - fullscreen will come eventually (tm)
-        match config.resolution with
-        | Windowed (w, h) -> 
-            graphics.PreferredBackBufferWidth <- w
-            graphics.PreferredBackBufferHeight <- h
-
-        this.IsMouseVisible <- config.mouseVisible
-        
-        // this makes draw run at monitor fps, rather than 60fps
-        graphics.SynchronizeWithVerticalRetrace <- true 
         
     /// Used by Xelmish with the Elmish setState. 
     /// Viewables from the Elmish components are accepted 
@@ -57,6 +45,31 @@ type GameLoop (config: GameConfig) as this =
                 | (OnDraw f)::rest -> splitter updatableAcc (f::drawableAcc) rest
             // we split the viewables by their DU type to be more efficient during draw/update
             splitter [] [] (List.rev value)
+
+    override __.Initialize () = 
+        // mingrate the "do" stuffs in constructor to here. 
+        match config.resolution with
+        | Windowed (w, h) -> 
+            graphics.PreferredBackBufferWidth <- w
+            graphics.PreferredBackBufferHeight <- h
+            this.Window.AllowUserResizing <- true 
+        | FullScreen (w, h) -> 
+            graphics.PreferredBackBufferWidth <- w 
+            graphics.PreferredBackBufferHeight <- h 
+            graphics.IsFullScreen <- true
+        | Borderless (w, h) -> 
+            graphics.PreferredBackBufferWidth <- w 
+            graphics.PreferredBackBufferHeight <- h 
+            this.Window.IsBorderless <- true 
+
+        this.IsMouseVisible <- config.mouseVisible
+        
+        // this makes draw run at monitor fps, rather than 60fps
+        graphics.SynchronizeWithVerticalRetrace <- true 
+
+        // important 
+        graphics.ApplyChanges()
+        base.Initialize() 
 
     override __.LoadContent () = 
         spriteBatch <- new SpriteBatch (graphics.GraphicsDevice)
@@ -123,7 +136,8 @@ type GameLoop (config: GameConfig) as this =
         // by default, all sprites are drawing on .End() in a batch
         // immediate changes this so they are drawn as called, which allows us to
         // change the sampler state (e.g. for pixel graphics vs text) between different sprite calls
-        spriteBatch.Begin (sortMode = SpriteSortMode.Immediate)
+        spriteBatch.Begin (sortMode = SpriteSortMode.Immediate, 
+                            samplerState = SamplerState.PointClamp)
 
         for drawFunc in drawable do drawFunc assets inputs spriteBatch
 
