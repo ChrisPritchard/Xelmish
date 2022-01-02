@@ -53,14 +53,18 @@ type GameLoop (config: GameConfig) as this =
             graphics.PreferredBackBufferWidth <- w
             graphics.PreferredBackBufferHeight <- h
             this.Window.AllowUserResizing <- true 
+            // set render target 
+            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
         | FullScreen (w, h) -> 
             graphics.PreferredBackBufferWidth <- w 
             graphics.PreferredBackBufferHeight <- h 
             graphics.IsFullScreen <- true
+            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
         | Borderless (w, h) -> 
             graphics.PreferredBackBufferWidth <- w 
             graphics.PreferredBackBufferHeight <- h 
             this.Window.IsBorderless <- true 
+            graphics.GraphicsDevice.SetRenderTarget(new RenderTarget2D(graphics.GraphicsDevice, w, h))
 
         this.IsMouseVisible <- config.mouseVisible
         
