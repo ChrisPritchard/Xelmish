@@ -1,33 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarnOn>3390;$(WarnOn)</WarnOn>
+    <ProjectGuid>{e03c5917-b17d-43c6-ab71-680f1178c4ab}</ProjectGuid>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <PackageVersion>0.0.3</PackageVersion>
+    <PackageId>xelmish</PackageId>
+    <Title>Xelmish</Title>
+    <Authors>Christopher Pritchard (https://github.com/ChrisPritchard)</Authors>
+    <Description>A set of helpers and types that allow you to write XNA games using the Elmish framework. Updated for NET 5 and MonoGame 3.8</Description>
+    <PackageTags>monogame fsharp xna elmish</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ChrisPritchard/Xelmish</RepositoryUrl>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Model.fs" />
     <Compile Include="Viewables.fs" />
     <Compile Include="UI.fs" />
     <Compile Include="GameLoop.fs" />
     <Compile Include="Program.fs" />
+    <PackageReference Include="Elmish" Version="3.1.0" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Elmish" Version="2.0.3" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL.Core" Version="3.7.0.7" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <PackageVersion>0.0.2</PackageVersion>
-    <PackageId>xelmish</PackageId>
-    <Title>Xelmish</Title>
-    <Authors>Christopher Pritchard (https://github.com/ChrisPritchard)</Authors>
-    <Description>A set of helpers and types that allow you to write XNA games using the Elmish framework. Updated for NET 5</Description>
-    <PackageTags>monogame fsharp xna elmish</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/ChrisPritchard/Xelmish</RepositoryUrl>
-  </PropertyGroup>
-
 </Project>

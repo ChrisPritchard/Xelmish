@@ -10,8 +10,8 @@ open Model
 let runGameLoop config (program: Program<_, _, _, Viewable list>) =
     use loop = new GameLoop (config)
     let setState model dispatch =
-        loop.View <- program.view model dispatch
-    Program.run { program with setState = setState }
+        loop.View <- (Program.view program) model dispatch
+    program |> Program.withSetState setState |> Program.run
     loop.Run ()
 
 /// Alternative entry point to Xelmish from Elmish.

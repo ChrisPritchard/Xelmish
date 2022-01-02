@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,31 +12,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="readme.md" />
-    <Compile Include="Common.fs" />
-    <Compile Include="StartScreen.fs" />
-    <Compile Include="GameOver.fs" />
-    <Compile Include="Player.fs" />
-    <Compile Include="Invaders.fs" />
-    <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <MonoGameContentReference Include="**\*.mgcb" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="bin\**" />
-    <MonoGameContentReference Remove="bin\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
     <PackageReference Include="Elmish" Version="3.1.0" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
+    <PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.0.1641" />
   </ItemGroup>
 
 </Project>
