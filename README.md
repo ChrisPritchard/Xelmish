@@ -30,6 +30,8 @@ Xelmish was developed first with Visual Studio Community 2017, then later with V
 
 It has been built with pure dotnet core 2.2, but has been upgraded without issue to .NET 5. So you will need to have the SDK for .NET 5 in order to compile. Xelmish and its samples have been tested on Windows 10, Mac OSX and Ubuntu 18.
 
+**NOTE** even with .NET 5 and official support for this as of MonoGame 3.8, I still needed to install Bet Core 3.1 in order for the content builder to work. Not sure why... kind of annoying. Maybe the next version will fix this.
+
 ### A note for Linux builders
 
 On Linux the Monogame Content Pipeline may not work by default. If you get mono failure errors, try installing mono-complete, e.g. `sudo apt install mono-complete`. I was able to compile and run the samples on Ubuntu 18.04 after this without issue.
@@ -47,6 +49,8 @@ The most basic sample, described above. Just a coloured rectangle on the screen 
 ### 1. Simple-Counter
 
 The 'hello world' of Elmish, this sample should be almost identical (except for the Xelmish view) to other counters in other Elmish-* projects
+
+> There is also a Windows DX  (Direct X API instead of OpenGL) version of this, to demonstrate cross platform support.
 
 ### 2. Sub-Model
 
