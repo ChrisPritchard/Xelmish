@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +30,7 @@
     <EmbeddedResource Remove="bin\**" />
     <MonoGameContentReference Remove="bin\**" />
   </ItemGroup>
+  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Xelmish.fsproj" />
