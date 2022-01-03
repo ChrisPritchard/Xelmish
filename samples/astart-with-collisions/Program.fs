@@ -2,11 +2,14 @@
 open Elmish
 open Xelmish.Model 
 open Xelmish.Viewables 
+open Tiles 
+open Collisions
 
 type Model = 
     { 
-        tileLayer: Tiles.tileLayer 
-        collisions: Collisions.bvhTree
+        tileLayer: tileLayer 
+        collisions: bvhTree
+        player: Player.Player
     } 
 
 let init () = 
@@ -16,37 +19,53 @@ let init () =
             for y = 0 to rows - 1 do 
                 for x = 0 to cols - 1 do 
                     // [0, n) or [0, n - 1]. 
-                    yield Random.Shared.Next(0, 4)
+                    yield Random.Shared.Next(0, 5)
         |]
 
-    let tileLayer = Tiles.TileLayer.fromArea 30 30 (0, 0) (600, 600) (rndMap 30 30)
+    let tileLayer = 
+        let (tw, th) = 25, 25
+        let (cols, rows) = 5, 5
+        {
+            tileLayer.tileWidth = tw
+            tileHeight = th 
+            x = 0 
+            y = 0
+            rows = rows 
+            cols = cols 
+            tiles = rndMap cols rows 
+        }
 
     let collisionId = Guid.NewGuid() 
 
     { 
-        tileLayer = tileLayer        
+        tileLayer = tileLayer
         collisions = 
             tileLayer.tiles 
             |> Seq.indexed
             |> Seq.filter(fun (i, e) -> e = 0)
-            |> Seq.map(fun (i, c) -> collisionId, Tiles.TileLayer.destRect tileLayer (i / tileLayer.cols) (i % tileLayer.cols))
-            |> Collisions.bvhTree.fromSeq
+            |> Seq.map(fun (i, c) -> collisionId, TileLayer.destRect tileLayer (Tiles.TileLayer.getXYByIndex tileLayer i) )
+            |> bvhTree.fromSeq
+        player = Player.init 
     }, Cmd.none
 
 type Message =
-    | E
+    | SubMsg of Player.Msg
 
-let update message model =
-    match message with
-    | E -> model, Cmd.none
+let update msg model =
+    match msg with
+    | SubMsg pmsg -> 
+        let (newPlayer, newMsg) = Player.update pmsg model.player
+        { model with player = newPlayer }, Cmd.map SubMsg newMsg
 
 let view model dispatch =
     [
-        Tiles.TileLayer.renderTileLayerColor (
+        TileLayer.renderTileLayerColor (
             function 
             | 0 -> Colour.Transparent 
             | _ -> Colour.Aqua
         ) model.tileLayer
+
+        yield! Player.view model.player (SubMsg >> dispatch) model.collisions
 
         // draw mouse 
         OnDraw(fun ast inps sb -> 
@@ -62,4 +81,5 @@ let view model dispatch =
     ]
 
 Program.mkProgram init update view
-|> Xelmish.Program.runSimpleGameLoop [] (600, 600) Colour.Black
+|> Program.withConsoleTrace
+|> Xelmish.Program.runSimpleGameLoop [] (1600, 900) Colour.Black

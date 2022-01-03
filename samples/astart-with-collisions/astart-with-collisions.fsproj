@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="Collisions.fs" />
     <Compile Include="Tiles.fs" />
+    <Compile Include="Player.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

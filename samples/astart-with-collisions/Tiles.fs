@@ -52,13 +52,16 @@ module TileLayer =
           tileWidth = width / cols 
           tileHeight = height / rows }
 
-    let inline destRect tileLayer x y =
+    let inline destRect tileLayer (x, y) =
         Rectangle(
             tileLayer.x + x * tileLayer.tileWidth,
             tileLayer.y
             + y * tileLayer.tileHeight,
             tileLayer.tileWidth,
             tileLayer.tileHeight)
+
+    let getXYByIndex tileLayer i = 
+        (i % tileLayer.cols, i / tileLayer.cols)
 
     /// if you use "tiled" then startId would be 1. 
     let renderTileLayer tileSet tileLayer startId =
@@ -72,7 +75,7 @@ module TileLayer =
 
                     if srcInd >= startId then 
                         let srcRect = tileSet.sourceRects.[srcInd - startId]
-                        let destRect = destRect tileLayer x y
+                        let destRect = destRect tileLayer (x, y)
                         sb.Draw(texture, destRect, srcRect, Colour.White))
 
     let renderTileLayerColor getColor tileLayer = 
@@ -85,5 +88,5 @@ module TileLayer =
                     if ind = 0 then 
                         () 
                     else 
-                        let destRect = destRect tileLayer x y
+                        let destRect = destRect tileLayer (x, y)
                         sb.Draw(texture, destRect, getColor tileLayer.tiles.[ind]))
