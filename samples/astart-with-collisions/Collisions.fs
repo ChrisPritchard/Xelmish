@@ -2,8 +2,12 @@
 
 open System
 open Xelmish.Model
-open System.Collections.Immutable
 
+/// the direction of vector
+/// 
+/// is the same as the entering direction of r1 
+/// 
+/// and the same as the leaving direction of r2. 
 let penetrationVector (r1: Rectangle) (r2: Rectangle) =
     let intersection = Rectangle.Intersect(r1, r2)
 
@@ -23,7 +27,6 @@ let penetrationVector (r1: Rectangle) (r2: Rectangle) =
 type bvhTree =
     | Node of left: bvhTree * right: bvhTree * aabb: Rectangle * height: int
     | Leaf of aabb: Rectangle * id: Guid
-    | MLeaf of aabb: Rectangle * ids: ImmutableList<Guid>
     | Nil
     static member empty = Nil
 
@@ -36,7 +39,6 @@ type bvhTree =
         match x with
         | Node (_, _, b, _) -> b
         | Leaf (b, _) -> b
-        | MLeaf (b, _) -> b
         | Nil -> Rectangle.Empty
 
     member x.insert(id: Guid, rect: Rectangle) =
@@ -119,14 +121,6 @@ type bvhTree =
                     ur
             | _ -> ur
         | Leaf (b, lid) ->
-            if b = rect then
-                MLeaf(b, ImmutableList.Create(lid).Add(id))
-            else
-                Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
-        | MLeaf (b, ids) ->
-            if b = rect then
-                MLeaf(b, ids.Add id)
-            else
                 Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
         | Nil -> Leaf(rect, id)
 
@@ -149,23 +143,16 @@ type bvhTree =
                 act lid b
             else
                 ()
-        | MLeaf (b, ids) ->
-            if b.Intersects rect then
-                ids |> Seq.iter (fun mid -> act mid b)
-            else
-                ()
         | Nil -> ()
 
     member x.count() =
         match x with
         | Nil -> 0
         | Leaf _ -> 1
-        | MLeaf (_, ids) -> ids.Count
         | Node (l, r, _, _) -> l.count () + r.count ()
 
     member x.height() =
         match x with
         | Node (_, _, _, h) -> h
         | Leaf _ -> 1
-        | MLeaf _ -> 1
         | Nil -> 0

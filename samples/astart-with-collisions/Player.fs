@@ -22,7 +22,7 @@ let init =
         y = 0 
         width = 25
         height = 25
-        speed = 2
+        speed = 3
         color = Colour.Blue
     }
 
@@ -43,11 +43,11 @@ let view (model:Model) dispatch (collisions:Collisions.bvhTree) =
         whilekeydown Keys.S (fun _ -> Movement(0, model.speed) |> dispatch)
 
         OnUpdate(fun inps -> 
-            collisions.query (model.getAABB())
-                             (fun id rect -> 
-                                Collisions.penetrationVector rect (model.getAABB())
-                                |> Movement
-                                |> dispatch))
+            let modelRect = model.getAABB() 
+            collisions.query modelRect (fun id rect -> 
+                Collisions.penetrationVector rect modelRect 
+                |> Movement 
+                |> dispatch))
 
         colour model.color (model.width, model.height) (model.x, model.y)
     ]
