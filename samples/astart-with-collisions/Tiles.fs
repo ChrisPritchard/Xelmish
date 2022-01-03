@@ -52,7 +52,7 @@ module TileLayer =
           tileWidth = width / cols 
           tileHeight = height / rows }
 
-    let inline private destRect tileLayer x y =
+    let inline destRect tileLayer x y =
         Rectangle(
             tileLayer.x + x * tileLayer.tileWidth,
             tileLayer.y
