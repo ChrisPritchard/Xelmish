@@ -3,21 +3,18 @@
 open System
 open Xelmish.Model
 open System.Collections.Immutable
-open Xelmish.MathExt
 
 let penetrationVector (r1: Rectangle) (r2: Rectangle) =
     let intersection = Rectangle.Intersect(r1, r2)
 
     if intersection.Width < intersection.Height then
-        vec2
             (if r1.Center.X < r2.Center.X then
                  intersection.Width
              else
-                 -intersection.Width)
+                 -intersection.Width),
             0
     else
-        vec2
-            0
+            0, 
             (if r1.Center.Y < r2.Center.Y then
                  intersection.Height
              else

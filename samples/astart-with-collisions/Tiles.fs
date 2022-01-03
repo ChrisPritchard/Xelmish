@@ -1,7 +1,6 @@
 module Tiles
 
 open Xelmish.Model
-open Xelmish.MathExt
 
 type tileSet =
     { tileWidth: int
@@ -25,7 +24,8 @@ module TileSet =
 
 
 type tileLayer =
-    { position: Vec2
+    { x: int 
+      y: int
       tileWidth: int
       tileHeight: int
       tiles: int array
@@ -34,7 +34,9 @@ type tileLayer =
 
 module TileLayer =
     let fromRect rows cols tiles (rect:Rectangle) = 
-        { position = rect.Location.ToVector2()
+        let pos = rect.Location.ToVector2()
+        { x = pos.X |> int 
+          y = pos.Y |> int 
           rows = rows 
           cols = cols 
           tiles = tiles
@@ -42,7 +44,8 @@ module TileLayer =
           tileHeight = rect.Height / rows }
 
     let fromArea rows cols (x, y) (width, height) tiles = 
-        { position = vec2 x y 
+        { x = x 
+          y = y
           rows = rows 
           cols = cols 
           tiles = tiles 
@@ -51,8 +54,8 @@ module TileLayer =
 
     let inline private destRect tileLayer x y =
         Rectangle(
-            int tileLayer.position.X + x * tileLayer.tileWidth,
-            int tileLayer.position.Y
+            tileLayer.x + x * tileLayer.tileWidth,
+            tileLayer.y
             + y * tileLayer.tileHeight,
             tileLayer.tileWidth,
             tileLayer.tileHeight)
@@ -70,7 +73,7 @@ module TileLayer =
                     if srcInd >= startId then 
                         let srcRect = tileSet.sourceRects.[srcInd - startId]
                         let destRect = destRect tileLayer x y
-                        sb.Draw(texture, destRect, srcRect, Color.White))
+                        sb.Draw(texture, destRect, srcRect, Colour.White))
 
     let renderTileLayerColor getColor tileLayer = 
         OnDraw (fun ast _ sb -> 
