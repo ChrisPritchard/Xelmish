@@ -4,7 +4,7 @@ open Elmish
 open Xelmish.Model
 open Xelmish.Viewables
 
-type Player = 
+type Model = 
     {
         x: int 
         y: int 
@@ -35,10 +35,8 @@ let update msg model =
         { model with x = model.x + x
                      y = model.y + y }, Cmd.none 
 
-let view model dispatch (collisions:Collisions.bvhTree) = 
+let view (model:Model) dispatch (collisions:Collisions.bvhTree) = 
     [
-        
-
         whilekeydown Keys.D (fun _ -> Movement(model.speed, 0) |> dispatch)
         whilekeydown Keys.A (fun _ -> Movement(-model.speed, 0) |> dispatch)
         whilekeydown Keys.W (fun _ -> Movement(0, -model.speed) |> dispatch)

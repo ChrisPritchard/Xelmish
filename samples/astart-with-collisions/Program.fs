@@ -9,7 +9,7 @@ type Model =
     { 
         tileLayer: tileLayer 
         collisions: bvhTree
-        player: Player.Player
+        player: Player.Model
     } 
 
 let init () = 
