@@ -147,15 +147,20 @@ type bvhTree =
     member collisions.queryPV (model: Rectangle) predicate =
         let mutable (vx, vy) = 0, 0
         let mutable mr =
-            Rectangle(model.X + vx, model.Y + vy, model.Width, model.Height)
+            Rectangle(model.X, model.Y, model.Width, model.Height)
 
-        collisions.query mr (fun id rect ->
+        // query x
+        collisions.query model (fun id rect ->
             if predicate id rect then
                 let (px, py) = penetrationVector rect mr
-
                 vx <- vx + px
+                mr.X <- mr.X + px)
+
+        // query y
+        collisions.query model (fun id rect ->
+            if predicate id rect then
+                let (px, py) = penetrationVector rect mr
                 vy <- vy + py
-                mr.X <- mr.X + px 
                 mr.Y <- mr.Y + py)
 
         (vx, vy)
