@@ -37,7 +37,7 @@ let update msg model =
 
 let view model dispatch (collisions:Collisions.bvhTree) = 
     [
-        colour model.color (model.width, model.height) (model.x, model.y)
+        
 
         whilekeydown Keys.D (fun _ -> Movement(model.speed, 0) |> dispatch)
         whilekeydown Keys.A (fun _ -> Movement(-model.speed, 0) |> dispatch)
@@ -50,4 +50,6 @@ let view model dispatch (collisions:Collisions.bvhTree) =
                                 Collisions.penetrationVector rect (model.getAABB())
                                 |> Movement
                                 |> dispatch))
+
+        colour model.color (model.width, model.height) (model.x, model.y)
     ]

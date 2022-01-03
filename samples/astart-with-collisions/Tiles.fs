@@ -85,7 +85,7 @@ module TileLayer =
             for y = 0 to tileLayer.rows - 1 do
                 for x = 0 to tileLayer.cols - 1 do
                     let ind = y * tileLayer.cols + x
-                    if ind = 0 then 
+                    if tileLayer.tiles.[ind] = 0 then 
                         () 
                     else 
                         let destRect = destRect tileLayer (x, y)
