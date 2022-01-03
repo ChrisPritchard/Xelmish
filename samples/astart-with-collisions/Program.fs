@@ -13,11 +13,12 @@ let init () =
         [|
             for y = 0 to rows - 1 do 
                 for x = 0 to cols - 1 do 
-                    yield Random.Shared.Next(0, 2) // [0, 2) or [0, 1]. 
+                    // [0, n) or [0, n - 1]. 
+                    yield Random.Shared.Next(0, 4)
         |]
     { 
         tileLayer = 
-            Tiles.TileLayer.fromArea 100 100 (0, 0) (600, 600) (rndMap 100 100)
+            Tiles.TileLayer.fromArea 30 30 (0, 0) (600, 600) (rndMap 30 30)
     }, Cmd.none
 
 type Message =
@@ -29,7 +30,22 @@ let update message model =
 
 let view model dispatch =
     [
-        Tiles.TileLayer.renderTileLayerColor (function | 0 -> Colour.Transparent | _ -> Colour.Aqua) model.tileLayer
+        Tiles.TileLayer.renderTileLayerColor (
+            function 
+            | 0 -> Colour.Transparent 
+            | _ -> Colour.Aqua
+        ) model.tileLayer
+
+        // draw mouse 
+        OnDraw(fun ast inps sb -> 
+            let (mx, my) = inps.mouseState.X - model.tileLayer.x, 
+                            inps.mouseState.Y - model.tileLayer.y
+            let (x, y) = (mx / model.tileLayer.tileWidth) * model.tileLayer.tileWidth + model.tileLayer.x, 
+                            (my / model.tileLayer.tileHeight) * model.tileLayer.tileWidth + model.tileLayer.y 
+            sb.Draw(ast.whiteTexture, 
+                    Rectangle(x, y, model.tileLayer.tileWidth, model.tileLayer.tileHeight), 
+                    Colour.Red))
+
         onkeydown Keys.Escape exit
     ]
 
