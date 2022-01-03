@@ -4,25 +4,25 @@ open System
 open Xelmish.Model
 
 /// the direction of vector
-/// 
-/// is the same as the entering direction of r1 
-/// 
-/// and the same as the leaving direction of r2. 
+///
+/// is the same as the entering direction of r1
+///
+/// and the same as the leaving direction of r2.
 let penetrationVector (r1: Rectangle) (r2: Rectangle) =
     let intersection = Rectangle.Intersect(r1, r2)
 
     if intersection.Width < intersection.Height then
-            (if r1.Center.X < r2.Center.X then
-                 intersection.Width
-             else
-                 -intersection.Width),
-            0
+        (if r1.Center.X < r2.Center.X then
+             intersection.Width
+         else
+             -intersection.Width),
+        0
     else
-            0, 
-            (if r1.Center.Y < r2.Center.Y then
-                 intersection.Height
-             else
-                 -intersection.Height)
+        0,
+        (if r1.Center.Y < r2.Center.Y then
+             intersection.Height
+         else
+             -intersection.Height)
 
 type bvhTree =
     | Node of left: bvhTree * right: bvhTree * aabb: Rectangle * height: int
@@ -120,8 +120,7 @@ type bvhTree =
                 else
                     ur
             | _ -> ur
-        | Leaf (b, lid) ->
-                Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
+        | Leaf (b, lid) -> Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
         | Nil -> Leaf(rect, id)
 
     static member fromSeq =
