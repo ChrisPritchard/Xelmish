@@ -144,6 +144,17 @@ type bvhTree =
                 ()
         | Nil -> ()
 
+    member collisions.queryPV (model: Rectangle) predicate =
+        let mutable (vx, vy) = 0, 0
+        collisions.query model (fun id rect ->
+            if predicate id rect 
+            then 
+                let mr = Rectangle(model.X + vx, model.Y + vy, model.Width, model.Height)
+                let (px, py) = penetrationVector rect mr 
+                vx <- vx + px
+                vy <- vy + py)
+        (vx, vy)
+
     member x.count() =
         match x with
         | Nil -> 0
