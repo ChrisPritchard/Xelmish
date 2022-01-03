@@ -6,9 +6,11 @@ open Xelmish.Viewables
 type Model = 
     { 
         tileLayer: Tiles.tileLayer 
+        collisions: Collisions.bvhTree
     } 
 
 let init () = 
+
     let rndMap cols rows = 
         [|
             for y = 0 to rows - 1 do 
@@ -16,9 +18,19 @@ let init () =
                     // [0, n) or [0, n - 1]. 
                     yield Random.Shared.Next(0, 4)
         |]
+
+    let tileLayer = Tiles.TileLayer.fromArea 30 30 (0, 0) (600, 600) (rndMap 30 30)
+
+    let collisionId = Guid.NewGuid() 
+
     { 
-        tileLayer = 
-            Tiles.TileLayer.fromArea 30 30 (0, 0) (600, 600) (rndMap 30 30)
+        tileLayer = tileLayer        
+        collisions = 
+            tileLayer.tiles 
+            |> Seq.indexed
+            |> Seq.filter(fun (i, e) -> e = 0)
+            |> Seq.map(fun (i, c) -> collisionId, Tiles.TileLayer.destRect tileLayer (i / tileLayer.cols) (i % tileLayer.cols))
+            |> Collisions.bvhTree.fromSeq
     }, Cmd.none
 
 type Message =
