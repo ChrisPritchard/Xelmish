@@ -152,7 +152,7 @@ type bvhTree =
         collisions.query mr (fun id rect ->
             if predicate id rect then
                 let (px, py) = penetrationVector rect mr
-                printfn $"{px} {py}"
+
                 vx <- vx + px
                 vy <- vy + py
                 mr.X <- mr.X + px 
