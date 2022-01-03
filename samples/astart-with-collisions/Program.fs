@@ -1,15 +1,23 @@
-﻿open Elmish
+﻿open System
+open Elmish
 open Xelmish.Model 
 open Xelmish.Viewables 
 
 type Model = 
     { 
-        T: int 
+        tileLayer: Tiles.tileLayer 
     } 
 
 let init () = 
+    let rndMap cols rows = 
+        [|
+            for y = 0 to rows - 1 do 
+                for x = 0 to cols - 1 do 
+                    yield Random.Shared.Next(0, 2) // [0, 2) or [0, 1]. 
+        |]
     { 
-        T = 0
+        tileLayer = 
+            Tiles.TileLayer.fromArea 100 100 (0, 0) (600, 600) (rndMap 100 100)
     }, Cmd.none
 
 type Message =
@@ -21,6 +29,7 @@ let update message model =
 
 let view model dispatch =
     [
+        Tiles.TileLayer.renderTileLayerColor (function | 0 -> Colour.Transparent | _ -> Colour.Aqua) model.tileLayer
         onkeydown Keys.Escape exit
     ]
 

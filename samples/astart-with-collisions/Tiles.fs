@@ -86,4 +86,4 @@ module TileLayer =
                         () 
                     else 
                         let destRect = destRect tileLayer x y
-                        sb.Draw(texture, destRect, getColor ind))
+                        sb.Draw(texture, destRect, getColor tileLayer.tiles.[ind]))
