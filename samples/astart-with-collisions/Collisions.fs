@@ -140,19 +140,24 @@ type bvhTree =
         | Leaf (b, lid) ->
             if b.Intersects rect then
                 act lid b
-            else 
+            else
                 ()
         | Nil -> ()
 
     member collisions.queryPV (model: Rectangle) predicate =
         let mutable (vx, vy) = 0, 0
-        collisions.query model (fun id rect ->
-            if predicate id rect 
-            then 
-                let mr = Rectangle(model.X + vx, model.Y + vy, model.Width, model.Height)
-                let (px, py) = penetrationVector rect mr 
+        let mutable mr =
+            Rectangle(model.X + vx, model.Y + vy, model.Width, model.Height)
+
+        collisions.query mr (fun id rect ->
+            if predicate id rect then
+                let (px, py) = penetrationVector rect mr
+                printfn $"{px} {py}"
                 vx <- vx + px
-                vy <- vy + py)
+                vy <- vy + py
+                mr.X <- mr.X + px 
+                mr.Y <- mr.Y + py)
+
         (vx, vy)
 
     member x.count() =

@@ -38,60 +38,27 @@ let update msg model =
         Cmd.none
 
 let view (model: Model) dispatch (collisions: Collisions.bvhTree) =
-    [
-      //whilekeydown Keys.D (fun _ -> Movement(model.speed, 0) |> dispatch)
-      //whilekeydown Keys.A (fun _ -> Movement(-model.speed, 0) |> dispatch)
-      //whilekeydown Keys.W (fun _ -> Movement(0, -model.speed) |> dispatch)
-      //whilekeydown Keys.S (fun _ -> Movement(0, model.speed) |> dispatch)
-
-      //OnUpdate (fun inps ->
-      //    collisions.query model.rectangle (fun id rect ->
-      //        Collisions.penetrationVector rect model.rectangle
-      //        |> Movement
-      //        |> dispatch))
-
-      //OnUpdate (fun inps ->
-      //    let mutable (vx, vy) =
-      //        [
-      //          if inps.keyboardState.IsKeyDown Keys.D then
-      //              (model.speed, 0)
-      //          if inps.keyboardState.IsKeyDown Keys.A then
-      //              (-model.speed, 0)
-      //          if inps.keyboardState.IsKeyDown Keys.W then
-      //              (0, -model.speed)
-      //          if inps.keyboardState.IsKeyDown Keys.S then
-      //              (0, model.speed)
-      //        ] |> List.fold(fun (x, y) (x', y') -> (x + x', y + y')) (0, 0)
-          
-      //    let mr = Rectangle(model.x + vx, model.y + vy, model.width, model.height)
-      //    collisions.query mr (fun id rect ->
-      //        let mr = Rectangle(model.x + vx, model.y + vy, model.width, model.height)
-      //        let (px, py) =
-      //            Collisions.penetrationVector rect mr 
-      //        vx <- vx + px
-      //        vy <- vy + py)
-
-      //    if (vx = 0 && vy = 0) |> not then
-      //        (vx, vy) |> Movement |> dispatch)
-
-      OnUpdate(fun inps -> 
+    [ OnUpdate (fun inps ->
         let (vx, vy) =
-            [ if inps.keyboardState.IsKeyDown Keys.D then
-                  (model.speed, 0)
-              if inps.keyboardState.IsKeyDown Keys.A then
-                  (-model.speed, 0)
+            [ 
               if inps.keyboardState.IsKeyDown Keys.W then
                   (0, -model.speed)
               if inps.keyboardState.IsKeyDown Keys.S then
                   (0, model.speed)
-            ] |> List.fold(fun (x, y) (x', y') -> (x + x', y + y')) (0, 0)
-        
-        let mr = Rectangle(model.x + vx, model.y + vy, model.width, model.height)
+              if inps.keyboardState.IsKeyDown Keys.D then
+                  (model.speed, 0)
+              if inps.keyboardState.IsKeyDown Keys.A then
+                  (-model.speed, 0)
+            ]
+            |> List.fold (fun (x, y) (x', y') -> (x + x', y + y')) (0, 0)
+
+        let mr =
+            Rectangle(model.x + vx, model.y + vy, model.width, model.height)
 
         let (px, py) = collisions.queryPV mr (fun _ _ -> true)
-
         let (vx, vy) = (vx + px, vy + py)
+
         if (vx = 0 && vy = 0) |> not then
             (vx, vy) |> Movement |> dispatch)
-          
+
       colour model.color (model.width, model.height) (model.x, model.y) ]
