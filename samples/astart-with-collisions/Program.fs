@@ -20,7 +20,7 @@ let init () =
 
     let tileLayer =
         let (tw, th) = 25, 25
-        let (cols, rows) = 5, 5
+        let (cols, rows) = 1600 / tw, 900 / th 
 
         { tileLayer.tileWidth = tw
           tileHeight = th
