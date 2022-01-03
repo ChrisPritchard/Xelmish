@@ -140,7 +140,7 @@ type bvhTree =
         | Leaf (b, lid) ->
             if b.Intersects rect then
                 act lid b
-            else
+            else 
                 ()
         | Nil -> ()
 

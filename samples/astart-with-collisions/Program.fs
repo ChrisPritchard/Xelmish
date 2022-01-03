@@ -77,5 +77,4 @@ let view model dispatch =
       onkeydown Keys.Escape exit ]
 
 Program.mkProgram init update view
-|> Program.withConsoleTrace
 |> Xelmish.Program.runSimpleGameLoop [] (1600, 900) Colour.Black
