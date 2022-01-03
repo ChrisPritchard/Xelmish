@@ -6,10 +6,19 @@
     <RootNamespace>astart_with_collisions</RootNamespace>
 	<ApplicationManifest>app.manifest</ApplicationManifest>  
   </PropertyGroup>
-  <ItemGroup />
 
   <ItemGroup>
+    <Compile Include="Collisions.fs" />
+    <Compile Include="Tiles.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Xelmish.fsproj" />
   </ItemGroup>
 
 </Project>
