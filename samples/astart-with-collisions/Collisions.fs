@@ -1,4 +1,5 @@
-﻿module Collisions
+﻿/// aabb tree based module(avl tree, recursion, no tail recursion)
+module Collisions
 
 open System
 open Xelmish.Model
