@@ -25,7 +25,7 @@ type Config<'a> =
         maxIterations: int option
     }
 
-let search<'a when 'a : comparison> start goal config : seq<'a> option =
+let search<'a when 'a : comparison> config start goal : seq<'a> option =
 
     let rec reconstructPath cameFrom current =
         seq {
