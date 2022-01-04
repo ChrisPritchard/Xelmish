@@ -129,12 +129,29 @@ type bvhTree =
     static member fromMap =
         Map.fold (fun (s: bvhTree) k v -> s.insert (k, v)) Nil
 
-    member x.query (rect: Rectangle) act =
+    member x.query (rect:Rectangle) = 
+        match x with 
+        | Node (l, r, b, _) -> 
+            if b.Intersects rect then 
+                seq {
+                    yield! l.query rect 
+                    yield! r.query rect 
+                }
+            else 
+                Seq.empty
+        | Leaf (b, lid) -> 
+            if b.Intersects rect then 
+                seq { yield (lid, b) }
+            else 
+                Seq.empty 
+        | Nil -> Seq.empty
+
+    member x.queryWithAction (rect: Rectangle) act =
         match x with
         | Node (l, r, b, _) ->
             if b.Intersects rect then
-                l.query rect act
-                r.query rect act
+                l.queryWithAction rect act
+                r.queryWithAction rect act
             else
                 ()
         | Leaf (b, lid) ->
@@ -150,14 +167,14 @@ type bvhTree =
             Rectangle(model.X, model.Y, model.Width, model.Height)
 
         // query x
-        collisions.query model (fun id rect ->
+        collisions.queryWithAction model (fun id rect ->
             if predicate id rect then
                 let (px, py) = penetrationVector rect mr
                 vx <- vx + px
                 mr.X <- mr.X + px)
 
         // query y
-        collisions.query model (fun id rect ->
+        collisions.queryWithAction model (fun id rect ->
             if predicate id rect then
                 let (px, py) = penetrationVector rect mr
                 vy <- vy + py
