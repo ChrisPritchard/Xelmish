@@ -146,6 +146,7 @@ type bvhTree =
                 Seq.empty 
         | Nil -> Seq.empty
 
+    [<Obsolete("Use bvhTree.query : Rectangle -> seq<Guid * Rectangle> instead. ", false)>]
     member x.queryWithAction (rect: Rectangle) act =
         match x with
         | Node (l, r, b, _) ->
@@ -161,6 +162,7 @@ type bvhTree =
                 ()
         | Nil -> ()
 
+    [<Obsolete("Use bvhTree.query : Rectangle -> seq<Guid * Rectangle> instead. ", false)>]
     member collisions.queryPV (model: Rectangle) predicate =
         let mutable (vx, vy) = 0, 0
         let mutable mr =
