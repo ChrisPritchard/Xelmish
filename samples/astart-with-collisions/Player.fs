@@ -12,6 +12,8 @@ type Model =
       speed: int // this mean we donnot normalize the velocity
       color: Colour
       rectangle: Rectangle }
+    member x.pivot = 
+        (x.x + x.width / 2, x.y + x.height / 2)
 
 let init =
     let (x, y, w, h) = 0, 0, 25, 25
