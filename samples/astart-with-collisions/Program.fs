@@ -12,12 +12,12 @@ type Model =
       player: Player.Model }
 
 let init () =
-
+    let rnd = System.Random()
     let rndMap cols rows =
         [| for y = 0 to rows - 1 do
                for x = 0 to cols - 1 do
                    // [0, n) or [0, n - 1].
-                   yield Random.Shared.Next(0, 5) |]
+                   yield rnd.Next(0, 5) |]
 
     let tileLayer =
         let (tw, th) = 25, 25

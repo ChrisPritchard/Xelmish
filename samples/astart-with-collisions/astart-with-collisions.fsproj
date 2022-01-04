@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>astart_with_collisions</RootNamespace>
 	<ApplicationManifest>app.manifest</ApplicationManifest>  
   </PropertyGroup>
