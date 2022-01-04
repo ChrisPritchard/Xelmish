@@ -64,6 +64,17 @@ module TileLayer =
     let getXYByIndex tileLayer i =
         (i % tileLayer.cols, i / tileLayer.cols)
 
+    let getTileXYbyAbsoluteXY tileLayer (ax, ay) = 
+        let (mx, my) =
+            ax - tileLayer.x, ay - tileLayer.y
+
+        (mx / tileLayer.tileWidth)
+        * tileLayer.tileWidth
+        + tileLayer.x,
+        (my / tileLayer.tileHeight)
+        * tileLayer.tileWidth
+        + tileLayer.y
+
     /// if you use "tiled" then startId would be 1.
     let renderTileLayer tileSet tileLayer startId =
         OnDraw (fun ast _ sb ->

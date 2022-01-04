@@ -73,6 +73,10 @@ let view model dispatch =
               + model.tileLayer.y
 
           sb.Draw(ast.whiteTexture, Rectangle(x, y, model.tileLayer.tileWidth, model.tileLayer.tileHeight), Colour.Red))
+      
+      // draw path. 
+      OnDraw(fun ast inps sb -> 
+      ())
 
       onkeydown Keys.Escape exit ]
 
