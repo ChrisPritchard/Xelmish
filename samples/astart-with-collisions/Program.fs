@@ -110,7 +110,8 @@ let view model dispatch =
             (inps.mouseState.X, inps.mouseState.Y)
             |> TileLayer.getTileXYbyAbsoluteXY model.tileLayer
 
-        if model.tileLayer.tiles.[TileLayer.getIndexByXY model.tileLayer goal] = 0 
+        let id = TileLayer.getIndexByXY model.tileLayer goal
+        if id >= 0 && id < model.tileLayer.tiles.Length && model.tileLayer.tiles.[id] = 0 
         then () 
         else 
             let search = model |> astarConfig |> search
