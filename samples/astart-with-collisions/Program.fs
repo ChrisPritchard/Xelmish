@@ -37,7 +37,7 @@ let init () =
       collisions =
         tileLayer.tiles
         |> Seq.indexed
-        |> Seq.filter (fun (i, e) -> e = 0)
+        |> Seq.filter (fun (i, e) -> e = 0) // use 0 to represent barriers. 
         |> Seq.map (fun (i, c) -> collisionId, TileLayer.destRect tileLayer (Tiles.TileLayer.getXYByIndex tileLayer i))
         |> bvhTree.fromSeq
       player = Player.init },
@@ -109,18 +109,21 @@ let view model dispatch =
         let goal = 
             (inps.mouseState.X, inps.mouseState.Y)
             |> TileLayer.getTileXYbyAbsoluteXY model.tileLayer
-        
-        let search = model |> astarConfig |> search
-        match search start goal with 
-        | Some s -> 
-            s |> Seq.iter (fun (x, y) -> 
-                let (ax, ay) = 
-                    x * model.tileLayer.tileWidth + model.tileLayer.x, 
-                    y * model.tileLayer.tileHeight + model.tileLayer.y
-                sb.Draw(ast.whiteTexture, 
-                        Rectangle(ax, ay, model.tileLayer.tileWidth, model.tileLayer.tileHeight), 
-                        Colour.MonoGameOrange * 0.5f))
-        | None -> ())
+
+        if model.tileLayer.tiles.[TileLayer.getIndexByXY model.tileLayer goal] = 0 
+        then () 
+        else 
+            let search = model |> astarConfig |> search
+            match search start goal with 
+            | Some s -> 
+                s |> Seq.iter (fun (x, y) -> 
+                    let (ax, ay) = 
+                        x * model.tileLayer.tileWidth + model.tileLayer.x, 
+                        y * model.tileLayer.tileHeight + model.tileLayer.y
+                    sb.Draw(ast.whiteTexture, 
+                            Rectangle(ax, ay, model.tileLayer.tileWidth, model.tileLayer.tileHeight), 
+                            Colour.MonoGameOrange * 0.5f))
+            | None -> ())
 
       onkeydown Keys.Escape exit ]
 
