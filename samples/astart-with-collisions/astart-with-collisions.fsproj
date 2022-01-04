@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="AStar.fs" />
     <Compile Include="Collisions.fs" />
     <Compile Include="Tiles.fs" />
     <Compile Include="Player.fs" />
