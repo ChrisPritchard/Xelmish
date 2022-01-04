@@ -61,19 +61,20 @@ module TileLayer =
             tileLayer.tileHeight
         )
 
+    let getIndexByXY tileLayer (x, y) = 
+        y * tileLayer.cols + x
+
+    /// return (cols, rows) or (x, y)
     let getXYByIndex tileLayer i =
         (i % tileLayer.cols, i / tileLayer.cols)
 
+    /// return (cols, rows) or (x, y). 
     let getTileXYbyAbsoluteXY tileLayer (ax, ay) = 
         let (mx, my) =
             ax - tileLayer.x, ay - tileLayer.y
 
-        (mx / tileLayer.tileWidth)
-        * tileLayer.tileWidth
-        + tileLayer.x,
-        (my / tileLayer.tileHeight)
-        * tileLayer.tileWidth
-        + tileLayer.y
+        mx / tileLayer.tileWidth,
+        my / tileLayer.tileHeight
 
     /// if you use "tiled" then startId would be 1.
     let renderTileLayer tileSet tileLayer startId =
