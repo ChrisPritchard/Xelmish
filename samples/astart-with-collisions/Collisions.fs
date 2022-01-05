@@ -24,7 +24,6 @@ let penetrationVector (r1: Rectangle) (r2: Rectangle) =
              intersection.Height
          else
              -intersection.Height)
-
 type bvhTree =
     | Node of left: bvhTree * right: bvhTree * aabb: Rectangle * height: int
     | Leaf of aabb: Rectangle * id: Guid
@@ -42,6 +41,73 @@ type bvhTree =
         | Leaf (b, _) -> b
         | Nil -> Rectangle.Empty
 
+    member inline private ur.balance() = 
+        match ur with
+        | Node (l, r, _, _) ->
+            let bf = ur.getBalanceFactor ()
+            let lbf = l.getBalanceFactor ()
+            let rbf = r.getBalanceFactor ()
+
+            if bf > 1 && lbf >= 0 then
+                match (l, r) with
+                | Node (Node (_, _, bz, zh) as z, t3, _, _), t4 ->
+                    let nb =
+                        Rectangle.Union(t3.getBound (), t4.getBound ())
+
+                    let n =
+                        Node(t3, t4, nb, (max (t3.height ()) (t4.height ())) + 1)
+
+                    Node(z, n, Rectangle.Union(nb, bz), (max zh (n.height ())) + 1)
+                | _ -> ur
+            elif bf > 1 && lbf < 0 then
+                match (l, r) with
+                | Node (t1, Node (t2, t3, _, _), _, _), t4 ->
+                    let bl =
+                        Rectangle.Union(t1.getBound (), t2.getBound ())
+
+                    let br =
+                        Rectangle.Union(t3.getBound (), t4.getBound ())
+
+                    let nl =
+                        Node(t1, t2, bl, (max (t1.height ()) (t2.height ())) + 1)
+
+                    let nr =
+                        Node(t3, t4, br, (max (t3.height ()) (t4.height ())) + 1)
+
+                    Node(nl, nr, Rectangle.Union(bl, br), (max (nl.height ()) (nr.height ())) + 1)
+                | _ -> ur
+            elif bf < -1 && rbf <= 0 then
+                match (l, r) with
+                | t1, Node (t2, (Node (_, _, bz, zh) as z), _, _) ->
+                    let nb =
+                        Rectangle.Union(t1.getBound (), t2.getBound ())
+
+                    let n =
+                        Node(t1, t2, nb, (max (t1.height ())) (t2.height ()) + 1)
+
+                    Node(n, z, Rectangle.Union(nb, bz), (max (n.height ()) zh) + 1)
+                | _ -> ur
+            elif bf < -1 && rbf > 0 then
+                match (l, r) with
+                | t1, Node (Node (t2, t3, _, _), t4, _, _) ->
+                    let bl =
+                        Rectangle.Union(t1.getBound (), t2.getBound ())
+
+                    let br =
+                        Rectangle.Union(t3.getBound (), t4.getBound ())
+
+                    let nl =
+                        Node(t1, t2, bl, (max (t1.height ()) (t2.height ())) + 1)
+
+                    let nr =
+                        Node(t3, t4, br, (max (t3.height ()) (t4.height ())) + 1)
+
+                    Node(nl, nr, Rectangle.Union(bl, br), (max (nl.height ()) (nr.height ())) + 1)
+                | _ -> ur
+            else
+                ur
+        | _ -> ur
+
     member x.insert(id: Guid, rect: Rectangle) =
         match x with
         | Node (l, r, b, h) ->
@@ -56,71 +122,7 @@ type bvhTree =
                     let r = r.insert (id, rect)
                     Node(l, r, Rectangle.Union(b, rect), (max (l.height ()) (r.height ())) + 1)
 
-            match ur with
-            | Node (l, r, _, _) ->
-                let bf = ur.getBalanceFactor ()
-                let lbf = l.getBalanceFactor ()
-                let rbf = r.getBalanceFactor ()
-
-                if bf > 1 && lbf >= 0 then
-                    match (l, r) with
-                    | Node (Node (_, _, bz, zh) as z, t3, _, _), t4 ->
-                        let nb =
-                            Rectangle.Union(t3.getBound (), t4.getBound ())
-
-                        let n =
-                            Node(t3, t4, nb, (max (t3.height ()) (t4.height ())) + 1)
-
-                        Node(z, n, Rectangle.Union(nb, bz), (max zh (n.height ())) + 1)
-                    | _ -> ur
-                elif bf > 1 && lbf < 0 then
-                    match (l, r) with
-                    | Node (t1, Node (t2, t3, _, _), _, _), t4 ->
-                        let bl =
-                            Rectangle.Union(t1.getBound (), t2.getBound ())
-
-                        let br =
-                            Rectangle.Union(t3.getBound (), t4.getBound ())
-
-                        let nl =
-                            Node(t1, t2, bl, (max (t1.height ()) (t2.height ())) + 1)
-
-                        let nr =
-                            Node(t3, t4, br, (max (t3.height ()) (t4.height ())) + 1)
-
-                        Node(nl, nr, Rectangle.Union(bl, br), (max (nl.height ()) (nr.height ())) + 1)
-                    | _ -> ur
-                elif bf < -1 && rbf <= 0 then
-                    match (l, r) with
-                    | t1, Node (t2, (Node (_, _, bz, zh) as z), _, _) ->
-                        let nb =
-                            Rectangle.Union(t1.getBound (), t2.getBound ())
-
-                        let n =
-                            Node(t1, t2, nb, (max (t1.height ())) (t2.height ()) + 1)
-
-                        Node(n, z, Rectangle.Union(nb, bz), (max (n.height ()) zh) + 1)
-                    | _ -> ur
-                elif bf < -1 && rbf > 0 then
-                    match (l, r) with
-                    | t1, Node (Node (t2, t3, _, _), t4, _, _) ->
-                        let bl =
-                            Rectangle.Union(t1.getBound (), t2.getBound ())
-
-                        let br =
-                            Rectangle.Union(t3.getBound (), t4.getBound ())
-
-                        let nl =
-                            Node(t1, t2, bl, (max (t1.height ()) (t2.height ())) + 1)
-
-                        let nr =
-                            Node(t3, t4, br, (max (t3.height ()) (t4.height ())) + 1)
-
-                        Node(nl, nr, Rectangle.Union(bl, br), (max (nl.height ()) (nr.height ())) + 1)
-                    | _ -> ur
-                else
-                    ur
-            | _ -> ur
+            ur.balance()
         | Leaf (b, lid) -> Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
         | Nil -> Leaf(rect, id)
 
