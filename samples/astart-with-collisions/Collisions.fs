@@ -108,23 +108,32 @@ type bvhTree =
                 ur
         | _ -> ur
 
-    member x.insert(id: Guid, rect: Rectangle) =
-        match x with
-        | Node (l, r, b, h) ->
-            let bl' = Rectangle.Union(l.getBound (), rect)
-            let br' = Rectangle.Union(r.getBound (), rect)
+    member x.insert(guid: Guid, rect: Rectangle) =
+        // cps
+        let rec ins id rect x cont =
+            match x with
+            | Node (l, r, b, _) ->
+                let bl' = Rectangle.Union(l.getBound (), rect)
+                let br' = Rectangle.Union(r.getBound (), rect)
 
-            let ur =
                 if bl'.Height + bl'.Width < br'.Height + br'.Width then
-                    let l = l.insert (id, rect)
-                    Node(l, r, Rectangle.Union(b, rect), (max (l.height ()) (r.height ())) + 1)
-                else
-                    let r = r.insert (id, rect)
-                    Node(l, r, Rectangle.Union(b, rect), (max (l.height ()) (r.height ())) + 1)
+                    ins id rect l (fun l ->
+                        Node(l, r, Rectangle.Union(b, rect), (max (l.height ()) (r.height ())) + 1)
+                            .balance ()
+                        |> cont)
 
-            ur.balance()
-        | Leaf (b, lid) -> Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
-        | Nil -> Leaf(rect, id)
+                else
+                    ins id rect r (fun r ->
+                        Node(l, r, Rectangle.Union(b, rect), (max (l.height ()) (r.height ())) + 1)
+                            .balance ()
+                        |> cont)
+
+            | Leaf (b, lid) ->
+                Node(x, Leaf(rect, id), Rectangle.Union(b, rect), x.height () + 1)
+                |> cont
+            | Nil -> Leaf(rect, id)
+
+        ins guid rect x id
 
     static member fromSeq =
         Seq.fold (fun (s: bvhTree) (id, x) -> s.insert (id, x)) Nil
