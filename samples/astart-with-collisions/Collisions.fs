@@ -1,4 +1,4 @@
-﻿/// aabb tree based module(avl tree, recursion, no tail recursion)
+﻿/// aabb tree based module(avl tree, tail recursion, cps)
 module Collisions
 
 open System
