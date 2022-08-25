@@ -6,7 +6,7 @@
     <ProjectGuid>{e03c5917-b17d-43c6-ab71-680f1178c4ab}</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
-    <PackageVersion>0.0.4</PackageVersion>
+    <PackageVersion>0.0.5</PackageVersion>
     <PackageId>xelmish</PackageId>
     <Title>Xelmish</Title>
     <Authors>Christopher Pritchard (https://github.com/ChrisPritchard)</Authors>
