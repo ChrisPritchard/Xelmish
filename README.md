@@ -14,6 +14,8 @@ Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not
 
 **Update Update**: the project and its samples were recently upgraded to .NET 5. The older, dotnet core 2.2 version can be found in [this branch](https://github.com/ChrisPritchard/Xelmish/tree/fs-applied-2019), though its mainly just the framework that changed, not any code effectively.
 
+**Update Update Update**: the project and its samples are now .NET 6, along with a MonoGame version bump.
+
 ## Simple Example of Usage
 
 The simplest usage of Xelmish is shown in the first sample, [xelmish-first](./samples/xelmish-first/Program.fs). This sample renders a square to the screen, and allows you to move and resize it with key presses. It doesnt have any loaded assets like textures, fonts or sound, and therefore also doesn't require the monogame content pipeline. Nice and simple.
