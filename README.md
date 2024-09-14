@@ -54,8 +54,6 @@ The most basic sample, described above. Just a coloured rectangle on the screen 
 
 The 'hello world' of Elmish, this sample should be almost identical (except for the Xelmish view) to other counters in other Elmish-* projects
 
-> There is also a Windows DX  (Direct X API instead of OpenGL) version of this, to demonstrate cross platform support.
-
 ### 2. Sub-Model
 
 An app with two sub components, each containing a counter and a clock. Pretty similar to other samples in Elmish projects, but with Xelmish views
