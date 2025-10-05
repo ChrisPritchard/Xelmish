@@ -137,6 +137,7 @@ let timerTick dispatch =
     dispatch <| App.ClockCounter1Msg clockMsg
     dispatch <| App.ClockCounter2Msg clockMsg)
     timer.Start()
+    {new IDisposable with member _.Dispose() = ()}
   
 [<EntryPoint; STAThread>]
 let main _ =
@@ -150,7 +151,7 @@ let main _ =
     }
 
     Program.mkSimple App.init App.update App.view // standard, out of the box Elmish mkSimple
-    |> Program.withSubscription (fun m -> Cmd.ofSub timerTick) // standard, out of the box Elmish subscription setup
+    |> Program.withSubscription (fun m -> [ ["timertick"], timerTick]) // standard, out of the box Elmish subscription setup
     |> Program.withConsoleTrace // standard, out of the box Elmish console trace
     |> Xelmish.Program.runGameLoop config // custom Xelmish initialiser
     0
