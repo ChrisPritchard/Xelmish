@@ -6,19 +6,25 @@
         <ProjectGuid>{e03c5917-b17d-43c6-ab71-680f1178c4ab}</ProjectGuid>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <PackageVersion>0.0.6</PackageVersion>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <IsPackable>true</IsPackable>
+        <PackageVersion>1.0.0</PackageVersion>
         <PackageId>xelmish</PackageId>
         <Title>Xelmish</Title>
-        <Authors>Christopher Pritchard (https://github.com/ChrisPritchard)</Authors>
-        <Description>A set of helpers and types that allow you to write XNA games using the Elmish
-            framework. Updated for NET 5 and MonoGame 3.8</Description>
-        <PackageTags>monogame fsharp xna elmish</PackageTags>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Authors>Chris Pritchard</Authors>
+        <Description>A set of helpers and types that allow you to write XNA (Monogame) games using
+            the Elmish framework. Updated for NET 8, Elmish 5 and MonoGame 3.8.4</Description>
+        <PackageTags>monogame;fsharp;xna;elmish</PackageTags>
+        <PackageIcon>icon.png</PackageIcon>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <RepositoryUrl>https://github.com/ChrisPritchard/Xelmish</RepositoryUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
+        <None Include="../LICENSE" Pack="true" PackagePath="" />
+        <None Include="../README.md" Pack="true" PackagePath="" />
+        <None Include="../icon.png" Pack="true" PackagePath="" />
         <Compile Include="Model.fs" />
         <Compile Include="Viewables.fs" />
         <Compile Include="UI.fs" />

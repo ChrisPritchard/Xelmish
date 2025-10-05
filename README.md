@@ -1,22 +1,14 @@
-# Xelmish - XNA + Elmish!
+# Xelmish - XNA + Elmish
 
-[![Nuget](https://img.shields.io/nuget/v/xelmish.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/xelmish)
+![.NET](https://github.com/ChrisPritchard/xelmish/actions/workflows/dotnet.yml/badge.svg) [![Nuget](https://img.shields.io/nuget/v/xelmish.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/xelmish)
 
-**Xelmish** is a small project that creates an **X**NA Game loop (via Mono Game) and connects it to the **Elmish** MVU architecture, via a custom setState method in its own version of the classic Elmish.Program module (Xelmish.Program). 
+**Xelmish** is a small project that creates an **X**NA Game loop (via Mono Game) and connects it to the **Elmish** MVU architecture, via a custom setState method in its own version of the classic Elmish.Program module (Xelmish.Program).
 
 In this way, you can develop games using the excellent Elmish architecture, with all the power of an XNA renderer! You can also convert existing Elmish applications to use Xelmish by rewriting their view functions.
 
 To use Xelmish, the Elmish program must provide a view function that returns a list of 'viewables', functions which take an XNA SpriteBatch. A set of common such functions like colour, image and text are provided in the Xelmish Viewables helper module.
 
 Xelmish is for **2D games** (the SpriteBatch object is for drawing textures, not rendering vertices). Hopefully it allows users to develop such games rapidly using the Elm architecture and F#!
-
-**Update: Available on Nuget [here](https://www.nuget.org/packages/xelmish)**
-
-**Update Update**: the project and its samples were recently upgraded to .NET 5. The older, dotnet core 2.2 version can be found in [this branch](https://github.com/ChrisPritchard/Xelmish/tree/fs-applied-2019), though its mainly just the framework that changed, not any code effectively.
-
-**Update Update Update**: the project and its samples are now .NET 6, along with a MonoGame version bump.
-
-**Update Update Update Update**: the project and its samples are now .NET 68, along with a MonoGame version bump.
 
 ## Simple Example of Usage
 
@@ -39,6 +31,8 @@ It has been upgraded since to MonoGame 3.8, and the core Xelmish project made cr
 **NOTE** even with .NET 5 and official support for this as of MonoGame 3.8, I still needed to install Net Core 3.1 in order for the content builder to work. Not sure why... kind of annoying. Maybe the next version will fix this.
 
 **UPDATE 2024** It has been updated to .NET 8, and compiled using dotnet cli. Tested on Windows 11.
+
+**UPDATE 2025** Latest versions of core dependencies added: elmish 5 and monogame 3.8.4. Minor rework was required for subscription changes in elmish.
 
 ### A note for Linux builders
 
@@ -74,11 +68,11 @@ This is also the first sample that uses audio, with retro beeps and explosions b
 
 ## History and Reasoning
 
-Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine. 
+Xelmish has been built for the **[2019 F# Applied Competition](http://foundation.fsharp.org/applied_fsharp_challenge)**, but also as a replacement architecture for my prior [fsharp-gamecore](https://github.com/ChrisPritchard/fsharp-gamecore) experimental engine.
 
 > **Update:** While Xelmish unfortunately did not win in the competition, my [other](https://github.com/ChrisPritchard/FSH) submission did. Full results [here](http://foundation.fsharp.org/results_applied_fsharp_2019).
 
-While I have successfully built several small games with gamecore, I was finding that as my games increased in complexity the very simplistic model/view architecture in gamecore started to get stretched and warp. Things which were view-specific started to leak into model, and vice versa. 
+While I have successfully built several small games with gamecore, I was finding that as my games increased in complexity the very simplistic model/view architecture in gamecore started to get stretched and warp. Things which were view-specific started to leak into model, and vice versa.
 
 In contrast the battle-tested Elmish model has, so far, proved a pleasure to work with. Much more elegant, and it has also achieved in a far better way my goal of having games being purely functional (where performance permits) and agnostic of engine. The MVU architecture, and parent-child relationships that the Elm architecture handles so well, mean that a game can be designed and theorised without having the engine get in the way, which is (in my opinion) ideal.
 
