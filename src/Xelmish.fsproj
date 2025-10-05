@@ -8,7 +8,7 @@
 
     <PropertyGroup Condition="'$(Configuration)' == 'Release'">
         <IsPackable>true</IsPackable>
-        <PackageVersion>1.0.0</PackageVersion>
+        <PackageVersion>1.0.0.1</PackageVersion>
         <PackageId>xelmish</PackageId>
         <Title>Xelmish</Title>
         <Authors>Chris Pritchard</Authors>

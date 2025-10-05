@@ -1,6 +1,6 @@
 # Xelmish - XNA + Elmish
 
-![.NET](https://github.com/ChrisPritchard/xelmish/actions/workflows/dotnet.yml/badge.svg) [![Nuget](https://img.shields.io/nuget/v/xelmish.svg?maxAge=0&colorB=brightgreen)](https://www.nuget.org/packages/xelmish)
+![.NET](https://github.com/ChrisPritchard/xelmish/actions/workflows/dotnet.yml/badge.svg) [![Nuget](https://img.shields.io/nuget/v/Xelmish.svg)](https://www.nuget.org/packages/xelmish)
 
 **Xelmish** is a small project that creates an **X**NA Game loop (via Mono Game) and connects it to the **Elmish** MVU architecture, via a custom setState method in its own version of the classic Elmish.Program module (Xelmish.Program).
 
