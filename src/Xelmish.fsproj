@@ -35,4 +35,15 @@
             <PrivateAssets>All</PrivateAssets>
         </PackageReference>
     </ItemGroup>
+
+    <Target Name="GetGitVersion" BeforeTargets="GenerateNuspec">
+        <Exec Command="git rev-parse HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true">
+            <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitHash" />
+        </Exec>
+        <PropertyGroup>
+            <RepositoryCommit Condition="'$(GitCommitHash)' != ''">$(GitCommitHash)</RepositoryCommit>
+            <RepositoryCommit Condition="'$(RepositoryCommit)' == ''">unknown</RepositoryCommit>
+        </PropertyGroup>
+        <Message Text="RepositoryCommit: $(RepositoryCommit)" Importance="high" />
+    </Target>
 </Project>
